@@ -3,6 +3,7 @@ package BuildingSecurityController.api.persistance;
 import BuildingSecurityController.api.exception.IInventoryDataManagerConflict;
 import BuildingSecurityController.api.exception.IInventoryDataManagerException;
 import BuildingSecurityController.api.model.PolicyDescriptor;
+import BuildingSecurityController.api.model.UserDescriptor;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -24,8 +25,7 @@ public class DefaultInventoryDataManager implements IInventoryDataManager {
     public List<PolicyDescriptor> getPolicyListByLocation(String location_id) throws IInventoryDataManagerException {
         return this.policyMap.values().stream()
                 .filter(policyDescriptor -> policyDescriptor != null && policyDescriptor.getLocation_id().equals(location_id))
-                .collect(Collectors.toList())
-                ;
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -47,11 +47,44 @@ public class DefaultInventoryDataManager implements IInventoryDataManager {
 
     @Override
     public PolicyDescriptor updatePolicy(PolicyDescriptor policyDescriptor) throws IInventoryDataManagerException {
+        this.policyMap.put(policyDescriptor.getPolicy_id(), policyDescriptor);
+        return policyDescriptor;
+    }
+
+    @Override
+    public PolicyDescriptor deletePolicy(String policy_id) throws IInventoryDataManagerException {
+        return this.policyMap.remove(policy_id);
+    }
+
+    ///USER MANAGEMENTS
+
+    @Override
+    public List<PolicyDescriptor> getUserList() throws IInventoryDataManagerException {
         return null;
     }
 
     @Override
-    public PolicyDescriptor deletePolicy(String location_id) throws IInventoryDataManagerException {
+    public List<PolicyDescriptor> getUserListByUsername(String username) throws IInventoryDataManagerException {
+        return null;
+    }
+
+    @Override
+    public Optional<PolicyDescriptor> getUser(String username) throws IInventoryDataManagerException {
+        return Optional.empty();
+    }
+
+    @Override
+    public PolicyDescriptor createNewUser(UserDescriptor userDescriptor) throws IInventoryDataManagerException, IInventoryDataManagerConflict {
+        return null;
+    }
+
+    @Override
+    public PolicyDescriptor updateUser(UserDescriptor userDescriptor) throws IInventoryDataManagerException {
+        return null;
+    }
+
+    @Override
+    public PolicyDescriptor deleteUser(String username) throws IInventoryDataManagerException {
         return null;
     }
 }
