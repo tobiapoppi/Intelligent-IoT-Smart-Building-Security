@@ -1,0 +1,16 @@
+server:
+  applicationConnectors:
+    - type: http
+      port: 7070
+      bindHost: 0.0.0.0
+  adminConnectors:
+    - type: http
+      port: 7071
+      bindHost: 0.0.0.0
+
+swagger:
+  resourcePackage: BuildingSecurityController.api.resources
+
+  #logging:
+  # The default level of all loggers. Can be OFF, ERROR, WARN, INFO, DEBUG, TRACE, or ALL.
+#  level: INFO
