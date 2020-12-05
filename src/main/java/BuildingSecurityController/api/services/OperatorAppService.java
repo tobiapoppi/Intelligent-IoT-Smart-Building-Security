@@ -1,13 +1,22 @@
 package BuildingSecurityController.api.services;
 
+
+import BuildingSecurityController.api.auth.ExampleAuthorizer;
+import BuildingSecurityController.api.auth.ExampleAuthenticator;
+import BuildingSecurityController.api.auth.User;
 import BuildingSecurityController.api.resources.PolicyResource;
 import BuildingSecurityController.api.utils.DummyDataGenerator;
 import io.dropwizard.Application;
+import io.dropwizard.auth.AuthDynamicFeature;
+import io.dropwizard.auth.AuthValueFactoryProvider;
+import io.dropwizard.auth.basic.BasicCredentialAuthFilter;
+import io.dropwizard.auth.oauth.OAuthCredentialAuthFilter;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import io.federecio.dropwizard.swagger.SwaggerBundle;
 import io.federecio.dropwizard.swagger.SwaggerBundleConfiguration;
 import org.eclipse.jetty.servlets.CrossOriginFilter;
+import org.glassfish.jersey.server.filter.RolesAllowedDynamicFeature;
 
 import javax.servlet.DispatcherType;
 import javax.servlet.FilterRegistration;
@@ -28,8 +37,23 @@ public class OperatorAppService extends Application<OperatorAppConfig> {
         DummyDataGenerator.generateRandomPolicies(operatorAppConfig.getInventoryDataManager());
 
 
-        //registro le risorse all'ambiente di dropwizard
+
+        //registro le risorse per l'autenticazione all'api
+
+        environment.jersey().register(new AuthDynamicFeature(
+                        new BasicCredentialAuthFilter.Builder<User>()
+                        .setAuthenticator(new ExampleAuthenticator())
+                        .setAuthorizer(new ExampleAuthorizer())
+                        .setRealm("SUPER SECRET STUFF")
+                        .buildAuthFilter()));
+        environment.jersey().register(RolesAllowedDynamicFeature.class);
+
+        environment.jersey().register(new AuthValueFactoryProvider.Binder<>(User.class));
+
+
+
         environment.jersey().register(new PolicyResource(operatorAppConfig));
+
 
         // Enable CORS headers
         final FilterRegistration.Dynamic cors = environment.servlets().addFilter("CORS", CrossOriginFilter.class);

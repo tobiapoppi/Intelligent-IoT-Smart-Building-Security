@@ -6,8 +6,6 @@ import java.util.List;
 
 public class UserDescriptor {
 
-    @JsonProperty("id")
-    private String internalId;
 
     @JsonProperty("username")
     private String username;
@@ -21,29 +19,20 @@ public class UserDescriptor {
     @JsonProperty("email")
     private String email;
 
-    @JsonProperty("allowed_locations")
-    private List<String> allowedLocationList;
-
     public UserDescriptor(){
 
     }
 
-    public UserDescriptor(String internalId, String username, String password, String role, String email, List<String> allowedLocationList) {
-        this.internalId = internalId;
+    public UserDescriptor(String username, String password, String role, String email) {
         this.username = username;
         this.password = password;
         this.role = role;
         this.email = email;
-        this.allowedLocationList = allowedLocationList;
     }
 
-    public String getInternalId() {
-        return internalId;
-    }
 
-    public void setInternalId(String internalId) {
-        this.internalId = internalId;
-    }
+
+
 
     public String getUsername() {
         return username;
@@ -77,22 +66,15 @@ public class UserDescriptor {
         this.email = email;
     }
 
-    public List<String> getAllowedLocationList() {
-        return allowedLocationList;
-    }
 
-    public void setAllowedLocationList(List<String> allowedLocationList) {
-        this.allowedLocationList = allowedLocationList;
-    }
+
 
     @Override
     public String toString() {
         return "UserDescriptor{" +
-                "internalId='" + internalId + '\'' +
                 ", username='" + username + '\'' +
                 ", role='" + role + '\'' +
                 ", email='" + email + '\'' +
-                ", allowedLocationList=" + allowedLocationList +
                 '}';
     }
 }

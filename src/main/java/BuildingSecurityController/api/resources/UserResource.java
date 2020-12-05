@@ -2,6 +2,7 @@ package BuildingSecurityController.api.resources;
 
 
 import BuildingSecurityController.api.model.PolicyDescriptor;
+import BuildingSecurityController.api.model.UserDescriptor;
 import BuildingSecurityController.api.services.OperatorAppConfig;
 import com.codahale.metrics.annotation.Timed;
 import io.dropwizard.jersey.errors.ErrorMessage;
@@ -26,6 +27,7 @@ public class UserResource {
 
     final protected Logger logger = LoggerFactory.getLogger(UserResource.class);
 
+
     @SuppressWarnings("serial")
     public static class MissingKeyException extends Exception{}
     final OperatorAppConfig conf;
@@ -45,7 +47,7 @@ public class UserResource {
         try{
             logger.info("Loading all stored IoT Inventory Policies.");
 
-            List<PolicyDescriptor> serviceList = null;
+            List<UserDescriptor> serviceList = null;
 
             serviceList = this.conf.getInventoryDataManager().getUserList();
             //else if(location_id != null)

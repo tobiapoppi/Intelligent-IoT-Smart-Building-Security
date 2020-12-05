@@ -1,20 +1,41 @@
 package BuildingSecurityController.api.persistance;
 
+
 import BuildingSecurityController.api.exception.IInventoryDataManagerConflict;
 import BuildingSecurityController.api.exception.IInventoryDataManagerException;
 import BuildingSecurityController.api.model.PolicyDescriptor;
 import BuildingSecurityController.api.model.UserDescriptor;
 
+import java.io.*;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.zip.GZIPOutputStream;
 
 public class DefaultInventoryDataManager implements IInventoryDataManager {
 
+
     private HashMap<String, PolicyDescriptor> policyMap;
+    private HashMap<String, UserDescriptor> userMap;
+
 
     public DefaultInventoryDataManager() {
         this.policyMap = new HashMap<>();
+        this.userMap = new HashMap<>();
     }
+
+    public void SerializeOnFile(HashMap hmap) throws IOException {
+
+        File file = new File("test.dat");
+        ObjectOutputStream output = new ObjectOutputStream(new GZIPOutputStream(new FileOutputStream(file)));
+
+
+        //Write the map to the output stream, then close
+        output.writeObject(hmap);
+        output.flush();
+        output.close();
+
+    }
+
 
     @Override
     public List<PolicyDescriptor> getPolicyList() throws IInventoryDataManagerException {
@@ -59,32 +80,40 @@ public class DefaultInventoryDataManager implements IInventoryDataManager {
     ///USER MANAGEMENTS
 
     @Override
-    public List<PolicyDescriptor> getUserList() throws IInventoryDataManagerException {
+    public List<UserDescriptor> getUserList() throws IInventoryDataManagerException {
         return null;
     }
 
     @Override
-    public List<PolicyDescriptor> getUserListByUsername(String username) throws IInventoryDataManagerException {
+    public List<UserDescriptor> getUserListByUsername(String username) throws IInventoryDataManagerException {
         return null;
     }
 
     @Override
-    public Optional<PolicyDescriptor> getUser(String username) throws IInventoryDataManagerException {
-        return Optional.empty();
+    public Optional<UserDescriptor> getUser(String username) throws IInventoryDataManagerException {
+        return Optional.ofNullable(this.userMap.get(username));
     }
 
     @Override
-    public PolicyDescriptor createNewUser(UserDescriptor userDescriptor) throws IInventoryDataManagerException, IInventoryDataManagerConflict {
+    public UserDescriptor createNewUser(UserDescriptor userDescriptor) throws IInventoryDataManagerException, IInventoryDataManagerConflict, IOException {
+        if(userDescriptor.getUsername() != null && this.getUser(userDescriptor.getUsername()).isPresent())
+            throw new IInventoryDataManagerConflict("User already exists!");
+
+        if(userDescriptor.getUsername() == null)
+            userDescriptor.setUsername(UUID.randomUUID().toString());
+
+        this.userMap.put(userDescriptor.getUsername(), userDescriptor);
+        this.SerializeOnFile(userMap);
+        return userDescriptor;
+    }
+
+    @Override
+    public UserDescriptor updateUser(UserDescriptor userDescriptor) throws IInventoryDataManagerException {
         return null;
     }
 
     @Override
-    public PolicyDescriptor updateUser(UserDescriptor userDescriptor) throws IInventoryDataManagerException {
-        return null;
-    }
-
-    @Override
-    public PolicyDescriptor deleteUser(String username) throws IInventoryDataManagerException {
+    public UserDescriptor deleteUser(String username) throws IInventoryDataManagerException {
         return null;
     }
 }

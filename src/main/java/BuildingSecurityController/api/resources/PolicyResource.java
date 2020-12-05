@@ -1,18 +1,23 @@
 package BuildingSecurityController.api.resources;
 
 
+import BuildingSecurityController.api.auth.User;
 import BuildingSecurityController.api.data_transfer_object.PolicyCreationRequest;
 import BuildingSecurityController.api.data_transfer_object.PolicyUpdateRequest;
 import BuildingSecurityController.api.exception.IInventoryDataManagerConflict;
 import BuildingSecurityController.api.model.PolicyDescriptor;
 import BuildingSecurityController.api.services.OperatorAppConfig;
 import com.codahale.metrics.annotation.Timed;
+import io.dropwizard.auth.Auth;
 import io.dropwizard.jersey.errors.ErrorMessage;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import org.eclipse.jetty.server.Authentication;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.security.DenyAll;
+import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.*;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.core.Context;
@@ -37,13 +42,15 @@ public class PolicyResource {
         this.conf = conf;
     }
 
+    //@DenyAll
+    @RolesAllowed("ADMIN")
     @GET
     @Path("/")
     @Timed
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "Get all the Policies")
     public Response GetPolicies(@Context ContainerRequestContext requestContext,
-                                                @QueryParam("location_id") String location_id){
+                                @QueryParam("location_id") String location_id){
 
         try{
             logger.info("Loading all stored IoT Inventory Policies filtered by Location: {}", location_id);
