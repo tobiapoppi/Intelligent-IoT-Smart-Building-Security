@@ -22,8 +22,7 @@ public interface IInventoryDataManager {
 
     //users management
 
-    public List<UserDescriptor> getUserList() throws IInventoryDataManagerException;
-    public List<UserDescriptor> getUserListByUsername(String username) throws IInventoryDataManagerException;
+    public List<String> getUsernameList() throws IInventoryDataManagerException;
     public Optional<UserDescriptor> getUser(String username) throws IInventoryDataManagerException;
     public UserDescriptor createNewUser(UserDescriptor userDescriptor) throws IInventoryDataManagerException, IInventoryDataManagerConflict, IOException;
     public UserDescriptor updateUser(UserDescriptor userDescriptor) throws IInventoryDataManagerException;

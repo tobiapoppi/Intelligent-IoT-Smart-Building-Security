@@ -43,7 +43,7 @@ public class PolicyResource {
     }
 
     //@DenyAll
-    @RolesAllowed("ADMIN")
+    @RolesAllowed("USER")
     @GET
     @Path("/")
     @Timed
@@ -78,6 +78,7 @@ public class PolicyResource {
         }
     }
 
+    @RolesAllowed("USER")
     @GET
     @Path("/{policy_id}")
     @Timed
@@ -107,6 +108,7 @@ public class PolicyResource {
         }
     }
 
+    @RolesAllowed("ADMIN")
     @POST
     @Path("/")
     @Timed
@@ -140,6 +142,8 @@ public class PolicyResource {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).type(MediaType.APPLICATION_JSON_TYPE).entity(new ErrorMessage(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(),"Internal Server Error !")).build();
         }
     }
+
+    @RolesAllowed("ADMIN")
     @PUT
     @Path("/{location_id}")
     @Timed
@@ -174,6 +178,7 @@ public class PolicyResource {
         }
     }
 
+    @RolesAllowed("ADMIN")
     @DELETE
     @Path("/{policy_id}")
     @Timed

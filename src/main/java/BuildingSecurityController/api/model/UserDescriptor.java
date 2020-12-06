@@ -2,9 +2,10 @@ package BuildingSecurityController.api.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.io.Serializable;
 import java.util.List;
 
-public class UserDescriptor {
+public class UserDescriptor implements Serializable {
 
 
     @JsonProperty("username")
@@ -71,10 +72,6 @@ public class UserDescriptor {
 
     @Override
     public String toString() {
-        return "UserDescriptor{" +
-                ", username='" + username + '\'' +
-                ", role='" + role + '\'' +
-                ", email='" + email + '\'' +
-                '}';
+        return "[ username : " + username + ", password : " + password + ", role : " + role + ", email : " + email + "]";
     }
 }

@@ -2,21 +2,21 @@ package BuildingSecurityController.api.auth;
 
 
 import java.security.Principal;
-import java.util.Set;
+
 
 public class User implements Principal {
     private final String name;
 
-    private final Set<String> roles;
+    private final String role;
 
     public User(String name) {
         this.name = name;
-        this.roles = null;
+        this.role = null;
     }
 
-    public User(String name, Set<String> roles) {
+    public User(String name, String role) {
         this.name = name;
-        this.roles = roles;
+        this.role = role;
     }
 
     public String getName() {
@@ -27,7 +27,15 @@ public class User implements Principal {
         return (int) (Math.random() * 100);
     }
 
-    public Set<String> getRoles() {
-        return roles;
+    public String getRole() {
+        return role;
+    }
+
+    @Override
+    public String toString() {
+        return "User{" +
+                "name='" + name + '\'' +
+                ", role='" + role + '\'' +
+                '}';
     }
 }

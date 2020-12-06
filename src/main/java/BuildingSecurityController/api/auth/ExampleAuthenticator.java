@@ -10,29 +10,29 @@ import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.zip.GZIPInputStream;
 
 public class ExampleAuthenticator implements Authenticator<BasicCredentials, User>{
 
 
-    final protected Logger logger = LoggerFactory.getLogger(PolicyResource.class);
-    private HashMap<String, UserDescriptor> userMap = null;
+    final protected Logger logger = LoggerFactory.getLogger(ExampleAuthenticator.class);
+    private HashMap<String, UserDescriptor> userMap = new HashMap<>();
 
     public void deserialize() throws IOException, ClassNotFoundException {
-        File file = new File("test.dat");
-        ObjectInputStream input = new ObjectInputStream(new GZIPInputStream(new FileInputStream(file)));
-        //Reads the first object in
-        Object readObject = input.readObject();
-        input.close();
+        try {
+            FileInputStream fileInputStream = new FileInputStream("users-file");
+            ObjectInputStream objectInputStream = new ObjectInputStream(fileInputStream);
 
-        if(!(readObject instanceof HashMap)) throw new IOException("Data is not a hashmap");
-        userMap = (HashMap<String, UserDescriptor>) readObject;
-        //Prints out everything in the map.
-        for(String key : userMap.keySet()) {
-            System.out.println(key + ": " + userMap.get(key));
+            userMap = (HashMap<String, UserDescriptor>) objectInputStream.readObject();
+
+            fileInputStream.close();
+            objectInputStream.close();
+        } catch (IOException | ClassNotFoundException e) {
+            e.printStackTrace();
         }
-        logger.info("ciaoooooooooooooooooooooooooooooooooooooo");
+
     }
 
 
@@ -46,8 +46,9 @@ public class ExampleAuthenticator implements Authenticator<BasicCredentials, Use
             e.printStackTrace();
         }
         if (userMap.get(credentials.getUsername()).getPassword().equals(credentials.getPassword())) {
-            return Optional.of(new User(credentials.getUsername()));
+            return Optional.of(new User(credentials.getUsername(), userMap.get(credentials.getUsername()).getRole()));
         }
+
         return Optional.empty();
     }
 }
