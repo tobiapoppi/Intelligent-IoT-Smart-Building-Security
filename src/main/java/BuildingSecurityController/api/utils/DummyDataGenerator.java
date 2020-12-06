@@ -1,6 +1,8 @@
 package BuildingSecurityController.api.utils;
 
+import BuildingSecurityController.api.auth.User;
 import BuildingSecurityController.api.model.PolicyDescriptor;
+import BuildingSecurityController.api.model.UserDescriptor;
 import BuildingSecurityController.api.persistance.IInventoryDataManager;
 
 public class DummyDataGenerator {
@@ -41,6 +43,22 @@ public class DummyDataGenerator {
             inventoryDataManager.createNewPolicy(pol2);
             inventoryDataManager.createNewPolicy(pol3);
 
+            UserDescriptor user1 = new UserDescriptor();
+
+            user1.setUsername("user");
+            user1.setPassword("pass");
+            user1.setEmail("test");
+            user1.setRole("USER");
+
+            UserDescriptor user2 = new UserDescriptor();
+
+            user2.setUsername("tobi");
+            user2.setPassword("tobi");
+            user2.setEmail("tessst");
+            user2.setRole("ADMIN");
+
+            inventoryDataManager.createNewUser(user1);
+            inventoryDataManager.createNewUser(user2);
 
 
         }catch (Exception e){

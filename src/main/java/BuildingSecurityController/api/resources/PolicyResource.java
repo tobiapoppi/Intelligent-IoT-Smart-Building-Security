@@ -1,18 +1,23 @@
 package BuildingSecurityController.api.resources;
 
 
+import BuildingSecurityController.api.auth.User;
 import BuildingSecurityController.api.data_transfer_object.PolicyCreationRequest;
 import BuildingSecurityController.api.data_transfer_object.PolicyUpdateRequest;
 import BuildingSecurityController.api.exception.IInventoryDataManagerConflict;
 import BuildingSecurityController.api.model.PolicyDescriptor;
 import BuildingSecurityController.api.services.OperatorAppConfig;
 import com.codahale.metrics.annotation.Timed;
+import io.dropwizard.auth.Auth;
 import io.dropwizard.jersey.errors.ErrorMessage;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import org.eclipse.jetty.server.Authentication;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.security.DenyAll;
+import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.*;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.core.Context;
@@ -37,13 +42,15 @@ public class PolicyResource {
         this.conf = conf;
     }
 
+    //@DenyAll
+    @RolesAllowed("USER")
     @GET
     @Path("/")
     @Timed
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "Get all the Policies")
     public Response GetPolicies(@Context ContainerRequestContext requestContext,
-                                                @QueryParam("location_id") String location_id){
+                                @QueryParam("location_id") String location_id){
 
         try{
             logger.info("Loading all stored IoT Inventory Policies filtered by Location: {}", location_id);
@@ -71,6 +78,7 @@ public class PolicyResource {
         }
     }
 
+    @RolesAllowed("USER")
     @GET
     @Path("/{policy_id}")
     @Timed
@@ -100,6 +108,7 @@ public class PolicyResource {
         }
     }
 
+    @RolesAllowed("ADMIN")
     @POST
     @Path("/")
     @Timed
@@ -133,6 +142,8 @@ public class PolicyResource {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).type(MediaType.APPLICATION_JSON_TYPE).entity(new ErrorMessage(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(),"Internal Server Error !")).build();
         }
     }
+
+    @RolesAllowed("ADMIN")
     @PUT
     @Path("/{location_id}")
     @Timed
@@ -167,6 +178,7 @@ public class PolicyResource {
         }
     }
 
+    @RolesAllowed("ADMIN")
     @DELETE
     @Path("/{policy_id}")
     @Timed

@@ -5,6 +5,7 @@ import BuildingSecurityController.api.exception.IInventoryDataManagerException;
 import BuildingSecurityController.api.model.PolicyDescriptor;
 import BuildingSecurityController.api.model.UserDescriptor;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
@@ -21,10 +22,9 @@ public interface IInventoryDataManager {
 
     //users management
 
-    public List<PolicyDescriptor> getUserList() throws IInventoryDataManagerException;
-    public List<PolicyDescriptor> getUserListByUsername(String username) throws IInventoryDataManagerException;
-    public Optional<PolicyDescriptor> getUser(String username) throws IInventoryDataManagerException;
-    public PolicyDescriptor createNewUser(UserDescriptor userDescriptor) throws IInventoryDataManagerException, IInventoryDataManagerConflict;
-    public PolicyDescriptor updateUser(UserDescriptor userDescriptor) throws IInventoryDataManagerException;
-    public PolicyDescriptor deleteUser(String username) throws IInventoryDataManagerException;
+    public List<String> getUsernameList() throws IInventoryDataManagerException;
+    public Optional<UserDescriptor> getUser(String username) throws IInventoryDataManagerException;
+    public UserDescriptor createNewUser(UserDescriptor userDescriptor) throws IInventoryDataManagerException, IInventoryDataManagerConflict, IOException;
+    public UserDescriptor updateUser(UserDescriptor userDescriptor) throws IInventoryDataManagerException;
+    public UserDescriptor deleteUser(String username) throws IInventoryDataManagerException;
 }
