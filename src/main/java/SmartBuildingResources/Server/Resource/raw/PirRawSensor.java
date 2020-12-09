@@ -8,53 +8,64 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.UUID;
 
-public class PirRawSensor extends SmartObjectResource<Boolean>{
+public class PirRawSensor extends SmartObjectResource<Boolean> {
 
 
     private static Logger logger = LoggerFactory.getLogger(PirRawSensor.class);
 
-    private static final String location_id = "Piano1";
 
     private static final boolean value = false;
+
+    private static final double half = 0.7;
 
     private static final String LOG_DISPLAY_NAME = "Pir Sensor";
 
     //Ms associated to data update
     public static final long UPDATE_PERIOD = 5000;
 
-    private static final long TASK_DELAY_TIME = 5000;
+    private static final long TASK_DELAY_TIME = 10000;
 
-    private static final String RESOURCE_TYPE = "iot.sensor.temperature";
+    private static final String RESOURCE_TYPE = "iot.sensor.pir";
 
-    private Double updatedValue;
+    private Boolean updatedValue;
+
+    private String location_id;
 
     private Random random;
 
+
     private Timer updateTimer = null;
 
-    public TemperatureRawSensor() {
+
+    public PirRawSensor() {
         super(UUID.randomUUID().toString(), RESOURCE_TYPE);
         init();
     }
 
-    private void init(){
+    private void init() {
 
-        try{
-
+        try {
             this.random = new Random(System.currentTimeMillis());
-            this.updatedValue = MIN_TEMPERATURE_VALUE + this.random.nextDouble()*(MAX_TEMPERATURE_VALUE - MIN_TEMPERATURE_VALUE);
+
+            if (half > this.random.nextDouble()) {
+
+                this.updatedValue = Boolean.TRUE;
+            } else {
+                this.updatedValue = Boolean.FALSE;
+            }
+
 
             startPeriodicEventValueUpdateTask();
 
-        }catch (Exception e){
+        } catch (Exception e) {
             logger.error("Error initializing the IoT Resource ! Msg: {}", e.getLocalizedMessage());
         }
 
     }
 
-    private void startPeriodicEventValueUpdateTask(){
+    private void startPeriodicEventValueUpdateTask() {
 
-        try{
+        try {
 
             logger.info("Starting periodic Update Task with Period: {} ms", UPDATE_PERIOD);
 
@@ -63,42 +74,48 @@ public class PirRawSensor extends SmartObjectResource<Boolean>{
                 @Override
                 public void run() {
 
-                    double variation = (MIN_TEMPERATURE_VARIATION + MAX_TEMPERATURE_VARIATION*random.nextDouble()) * (random.nextDouble() > 0.5 ? 1.0 : -1.0);
-                    updatedValue = updatedValue + variation;
+
+                    if (half > random.nextDouble()) {
+
+                        updatedValue = Boolean.TRUE;
+                    } else {
+                        updatedValue = Boolean.FALSE;
+                    }
                     notifyUpdate(updatedValue);
 
                 }
             }, TASK_DELAY_TIME, UPDATE_PERIOD);
 
-        }catch (Exception e){
+        } catch (Exception e) {
             logger.error("Error executing periodic resource value ! Msg: {}", e.getLocalizedMessage());
         }
 
     }
 
     @Override
-    public Double loadUpdatedValue() {
+    public Boolean loadUpdatedValue() {
         return this.updatedValue;
     }
 
     public static void main(String[] args) {
 
-        it.unimore.dipi.iot.server.resource.raw.TemperatureRawSensor rawResource = new it.unimore.dipi.iot.server.resource.raw.TemperatureRawSensor();
+        PirRawSensor rawResource = new PirRawSensor();
         logger.info("New {} Resource Created with Id: {} ! {} New Value: {}",
                 rawResource.getType(),
                 rawResource.getId(),
                 LOG_DISPLAY_NAME,
                 rawResource.loadUpdatedValue());
 
-        rawResource.addDataListener(new ResourceDataListener<Double>() {
+        rawResource.addDataListener(new ResourceDataListener<Boolean>() {
             @Override
-            public void onDataChanged(SmartObjectResource<Double> resource, Double updatedValue) {
+            public void onDataChanged(SmartObjectResource<Boolean> resource, Boolean updatedValue) {
 
-                if(resource != null && updatedValue != null)
+                if (resource != null && updatedValue != null)
                     logger.info("Device: {} -> New Value Received: {}", resource.getId(), updatedValue);
                 else
                     logger.error("onDataChanged Callback -> Null Resource or Updated Value !");
             }
         });
 
+    }
 }
