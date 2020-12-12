@@ -1,4 +1,4 @@
-package it.unimore.dipi.iot.utils;
+package utils;
 
 import java.util.Random;
 

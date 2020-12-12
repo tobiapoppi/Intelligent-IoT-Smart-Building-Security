@@ -1,4 +1,4 @@
-package BuildingSecurityController.api.utils;
+package utils;
 
 import BuildingSecurityController.api.auth.User;
 import BuildingSecurityController.api.model.PolicyDescriptor;
