@@ -11,16 +11,17 @@ import org.slf4j.LoggerFactory;
 import utils.CoreInterfaces;
 
 import java.io.IOException;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class LookupAndObserveProcess {
 
     private final static Logger logger = LoggerFactory.getLogger(LookupAndObserveProcess.class);
 
-    private static final String COAP_ENDPOINT = "coap://127.0.0.1:<porta>/rd-lookup/res";
-    //private static final String COAP_ENDPOINT = "coap://<futuro_ip_del_raspberry>:<porta>/rd-lookup/res";
+    //private static final String COAP_ENDPOINT = "coap://127.0.0.1:<porta>/rd-lookup/res";
+
+    private static final String TARGET_RD_IP = "127.0.0.1";
+    private static final int TARGET_RD_PORT = 9999;
+    private static final String RD_LOOKUP_URI = "/rd-lookup/res";
 
     private static final String OBSERVABLE_CORE_ATTRIBUTE = "obs";
     private static final String INTERFACE_CORE_ATTRIBUTE = "if";
@@ -31,10 +32,28 @@ public class LookupAndObserveProcess {
 
     public static void main(String[] args){
 
-        CoapClient coapClient = new CoapClient(COAP_ENDPOINT);
+        //init coap client
+        CoapClient coapClient = new CoapClient();
+
+        //init target resource list array and observing relations
+        targetObservableResList = new ArrayList<>();
+        observingRelationMap = new HashMap<>();
+
+        //discover all available sensors and actuators
+        lookupTarget(coapClient);
+
+        //start observing resources
+        targetObservableResList.forEach(targetResourceUrl -> {
+            startObservingResources(coapClient, targetResourceUrl);
+        });
+
+    }
+
+    private static void lookupTarget(CoapClient coapClient){
 
         //we set the type of request as a "Get"
         Request request = new Request(Code.GET);
+        request.setURI(String.format("coap://%s:%d%s", TARGET_RD_IP, TARGET_RD_PORT, RD_LOOKUP_URI));
         request.setConfirmable(true);
 
         logger.info("Request Pretty Print: \n{}", Utils.prettyPrint(request));
@@ -60,19 +79,33 @@ public class LookupAndObserveProcess {
 
                     links.forEach(webLink -> {
 
+                        if(webLink.getURI() != null && !webLink.getURI().equals(WELL_KNOWN_CORE_URI) && webLink.getAttributes() != null && webLink.getAttributes().getCount() > 0){
 
-                        //I DUE IF SONO SBAGLIATI, DA SISTEMARE
-                        //TODO
-                        //if(webLink.getURI() != null && !webLink.getURI().equals(WELL_KNOWN_CORE_URI) && webLink.getAttributes() != null && webLink.getAttributes().getAttributeValues(INTERFACE_CORE_ATTRIBUTE).get(0).equals(CoreInterfaces.CORE_A.getValue())){
-
-                            //if (webLink.getAttributes().containsAttribute(OBSERVABLE_CORE_ATTRIBUTE) &&
+                            if (webLink.getAttributes().containsAttribute(OBSERVABLE_CORE_ATTRIBUTE) &&
                                     webLink.getAttributes().containsAttribute(INTERFACE_CORE_ATTRIBUTE) &&
-                                    (webLink.getAttributes().getAttributeValues(INTERFACE_CORE_ATTRIBUTE).contains(CoreInterfaces.CORE_S.getValue())))
+                                    (webLink.getAttributes().getAttributeValues(INTERFACE_CORE_ATTRIBUTE)
+                                            .contains(CoreInterfaces.CORE_S.getValue()) || webLink.getAttributes()
+                                            .getAttributeValues(INTERFACE_CORE_ATTRIBUTE).contains(CoreInterfaces.CORE_A.getValue()))){
+
+                                logger.info("Target Resource found! URI: {}", webLink.getURI());
+
+                                String targetResourceUrl = String.format("coap://%s:%d%s", TARGET_RD_IP, TARGET_RD_PORT, webLink.getURI());
+
+                                targetObservableResList.add(targetResourceUrl);
+                                logger.info("Target Resource URL: {} correctly saved!", targetResourceUrl);
+
+                            }
+                            else{
+                                logger.info("Resource {} does not match filtering parameters.", webLink.getURI());
+                            }
 
                         }
 
                     });
 
+                }
+                else{
+                    logger.info("Core Link Format Response not found.");
                 }
 
             }
@@ -94,15 +127,29 @@ public class LookupAndObserveProcess {
         }catch (ConnectorException | IOException e){
             e.printStackTrace();
         }
-
-
     }
 
-    public void startObservingResources (){
+    private static void startObservingResources (CoapClient coapClient, String targetUrl){
+
+        logger.info("OBSERVING ... {}", targetUrl);
+        Request request = Request.newGet().setURI(targetUrl).setObserve();
+        request.setConfirmable(true);
+        CoapObserveRelation relation = coapClient.observe(request, new CoapHandler() {
+            @Override
+            public void onLoad(CoapResponse response) {
+                String content = response.getResponseText();
+                logger.info("Notification -> Resource Target: {} -> Body: {}", targetUrl, content);
+            }
+
+            @Override
+            public void onError() {
+                logger.error("OBSERVE {} FAILED", targetUrl);
+            }
+        });
+
+        observingRelationMap.put(targetUrl, relation);
 
     }
-
-
 
 
 
