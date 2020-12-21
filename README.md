@@ -29,3 +29,39 @@ Parte con una configurazione di Smart Object (sensori ed attuatori) e il relativ
 Si registra per i ricevere i dati di sensori e attuatori (in funzione del protocollo scelto)
 Nel caso in cui sia inserito e rilevi la presenza in una zona fa scattare l’allarme nella zona e accende le luci della zona
 Quando viene disinserito spegne sirena e luci
+
+
+
+**ALBERO DELLE RISORSE**
+
+/building/floor
+    -GET: ricevi la lista dei piani del building
+    -POST: crea un nuovo piano
+    ../<floor_id>
+        -GET: ricevi le info del singolo piano
+        -PUT: cambia i dati del piano
+        -DELETE: cancella il piano
+        ../area
+            -GET: ricevi la lista delle zone in quel piano
+            -POST: crea una nuova zona
+            ../<area_id>
+                -GET: ricevi le info di quella zona
+                -PUT: modifica le info di quella zona
+                -DELETE: elimina quella zona
+                ../device
+                    -GET: ricevi tutti i device di quella zona
+                    -POST: crea un nuovo device per quella zona
+                    ../<device_id>
+                        -GET: ricevi i dati di quel device
+                        -PUT: modifica i dati di quel device
+                        -DELETE: elimina quel device
+                        
+/building/policy
+    -GET: ricevi la lista delle ppolicy del buiding
+    -POST: crea una nuova policy
+    ../<policy_id>
+        -GET: ricevi le info della policy
+        -PUT: cambia i dati della policy
+        -DELETE: cancella la policy
+    
+                        
