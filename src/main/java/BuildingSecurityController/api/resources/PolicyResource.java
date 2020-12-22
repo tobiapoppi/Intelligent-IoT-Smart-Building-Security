@@ -28,7 +28,7 @@ import java.net.URI;
 import java.util.List;
 import java.util.Optional;
 
-@Path("/api/iot/inventory/policy")
+@Path("/building/policy")
 @Api("IoT Policy Inventory Endpoint")
 public class PolicyResource {
 
@@ -53,10 +53,11 @@ public class PolicyResource {
                                 @QueryParam("location_id") String location_id){
 
         try{
-            logger.info("Loading all stored IoT Inventory Policies filtered by Location: {}", location_id);
+
             List<PolicyDescriptor> serviceList = null;
 
             if(location_id == null) {
+                logger.info("Loading all stored IoT Inventory Policies");
                 serviceList = this.conf.getInventoryDataManager().getPolicyList();
             }
 
@@ -145,7 +146,7 @@ public class PolicyResource {
 
     @RolesAllowed("ADMIN")
     @PUT
-    @Path("/{location_id}")
+    @Path("/{policy_id}")
     @Timed
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)

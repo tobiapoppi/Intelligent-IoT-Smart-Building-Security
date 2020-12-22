@@ -57,11 +57,22 @@ Quando viene disinserito spegne sirena e luci
                         -DELETE: elimina quel device
                         
 /building/policy
-    -GET: ricevi la lista delle ppolicy del buiding
+    -GET: ricevi la lista delle policy del buiding
     -POST: crea una nuova policy
     ../<policy_id>
         -GET: ricevi le info della policy
         -PUT: cambia i dati della policy
         -DELETE: cancella la policy
+        
+/building/user
+    -GET: ricevi la lista degli utenti
+    -POST: crea un nuovo utente
+    ../<username>
+        -GET: ricevi le info dell'utente
+        -PUT: cambia i dati dell'utente
+        -DELETE: cancella l'utente
     
+    
+
+
                         

@@ -4,6 +4,7 @@ package BuildingSecurityController.api.persistance;
 import BuildingSecurityController.api.auth.ExampleAuthenticator;
 import BuildingSecurityController.api.exception.IInventoryDataManagerConflict;
 import BuildingSecurityController.api.exception.IInventoryDataManagerException;
+import BuildingSecurityController.api.model.FloorDescriptor;
 import BuildingSecurityController.api.model.PolicyDescriptor;
 import BuildingSecurityController.api.model.UserDescriptor;
 import org.slf4j.Logger;
@@ -19,6 +20,7 @@ public class DefaultInventoryDataManager implements IInventoryDataManager {
 
     private HashMap<String, PolicyDescriptor> policyMap;
     private HashMap<String, UserDescriptor> userMap;
+    private HashMap<Integer, FloorDescriptor> floorMap;
 
 
     public DefaultInventoryDataManager() {
@@ -43,6 +45,7 @@ public class DefaultInventoryDataManager implements IInventoryDataManager {
 
     }
 
+    ///POLICY RESOURCE MANAGEMENT
 
     @Override
     public List<PolicyDescriptor> getPolicyList() throws IInventoryDataManagerException {
@@ -84,7 +87,7 @@ public class DefaultInventoryDataManager implements IInventoryDataManager {
         return this.policyMap.remove(policy_id);
     }
 
-    ///USER MANAGEMENTS
+    ///USER RESOURCE MANAGEMENTS
 
     @Override
     public List<String> getUsernameList() throws IInventoryDataManagerException {
@@ -119,4 +122,43 @@ public class DefaultInventoryDataManager implements IInventoryDataManager {
     public UserDescriptor deleteUser(String username) throws IInventoryDataManagerException {
         return this.userMap.remove(username);
     }
+
+    ///BUILDING RESOURCE MANAGEMENT
+
+    @Override
+    public List<FloorDescriptor> getFloorList() throws IInventoryDataManagerException{
+        return new ArrayList<>(this.floorMap.values());
+    }
+
+    @Override
+    public FloorDescriptor createNewFloor(FloorDescriptor floorDescriptor) throws IInventoryDataManagerException, IInventoryDataManagerConflict {
+        if(this.getFloor(floorDescriptor.getNumber()).isPresent())
+            throw new IInventoryDataManagerConflict("Floor already exists!");
+
+        floorDescriptor.setFloor_id(UUID.randomUUID().toString());
+
+        this.floorMap.put(floorDescriptor.getNumber(), floorDescriptor);
+        return floorDescriptor;
+    }
+
+    @Override
+    public Optional<FloorDescriptor> getFloor(int floor_number) throws IInventoryDataManagerException {
+        return Optional.ofNullable(this.floorMap.get(floor_number));
+    }
+
+    @Override
+    public FloorDescriptor updateFloor(FloorDescriptor floorDescriptor) throws IInventoryDataManagerException {
+        this.floorMap.put(floorDescriptor.getNumber(), floorDescriptor);
+        return floorDescriptor;
+    }
+
+    @Override
+    public FloorDescriptor deleteFloor(int floor_number) throws IInventoryDataManagerException {
+        return this.floorMap.remove(floor_number);
+    }
+
+    //TODO
+    //TODO
+    //TODO
+
 }

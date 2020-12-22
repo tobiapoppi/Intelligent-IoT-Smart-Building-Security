@@ -2,6 +2,7 @@ package BuildingSecurityController.api.persistance;
 
 import BuildingSecurityController.api.exception.IInventoryDataManagerConflict;
 import BuildingSecurityController.api.exception.IInventoryDataManagerException;
+import BuildingSecurityController.api.model.FloorDescriptor;
 import BuildingSecurityController.api.model.PolicyDescriptor;
 import BuildingSecurityController.api.model.UserDescriptor;
 
@@ -27,4 +28,13 @@ public interface IInventoryDataManager {
     public UserDescriptor createNewUser(UserDescriptor userDescriptor) throws IInventoryDataManagerException, IInventoryDataManagerConflict, IOException;
     public UserDescriptor updateUser(UserDescriptor userDescriptor) throws IInventoryDataManagerException;
     public UserDescriptor deleteUser(String username) throws IInventoryDataManagerException;
+
+    //building management
+
+    public List<FloorDescriptor> getFloorList() throws IInventoryDataManagerException;
+    public FloorDescriptor createNewFloor(FloorDescriptor floorDescriptor) throws IInventoryDataManagerException, IInventoryDataManagerConflict;
+    public Optional<FloorDescriptor> getFloor(int floor_number) throws IInventoryDataManagerException;
+    public FloorDescriptor updateFloor(FloorDescriptor floorDescriptor) throws IInventoryDataManagerException;
+    public FloorDescriptor deleteFloor(int floor_inumber) throws IInventoryDataManagerException;
+
 }

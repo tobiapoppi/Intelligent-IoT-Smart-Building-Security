@@ -28,7 +28,7 @@ import java.net.URI;
 import java.util.List;
 import java.util.Optional;
 
-@Path("/api/iot/inventory/user")
+@Path("/building/user")
 @Api("IoT User Inventory Endpoint")
 public class UserResource {
 
