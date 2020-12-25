@@ -13,6 +13,11 @@ import utils.CoreInterfaces;
 import java.io.IOException;
 import java.util.*;
 
+
+/*questo process ha lo scopo di ricevere l'albero delle risorse presenti nel resource directory, e di iniziare
+automaticamente ad osservarle, implementando tutti i metody onLoad invocati in maniera asincrona.
+l'observing va fatto su tutti e soli i sensori (no attuatori). */
+
 public class LookupAndObserveProcess {
 
     private final static Logger logger = LoggerFactory.getLogger(LookupAndObserveProcess.class);
@@ -44,6 +49,7 @@ public class LookupAndObserveProcess {
 
         //start observing resources
         targetObservableResList.forEach(targetResourceUrl -> {
+            if(targetResourceUrl.)
             startObservingResources(coapClient, targetResourceUrl);
         });
 
@@ -79,19 +85,22 @@ public class LookupAndObserveProcess {
 
                     links.forEach(webLink -> {
 
+                        //evito di includere wellknowncore alla lista delle risorse che ricevo.
                         if(webLink.getURI() != null && !webLink.getURI().equals(WELL_KNOWN_CORE_URI) && webLink.getAttributes() != null && webLink.getAttributes().getCount() > 0){
 
+                            //considero solamente le risorse osservabili, che abbiano interface core attribute, e che sia di tipo sensor
                             if (webLink.getAttributes().containsAttribute(OBSERVABLE_CORE_ATTRIBUTE) &&
                                     webLink.getAttributes().containsAttribute(INTERFACE_CORE_ATTRIBUTE) &&
                                     (webLink.getAttributes().getAttributeValues(INTERFACE_CORE_ATTRIBUTE)
-                                            .contains(CoreInterfaces.CORE_S.getValue()) || webLink.getAttributes()
-                                            .getAttributeValues(INTERFACE_CORE_ATTRIBUTE).contains(CoreInterfaces.CORE_A.getValue()))){
+                                            .contains(CoreInterfaces.CORE_S.getValue()))){
 
                                 logger.info("Target Resource found! URI: {}", webLink.getURI());
 
                                 String targetResourceUrl = String.format("coap://%s:%d%s", TARGET_RD_IP, TARGET_RD_PORT, webLink.getURI());
 
-                                targetObservableResList.add(targetResourceUrl);
+                                //CREA I DUE DIVERSI ARRAY DI STRINGHE E SEPARA I DUE IF, IN CUI IN ENTRAMBI AGGIUNGI I DUE RESOURCETYPE CONTROLS
+                                pirTargetObservableList.add(targetResourceUrl);
+                                camTargetObservableList
                                 logger.info("Target Resource URL: {} correctly saved!", targetResourceUrl);
 
                             }
@@ -137,6 +146,9 @@ public class LookupAndObserveProcess {
         CoapObserveRelation relation = coapClient.observe(request, new CoapHandler() {
             @Override
             public void onLoad(CoapResponse response) {
+
+                //this is the method asynchronously invoked when an observed resource is sending data;
+
                 String content = response.getResponseText();
                 logger.info("Notification -> Resource Target: {} -> Body: {}", targetUrl, content);
             }
