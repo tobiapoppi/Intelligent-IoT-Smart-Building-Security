@@ -2,25 +2,25 @@ package utils;
 
 
 /**
-+---------------+------+---------+
-|         SenML | JSON | Type    |
-+---------------+------+---------+
-|     Base Name | bn   | String  |
-|     Base Time | bt   | Number  |
-|     Base Unit | bu   | String  |
-|    Base Value | bv   | Number  |
-|       Version | bver | Number  |
-|          Name | n    | String  |
-|          Unit | u    | String  |
-|         Value | v    | Number  |
-|  String Value | vs   | String  |
-| Boolean Value | vb   | Boolean |
-|    Data Value | vd   | String  |
-|     Value Sum | s    | Number  |
-|          Time | t    | Number  |
-|   Update Time | ut   | Number  |
-+---------------+------+---------+
-*/
+ +---------------+------+---------+
+ |         SenML | JSON | Type    |
+ +---------------+------+---------+
+ |     Base Name | bn   | String  |
+ |     Base Time | bt   | Number  |
+ |     Base Unit | bu   | String  |
+ |    Base Value | bv   | Number  |
+ |       Version | bver | Number  |
+ |          Name | n    | String  |
+ |          Unit | u    | String  |
+ |         Value | v    | Number  |
+ |  String Value | vs   | String  |
+ | Boolean Value | vb   | Boolean |
+ |    Data Value | vd   | String  |
+ |     Value Sum | s    | Number  |
+ |          Time | t    | Number  |
+ |   Update Time | ut   | Number  |
+ +---------------+------+---------+
+ */
 
 public class SenMLRecord {
 
@@ -104,7 +104,7 @@ public class SenMLRecord {
 		return bver;
 	}
 
-	public void setBver(Double bver) {
+	public void setBver(Number bver) {
 		this.bver = bver;
 	}
 
@@ -128,7 +128,7 @@ public class SenMLRecord {
 		return v;
 	}
 
-	public void setV(Boolean v) {
+	public void setV(Number v) {
 		this.v = v;
 	}
 

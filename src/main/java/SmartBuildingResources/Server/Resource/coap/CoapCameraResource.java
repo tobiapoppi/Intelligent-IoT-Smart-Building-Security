@@ -1,5 +1,6 @@
 package SmartBuildingResources.Server.Resource.coap;
 
+import SmartBuildingResources.Server.Resource.raw.CameraRawSensor;
 import SmartBuildingResources.Server.Resource.raw.PirRawSensor;
 import SmartBuildingResources.Server.Resource.raw.ResourceDataListener;
 import SmartBuildingResources.Server.Resource.raw.SmartObjectResource;
@@ -17,32 +18,32 @@ import utils.SenMLRecord;
 
 import java.util.Optional;
 
-public class CoapPirResource extends CoapResource {
+public class CoapCameraResource extends CoapResource {
 
-    private final static Logger logger = LoggerFactory.getLogger(CoapPirResource.class);
+    private final static Logger logger = LoggerFactory.getLogger(CoapCameraResource.class);
 
-    private final static String OBJECT_TITLE =" PirSensor";
+    private final static String OBJECT_TITLE =" CameraSensor";
 
-    private String UNIT = "SEEING";
+    private String UNIT = "Num";
 
     private Double SENSOR_VERSION = 0.5;
 
     private String deviceId;
 
-    private Boolean updatedValue = false;
+    private Integer updatedValue = 0;
 
-    private PirRawSensor pirRawSensor;
+    private CameraRawSensor cameraRawSensor;
 
     private ObjectMapper objectMapper;
 
 
-    public CoapPirResource(String name, String deviceId, PirRawSensor pirRawSensor) {
+    public CoapCameraResource(String name, String deviceId, CameraRawSensor cameraRawSensor) {
         super(name);
 
-        if (pirRawSensor != null && deviceId != null)
+        if (cameraRawSensor != null && deviceId != null)
         {
             this.deviceId = deviceId;
-            this.pirRawSensor = pirRawSensor;
+            this.cameraRawSensor = cameraRawSensor;
             this.objectMapper=new ObjectMapper();
             this.objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
 
@@ -51,7 +52,7 @@ public class CoapPirResource extends CoapResource {
 
             getAttributes().setTitle(OBJECT_TITLE);
             getAttributes().setObservable();
-            getAttributes().addAttribute("rt", pirRawSensor.getType());
+            getAttributes().addAttribute("rt", cameraRawSensor.getType());
             getAttributes().addAttribute("if", CoreInterfaces.CORE_S.getValue());
             getAttributes().addAttribute("ct", Integer.toString(MediaTypeRegistry.APPLICATION_SENML_JSON));
             getAttributes().addAttribute("ct", Integer.toString(MediaTypeRegistry.TEXT_PLAIN));
@@ -61,11 +62,11 @@ public class CoapPirResource extends CoapResource {
             logger.error(" ERROR -->NULL Raw References");
         }
 
-        this.pirRawSensor.addDataListener(new ResourceDataListener<Boolean>() {
+        this.cameraRawSensor.addDataListener(new ResourceDataListener<Integer>() {
             @Override
-            public void onDataChanged(SmartObjectResource<Boolean> resource, Boolean updatedSensorValue) {
+            public void onDataChanged(SmartObjectResource<Integer> resource, Integer updatedSensorValue) {
 
-                updatedValue = updatedSensorValue;
+                updatedValue=updatedSensorValue;
                 changed();
             }
         });
@@ -82,7 +83,7 @@ public class CoapPirResource extends CoapResource {
             senMLRecord.setBn(String.format("%s:%s", this.deviceId, this.getName()));
             senMLRecord.setBver(SENSOR_VERSION);
             senMLRecord.setU(UNIT);
-            senMLRecord.setVb(updatedValue);
+            senMLRecord.setV(updatedValue);
             senMLRecord.setT(System.currentTimeMillis());
 
             senMLPack.add(senMLRecord);
@@ -98,7 +99,7 @@ public class CoapPirResource extends CoapResource {
     public void handleGET (CoapExchange exchange)
     {
 
-        exchange.setMaxAge(PirRawSensor.UPDATE_PERIOD);
+        exchange.setMaxAge(CameraRawSensor.UPDATE_PERIOD);
 
         if(exchange.getRequestOptions().getAccept() == MediaTypeRegistry.APPLICATION_SENML_JSON ||
                 exchange.getRequestOptions().getAccept() == MediaTypeRegistry.APPLICATION_JSON){
