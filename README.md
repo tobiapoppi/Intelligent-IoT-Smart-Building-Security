@@ -41,6 +41,8 @@ Quando viene disinserito spegne sirena e luci
         -GET: ricevi le info del singolo piano
         -PUT: cambia i dati del piano
         -DELETE: cancella il piano
+        
+        
         ../area
             -GET: ricevi la lista delle zone in quel piano
             -POST: crea una nuova zona
