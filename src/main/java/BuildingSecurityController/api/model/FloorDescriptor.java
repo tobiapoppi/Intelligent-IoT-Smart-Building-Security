@@ -13,6 +13,10 @@ public class FloorDescriptor {
         this.zoneList = zoneList;
     }
 
+    public FloorDescriptor(){
+
+    }
+
     public int getNumber() {
         return number;
     }
