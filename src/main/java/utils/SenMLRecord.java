@@ -104,7 +104,7 @@ public class SenMLRecord {
 		return bver;
 	}
 
-	public void setBver(Number bver) {
+	public void setBver(Double bver) {
 		this.bver = bver;
 	}
 
@@ -128,7 +128,7 @@ public class SenMLRecord {
 		return v;
 	}
 
-	public void setV(Number v) {
+	public void setV(Boolean v) {
 		this.v = v;
 	}
 
