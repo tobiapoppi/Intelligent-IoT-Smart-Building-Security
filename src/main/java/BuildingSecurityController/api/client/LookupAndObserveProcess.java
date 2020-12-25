@@ -13,6 +13,8 @@ import utils.CoreInterfaces;
 import java.io.IOException;
 import java.util.*;
 
+import static org.eclipse.californium.core.coap.LinkFormat.RESOURCE_TYPE;
+
 
 /*questo process ha lo scopo di ricevere l'albero delle risorse presenti nel resource directory, e di iniziare
 automaticamente ad osservarle, implementando tutti i metody onLoad invocati in maniera asincrona.
@@ -32,7 +34,8 @@ public class LookupAndObserveProcess {
     private static final String INTERFACE_CORE_ATTRIBUTE = "if";
     private static final String WELL_KNOWN_CORE_URI = "/.well-known/core";
 
-    private static List<String> targetObservableResList = null;
+    private static List<String> pirTargetObservableList = null;
+    private static List<String> camTargetObservableList = null;
     private static Map<String, CoapObserveRelation> observingRelationMap = null;
 
     public static void main(String[] args){
@@ -41,16 +44,19 @@ public class LookupAndObserveProcess {
         CoapClient coapClient = new CoapClient();
 
         //init target resource list array and observing relations
-        targetObservableResList = new ArrayList<>();
+        pirTargetObservableList = new ArrayList<>();
+        camTargetObservableList = new ArrayList<>();
         observingRelationMap = new HashMap<>();
 
         //discover all available sensors and actuators
         lookupTarget(coapClient);
 
         //start observing resources
-        targetObservableResList.forEach(targetResourceUrl -> {
-            if(targetResourceUrl.)
-            startObservingResources(coapClient, targetResourceUrl);
+        pirTargetObservableList.forEach(targetResourceUrl -> {
+            startObservingPir(coapClient, targetResourceUrl);
+        });
+        camTargetObservableList.forEach(targetResourceUrl -> {
+            startObservingCam(coapClient, targetResourceUrl);
         });
 
     }
@@ -93,15 +99,23 @@ public class LookupAndObserveProcess {
                                     webLink.getAttributes().containsAttribute(INTERFACE_CORE_ATTRIBUTE) &&
                                     (webLink.getAttributes().getAttributeValues(INTERFACE_CORE_ATTRIBUTE)
                                             .contains(CoreInterfaces.CORE_S.getValue()))){
+                                if (webLink.getAttributes().getAttributeValues(RESOURCE_TYPE).contains("iot.sensor.pir")){
 
-                                logger.info("Target Resource found! URI: {}", webLink.getURI());
+                                    logger.info("Target Resource found! URI: {}", webLink.getURI());
 
-                                String targetResourceUrl = String.format("coap://%s:%d%s", TARGET_RD_IP, TARGET_RD_PORT, webLink.getURI());
+                                    String targetResourceUrl = String.format("coap://%s:%d%s", TARGET_RD_IP, TARGET_RD_PORT, webLink.getURI());
+                                    pirTargetObservableList.add(targetResourceUrl);
+                                    logger.info("Target Resource URL: {} correctly saved!", targetResourceUrl);
 
-                                //CREA I DUE DIVERSI ARRAY DI STRINGHE E SEPARA I DUE IF, IN CUI IN ENTRAMBI AGGIUNGI I DUE RESOURCETYPE CONTROLS
-                                pirTargetObservableList.add(targetResourceUrl);
-                                camTargetObservableList
-                                logger.info("Target Resource URL: {} correctly saved!", targetResourceUrl);
+                                } else if (webLink.getAttributes().getAttributeValues(RESOURCE_TYPE).contains("iot.sensor.camera")){
+
+                                    logger.info("Target Resource found! URI: {}", webLink.getURI());
+
+                                    String targetResourceUrl = String.format("coap://%s:%d%s", TARGET_RD_IP, TARGET_RD_PORT, webLink.getURI());
+                                    camTargetObservableList.add(targetResourceUrl);
+                                    logger.info("Target Resource URL: {} correctly saved!", targetResourceUrl);
+
+                                }
 
                             }
                             else{
@@ -138,7 +152,7 @@ public class LookupAndObserveProcess {
         }
     }
 
-    private static void startObservingResources (CoapClient coapClient, String targetUrl){
+    private static void startObservingPir (CoapClient coapClient, String targetUrl){
 
         logger.info("OBSERVING ... {}", targetUrl);
         Request request = Request.newGet().setURI(targetUrl).setObserve();
@@ -151,6 +165,47 @@ public class LookupAndObserveProcess {
 
                 String content = response.getResponseText();
                 logger.info("Notification -> Resource Target: {} -> Body: {}", targetUrl, content);
+
+                //TODO
+                /*QUI DEVO ANALIZZARE "content" E CONTROLLARE CHE TUTTI I CAMBIAMENTI CHE SONO AVVENUTI NEL SENSORE,
+                SIANO CONSONI CON TUTTE LE POLICY DEL BUILDING, E IN CASO CONTRARIO, FAR SCATTARE L'ALLARME COLLEATO
+                ALLA ZONA NELLA QUALE E' STATA INFRANTA UNA REGOLA.*/
+
+                /*IL CONTROLLO VERRA' INVOCATO DA QUI E SARA' SVOLTO DAL "INVENTORY DATA MANAGER" IN QUANTO E'
+                L'UNICO COMPONTE AD AVERE CONTROLLO ED ACCESSO ALLE RISORSE ARCHIVIATE IN MEMORIA RAM.*/
+
+                //TODO
+                /*DECIDERE SE E' MEGLIO LASCIARE TUTTO SU RAM O SE SCRIVERE SU FILE PER POI ACCEDERE ALL'ARCHIVIO
+                DA ALTRI OGGETTI */
+
+            }
+
+            @Override
+            public void onError() {
+                logger.error("OBSERVE {} FAILED", targetUrl);
+            }
+        });
+
+        observingRelationMap.put(targetUrl, relation);
+
+    }
+
+    private static void startObservingCam (CoapClient coapClient, String targetUrl){
+
+        logger.info("OBSERVING ... {}", targetUrl);
+        Request request = Request.newGet().setURI(targetUrl).setObserve();
+        request.setConfirmable(true);
+        CoapObserveRelation relation = coapClient.observe(request, new CoapHandler() {
+            @Override
+            public void onLoad(CoapResponse response) {
+
+                //this is the method asynchronously invoked when an observed resource is sending data;
+
+                String content = response.getResponseText();
+                logger.info("Notification -> Resource Target: {} -> Body: {}", targetUrl, content);
+
+                //TODO
+                //STESSA COSA DI SOPRA, ANCHE PER QUESTO TIPO DI SENSORE.
             }
 
             @Override
