@@ -1,5 +1,8 @@
 package BuildingSecurityController.api.client;
 
+import SmartBuildingResources.Server.Resource.coap.CoapPirResource;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.eclipse.californium.core.*;
 import org.eclipse.californium.core.coap.CoAP.Code;
 import org.eclipse.californium.core.coap.LinkFormat;
@@ -37,6 +40,9 @@ public class LookupAndObserveProcess {
     private static List<String> pirTargetObservableList = null;
     private static List<String> camTargetObservableList = null;
     private static Map<String, CoapObserveRelation> observingRelationMap = null;
+    private static CoapPirResource newPir = null;
+
+    private static ObjectMapper objectMapper = new ObjectMapper();
 
     public static void main(String[] args){
 
@@ -164,12 +170,25 @@ public class LookupAndObserveProcess {
                 //this is the method asynchronously invoked when an observed resource is sending data;
 
                 String content = response.getResponseText();
-                logger.info("Notification -> Resource Target: {} -> Body: {}", targetUrl, content);
 
-                //TODO
-                /*QUI DEVO ANALIZZARE "content" E CONTROLLARE CHE TUTTI I CAMBIAMENTI CHE SONO AVVENUTI NEL SENSORE,
+                //TODO PER NIENTE SICURO, C'è DA PROVARE SE VA
+                try {
+
+                    logger.info("Notification -> Resource Target: {} -> Body: {}", targetUrl, objectMapper);
+                    newPir = objectMapper.readValue(content, CoapPirResource.class);
+
+                } catch (JsonProcessingException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+                /*TODO QUI DEVO ANALIZZARE "content" E CONTROLLARE CHE TUTTI I CAMBIAMENTI CHE SONO AVVENUTI NEL SENSORE,
                 SIANO CONSONI CON TUTTE LE POLICY DEL BUILDING, E IN CASO CONTRARIO, FAR SCATTARE L'ALLARME COLLEATO
                 ALLA ZONA NELLA QUALE E' STATA INFRANTA UNA REGOLA.*/
+
+                //AIUTOOOOOOOOOOOOOOOOOOOOOOOOO
+                newPir = objectMapper.readValue(content);
 
                 /*IL CONTROLLO VERRA' INVOCATO DA QUI E SARA' SVOLTO DAL "INVENTORY DATA MANAGER" IN QUANTO E'
                 L'UNICO COMPONTE AD AVERE CONTROLLO ED ACCESSO ALLE RISORSE ARCHIVIATE IN MEMORIA RAM.*/

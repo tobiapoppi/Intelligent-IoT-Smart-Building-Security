@@ -24,7 +24,7 @@ public class SmartBuildingCoapSmartObjectProcess extends CoapServer {
         CoapLightResource PMLightResource = new CoapLightResource("light", deviceId, PMlightActuator);
 
         AlarmActuator PMalarmActuator = new AlarmActuator();
-        CoapAlarmResource PMalarmResource = new CoapAlarmResource("light", deviceId, PMalarmActuator);
+        CoapAlarmResource PMalarmResource = new CoapAlarmResource("alarm", deviceId, PMalarmActuator);
 
 
 

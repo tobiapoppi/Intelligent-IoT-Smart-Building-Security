@@ -21,7 +21,7 @@ public class CoapPirResource extends CoapResource {
 
     private final static Logger logger = LoggerFactory.getLogger(CoapPirResource.class);
 
-    private final static String OBJECT_TITLE =" PirSensor";
+    private final static String OBJECT_TITLE = "PirSensor";
 
     private String UNIT = "SEEING";
 
