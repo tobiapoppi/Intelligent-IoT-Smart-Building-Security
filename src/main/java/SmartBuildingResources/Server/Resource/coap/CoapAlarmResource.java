@@ -34,7 +34,7 @@ public class CoapAlarmResource extends CoapResource {
     private ObjectMapper objectMapper;
 
 
-    public CoapAlarmResource(String name, String deviceId, AlarmActuator alarmActuator) {
+    public CoapAlarmResource(String name, String deviceId, AlarmActuator alarmActuator) throws InterruptedException {
         super(name);
 
         if (alarmActuator != null && deviceId != null)
@@ -69,6 +69,8 @@ public class CoapAlarmResource extends CoapResource {
         }
 
     }
+
+
     private Optional<String> getJsonSenmlResponse() {
 
         try {

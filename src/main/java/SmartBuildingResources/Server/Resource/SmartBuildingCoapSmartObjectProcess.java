@@ -15,7 +15,7 @@ import java.util.UUID;
 public class SmartBuildingCoapSmartObjectProcess extends CoapServer {
     private final static Logger logger = LoggerFactory.getLogger(SmartBuildingCoapSmartObjectProcess.class);
 
-    public SmartBuildingCoapSmartObjectProcess() {
+    public SmartBuildingCoapSmartObjectProcess() throws InterruptedException {
 
         super();
         String deviceId = String.format("%s", UUID.randomUUID().toString());
@@ -64,7 +64,8 @@ public class SmartBuildingCoapSmartObjectProcess extends CoapServer {
         };
 
 
-    public static void main(String[] args) {
+
+    public static void main(String[] args) throws InterruptedException {
 
         SmartBuildingCoapSmartObjectProcess smartBuildingCoapSmartObjectProcess = new SmartBuildingCoapSmartObjectProcess();
         smartBuildingCoapSmartObjectProcess.start();
@@ -79,6 +80,8 @@ public class SmartBuildingCoapSmartObjectProcess extends CoapServer {
                 });
             }
         });
+
+
 
     }
 

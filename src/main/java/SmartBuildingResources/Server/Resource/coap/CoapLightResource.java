@@ -93,6 +93,7 @@ public class CoapLightResource extends CoapResource {
         }
     }
 
+
     @Override
     public void handleGET(CoapExchange exchange){
 

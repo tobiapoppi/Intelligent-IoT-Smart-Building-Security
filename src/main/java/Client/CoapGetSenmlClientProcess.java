@@ -23,6 +23,8 @@ import java.io.IOException;
  * @project coap-demo-smartobject
  * @created 20/10/2020 - 09:19
  */
+
+
 public class CoapGetSenmlClientProcess {
 
     private final static Logger logger = LoggerFactory.getLogger(CoapGetSenmlClientProcess.class);

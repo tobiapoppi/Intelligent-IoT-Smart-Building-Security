@@ -117,4 +117,34 @@ public class CoapPirResource extends CoapResource {
 
     }
 
+    public static void main(String[] args) {
+
+
+        PirRawSensor rawResource = new PirRawSensor();
+
+        rawResource.addDataListener(new ResourceDataListener<Boolean>() {
+            @Override
+            public void onDataChanged(SmartObjectResource<Boolean> resource, Boolean updatedValue) {
+
+                if (resource != null && updatedValue != null)
+                    logger.info("Device: {} -> New Value Received: {}", resource.getId(), updatedValue);
+                else
+                    logger.error("onDataChanged Callback -> Null Resource or Updated Value !");
+            }
+        });
+
+        CoapPirResource coapPirResource = new CoapPirResource("pir", "idcazzodiboia", rawResource);
+
+        logger.info("New {} Resource Created with Id: {} ! {} New Value: {}",
+                rawResource.getType(),
+                rawResource.getId(),
+                "pir",
+                rawResource.loadUpdatedValue());
+
+
+
+    }
 }
+
+
+
