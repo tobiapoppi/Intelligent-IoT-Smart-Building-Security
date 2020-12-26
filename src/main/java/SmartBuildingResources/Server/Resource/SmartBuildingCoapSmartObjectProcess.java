@@ -36,6 +36,7 @@ public class SmartBuildingCoapSmartObjectProcess extends CoapServer {
 
         return FloorResource;
     }
+
     private CoapResource CreateAreaResource (String deviceId) throws InterruptedException {
 
         CoapResource AreaResource = new CoapResource("area");
