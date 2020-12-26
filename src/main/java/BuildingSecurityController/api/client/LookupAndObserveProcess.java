@@ -1,5 +1,6 @@
 package BuildingSecurityController.api.client;
 
+import SmartBuildingResources.Server.Resource.coap.CoapCameraResource;
 import SmartBuildingResources.Server.Resource.coap.CoapPirResource;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -29,8 +30,8 @@ public class LookupAndObserveProcess {
 
     //private static final String COAP_ENDPOINT = "coap://127.0.0.1:<porta>/rd-lookup/res";
 
-    private static final String TARGET_RD_IP = "127.0.0.1";
-    private static final int TARGET_RD_PORT = 9999;
+    private static final String TARGET_RD_IP = "0.0.0.0";
+    private static final int TARGET_RD_PORT = 5683;
     private static final String RD_LOOKUP_URI = "/rd-lookup/res";
 
     private static final String OBSERVABLE_CORE_ATTRIBUTE = "obs";
@@ -41,6 +42,7 @@ public class LookupAndObserveProcess {
     private static List<String> camTargetObservableList = null;
     private static Map<String, CoapObserveRelation> observingRelationMap = null;
     private static CoapPirResource newPir = null;
+    private static CoapCameraResource newCam = null;
 
     private static ObjectMapper objectMapper = new ObjectMapper();
 
@@ -120,7 +122,6 @@ public class LookupAndObserveProcess {
                                     String targetResourceUrl = String.format("coap://%s:%d%s", TARGET_RD_IP, TARGET_RD_PORT, webLink.getURI());
                                     camTargetObservableList.add(targetResourceUrl);
                                     logger.info("Target Resource URL: {} correctly saved!", targetResourceUrl);
-
                                 }
 
                             }
@@ -138,8 +139,6 @@ public class LookupAndObserveProcess {
                 }
 
             }
-
-
 
             String text = coapResponse.getResponseText();
             logger.info("Payload: {}", text);
@@ -219,10 +218,33 @@ public class LookupAndObserveProcess {
                 //this is the method asynchronously invoked when an observed resource is sending data;
 
                 String content = response.getResponseText();
-                logger.info("Notification -> Resource Target: {} -> Body: {}", targetUrl, content);
+
+                //TODO PER NIENTE SICURO, C'è DA PROVARE SE VA
+                try {
+
+                    logger.info("Notification -> Resource Target: {} -> Body: {}", targetUrl, objectMapper);
+                    newCam = objectMapper.readValue(content, CoapCameraResource.class);
+
+
+
+
+                } catch (JsonProcessingException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+                /*TODO QUI DEVO ANALIZZARE "content" E CONTROLLARE CHE TUTTI I CAMBIAMENTI CHE SONO AVVENUTI NEL SENSORE,
+                SIANO CONSONI CON TUTTE LE POLICY DEL BUILDING, E IN CASO CONTRARIO, FAR SCATTARE L'ALLARME COLLEATO
+                ALLA ZONA NELLA QUALE E' STATA INFRANTA UNA REGOLA.*/
+
+
+                /*IL CONTROLLO VERRA' INVOCATO DA QUI E SARA' SVOLTO DAL "INVENTORY DATA MANAGER" IN QUANTO E'
+                L'UNICO COMPONTE AD AVERE CONTROLLO ED ACCESSO ALLE RISORSE ARCHIVIATE IN MEMORIA RAM.*/
 
                 //TODO
-                //STESSA COSA DI SOPRA, ANCHE PER QUESTO TIPO DI SENSORE.
+                /*DECIDERE SE E' MEGLIO LASCIARE TUTTO SU RAM O SE SCRIVERE SU FILE PER POI ACCEDERE ALL'ARCHIVIO
+                DA ALTRI OGGETTI */
             }
 
             @Override

@@ -12,13 +12,13 @@ public class CameraRawSensor extends SmartObjectResource<Integer>{
 
     private static Logger logger = LoggerFactory.getLogger(CameraRawSensor.class);
 
-    private static final int MIN_VALUE = 0;
+    private static final double MIN_VALUE = 0;
 
-    private static final int MAX_VALUE = 30;
+    private static final double MAX_VALUE = 30;
 
-    private static final int MIN_VARIATION = 0;
+    private static final double MIN_VARIATION = 0;
 
-    private static final int MAX_VARIATION = 5;
+    private static final double MAX_VARIATION = 5;
 
     private static final String LOG_DISPLAY_NAME = "CameraSensor";
 
@@ -49,7 +49,7 @@ public class CameraRawSensor extends SmartObjectResource<Integer>{
         try{
 
             this.random = new Random(System.currentTimeMillis());
-            this.updatedValue = MIN_VALUE + this.random.nextInt()*(MAX_VALUE - MIN_VALUE);
+            this.updatedValue = ((int) (MIN_VALUE + this.random.nextDouble()*(MAX_VALUE - MIN_VALUE)));
 
             startPeriodicEventValueUpdateTask();
 
@@ -70,7 +70,7 @@ public class CameraRawSensor extends SmartObjectResource<Integer>{
                 @Override
                 public void run() {
 
-                    int people = (MIN_VARIATION + MAX_VARIATION*random.nextInt());
+                    int people = (int) (MIN_VARIATION + MAX_VARIATION*random.nextDouble());
                     if (random.nextDouble()>0.5){
                         updatedValue = updatedValue + people;
                     }

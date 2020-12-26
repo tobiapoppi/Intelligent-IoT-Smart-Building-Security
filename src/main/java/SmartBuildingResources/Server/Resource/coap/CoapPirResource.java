@@ -29,7 +29,7 @@ public class CoapPirResource extends CoapResource {
 
     private String deviceId;
 
-    private Boolean updatedValue = false;
+    private Boolean value = false;
 
     private PirRawSensor pirRawSensor;
 
@@ -65,7 +65,7 @@ public class CoapPirResource extends CoapResource {
             @Override
             public void onDataChanged(SmartObjectResource<Boolean> resource, Boolean updatedSensorValue) {
 
-                updatedValue = updatedSensorValue;
+                value = updatedSensorValue;
                 changed();
             }
         });
@@ -82,7 +82,7 @@ public class CoapPirResource extends CoapResource {
             senMLRecord.setBn(String.format("%s:%s", this.deviceId, this.getName()));
             senMLRecord.setBver(SENSOR_VERSION);
             senMLRecord.setU(UNIT);
-            senMLRecord.setVb(updatedValue);
+            senMLRecord.setVb(value);
             senMLRecord.setT(System.currentTimeMillis());
 
             senMLPack.add(senMLRecord);
@@ -112,9 +112,39 @@ public class CoapPirResource extends CoapResource {
         }
         //Otherwise respond with the default textplain payload
         else
-            exchange.respond(CoAP.ResponseCode.CONTENT, String.valueOf(updatedValue), MediaTypeRegistry.TEXT_PLAIN);
+            exchange.respond(CoAP.ResponseCode.CONTENT, String.valueOf(value), MediaTypeRegistry.TEXT_PLAIN);
 
 
     }
 
+    public static void main(String[] args) {
+
+
+        PirRawSensor rawResource = new PirRawSensor();
+
+        rawResource.addDataListener(new ResourceDataListener<Boolean>() {
+            @Override
+            public void onDataChanged(SmartObjectResource<Boolean> resource, Boolean updatedValue) {
+
+                if (resource != null && updatedValue != null)
+                    logger.info("Device: {} -> New Value Received: {}", resource.getId(), updatedValue);
+                else
+                    logger.error("onDataChanged Callback -> Null Resource or Updated Value !");
+            }
+        });
+
+        CoapPirResource coapPirResource = new CoapPirResource("pir", "idcazzodiboia", rawResource);
+
+        logger.info("New {} Resource Created with Id: {} ! {} New Value: {}",
+                rawResource.getType(),
+                rawResource.getId(),
+                "pir",
+                rawResource.loadUpdatedValue());
+
+
+
+    }
 }
+
+
+

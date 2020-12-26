@@ -22,19 +22,19 @@ public class CoapAlarmResource extends CoapResource {
 
     private final static Logger logger = LoggerFactory.getLogger(CoapAlarmResource.class);
 
-    private final static String OBJECT_TITLE =" Light Actuator";
+    private final static String OBJECT_TITLE = "Light Actuator";
 
     private Double ACTUATOR_VERSION = 0.5;
 
     private AlarmActuator alarmActuator;
 
-    private Boolean Is_Active=false;
+    private Boolean isActive=false;
 
     private String deviceId;
     private ObjectMapper objectMapper;
 
 
-    public CoapAlarmResource(String name, String deviceId, AlarmActuator alarmActuator) {
+    public CoapAlarmResource(String name, String deviceId, AlarmActuator alarmActuator) throws InterruptedException {
         super(name);
 
         if (alarmActuator != null && deviceId != null)
@@ -58,7 +58,7 @@ public class CoapAlarmResource extends CoapResource {
                 @Override
                 public void onDataChanged(SmartObjectResource<Boolean> resource, Boolean updatedValue) {
                     logger.info("Raw Resource Notification. New Value: {}", updatedValue);
-                    Is_Active=updatedValue;
+                    isActive=updatedValue;
                     changed();
                 }
             });
@@ -69,6 +69,8 @@ public class CoapAlarmResource extends CoapResource {
         }
 
     }
+
+
     private Optional<String> getJsonSenmlResponse() {
 
         try {
@@ -78,7 +80,7 @@ public class CoapAlarmResource extends CoapResource {
             SenMLRecord senMLRecord = new SenMLRecord();
             senMLRecord.setBn(String.format("%s:%s", this.deviceId, this.getName()));
             senMLRecord.setBver(ACTUATOR_VERSION);
-            senMLRecord.setVb(Is_Active);
+            senMLRecord.setVb(isActive);
             senMLRecord.setT(System.currentTimeMillis());
 
             senMLPack.add(senMLRecord);
@@ -105,7 +107,7 @@ public class CoapAlarmResource extends CoapResource {
         }
         //Otherwise respond with the default textplain payload
         else
-            exchange.respond(CoAP.ResponseCode.CONTENT, String.valueOf(Is_Active), MediaTypeRegistry.TEXT_PLAIN);
+            exchange.respond(CoAP.ResponseCode.CONTENT, String.valueOf(isActive), MediaTypeRegistry.TEXT_PLAIN);
     }
     @Override
     public void handlePOST(CoapExchange exchange){
@@ -114,10 +116,10 @@ public class CoapAlarmResource extends CoapResource {
             if(exchange.getRequestPayload() == null){
 
                 //Update internal status
-                this.Is_Active = !Is_Active;
-                this.alarmActuator.setActive(Is_Active);
+                this.isActive = !isActive;
+                this.alarmActuator.setActive(isActive);
 
-                logger.info("Resource Status Updated: {}", this.Is_Active);
+                logger.info("Resource Status Updated: {}", this.isActive);
 
                 exchange.respond(CoAP.ResponseCode.CHANGED);
             }
@@ -141,10 +143,10 @@ public class CoapAlarmResource extends CoapResource {
                 logger.info("Submitted value: {}", submittedValue);
 
                 //Update internal status
-                this.Is_Active = submittedValue;
-                this.alarmActuator.setActive(this.Is_Active);
+                this.isActive = submittedValue;
+                this.alarmActuator.setActive(this.isActive);
 
-                logger.info("Resource Status Updated: {}", this.Is_Active);
+                logger.info("Resource Status Updated: {}", this.isActive);
 
                 exchange.respond(CoAP.ResponseCode.CHANGED);
             }

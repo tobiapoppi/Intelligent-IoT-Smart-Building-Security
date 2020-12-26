@@ -5,6 +5,7 @@ import BuildingSecurityController.api.exception.IInventoryDataManagerException;
 import BuildingSecurityController.api.model.FloorDescriptor;
 import BuildingSecurityController.api.model.PolicyDescriptor;
 import BuildingSecurityController.api.model.UserDescriptor;
+import SmartBuildingResources.Server.Resource.coap.CoapPirResource;
 
 import java.io.IOException;
 import java.util.List;
@@ -36,5 +37,15 @@ public interface IInventoryDataManager {
     public Optional<FloorDescriptor> getFloor(int floor_number) throws IInventoryDataManagerException;
     public FloorDescriptor updateFloor(FloorDescriptor floorDescriptor) throws IInventoryDataManagerException;
     public FloorDescriptor deleteFloor(int floor_inumber) throws IInventoryDataManagerException;
+
+    //PIR Devices management
+
+    public List<CoapPirResource> getPirList() throws IInventoryDataManagerException;
+    public CoapPirResource createNewPir(CoapPirResource coapPirResource) throws IInventoryDataManagerException, IInventoryDataManagerConflict;
+    public Optional<CoapPirResource> getPir(String device_id) throws IInventoryDataManagerException;
+    public CoapPirResource updatePir(CoapPirResource coapPirResource) throws  IInventoryDataManagerException;
+    public CoapPirResource deletePir(String device_id) throws IInventoryDataManagerException;
+
+
 
 }

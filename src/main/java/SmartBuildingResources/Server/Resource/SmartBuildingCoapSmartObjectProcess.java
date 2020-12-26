@@ -15,10 +15,10 @@ import java.util.UUID;
 public class SmartBuildingCoapSmartObjectProcess extends CoapServer {
     private final static Logger logger = LoggerFactory.getLogger(SmartBuildingCoapSmartObjectProcess.class);
 
-    public SmartBuildingCoapSmartObjectProcess() {
+    public SmartBuildingCoapSmartObjectProcess() throws InterruptedException {
 
         super();
-        String deviceId = String.format("dipi:iot:%s", UUID.randomUUID().toString());
+        String deviceId = String.format("%s", UUID.randomUUID().toString());
 
 
 
@@ -30,13 +30,13 @@ public class SmartBuildingCoapSmartObjectProcess extends CoapServer {
 
     }
 
-    private CoapResource CreateFloorResource (String deviceId){
+    private CoapResource CreateFloorResource (String deviceId) throws InterruptedException {
         CoapResource FloorResource = new CoapResource("floor");
         this.add(CreateAreaResource(deviceId));
 
         return FloorResource;
     }
-    private CoapResource CreateAreaResource (String deviceId){
+    private CoapResource CreateAreaResource (String deviceId) throws InterruptedException {
 
         CoapResource AreaResource = new CoapResource("area");
         LightActuator PMlightActuator = new LightActuator();
@@ -44,6 +44,7 @@ public class SmartBuildingCoapSmartObjectProcess extends CoapServer {
 
         AlarmActuator PMalarmActuator = new AlarmActuator();
         CoapAlarmResource PMalarmResource = new CoapAlarmResource("alarm", deviceId, PMalarmActuator);
+
 
         this.add(CreatePresenceMonitoringResource(deviceId));
         this.add(PMLightResource);
@@ -65,10 +66,11 @@ public class SmartBuildingCoapSmartObjectProcess extends CoapServer {
         return PresenceMonitoringResource;
 
 
-        };
+    };
 
 
-    public static void main(String[] args) {
+
+    public static void main(String[] args) throws InterruptedException {
 
         SmartBuildingCoapSmartObjectProcess smartBuildingCoapSmartObjectProcess = new SmartBuildingCoapSmartObjectProcess();
         smartBuildingCoapSmartObjectProcess.start();
@@ -83,6 +85,8 @@ public class SmartBuildingCoapSmartObjectProcess extends CoapServer {
                 });
             }
         });
+
+
 
     }
 
