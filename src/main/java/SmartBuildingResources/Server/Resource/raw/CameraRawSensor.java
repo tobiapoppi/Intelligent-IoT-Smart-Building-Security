@@ -33,7 +33,6 @@ public class CameraRawSensor extends SmartObjectResource<Integer>{
 
     private int updatedValue;
 
-    private String location_id;
 
 
     private Random random;

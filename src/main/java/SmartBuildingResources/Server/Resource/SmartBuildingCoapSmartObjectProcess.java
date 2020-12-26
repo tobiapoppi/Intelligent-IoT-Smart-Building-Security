@@ -20,25 +20,41 @@ public class SmartBuildingCoapSmartObjectProcess extends CoapServer {
         super();
         String deviceId = String.format("dipi:iot:%s", UUID.randomUUID().toString());
 
+
+
+
+        this.add(CreateFloorResource(deviceId));
+
+
+
+
+    }
+
+    private CoapResource CreateFloorResource (String deviceId){
+        CoapResource FloorResource = new CoapResource("floor");
+        this.add(CreateAreaResource(deviceId));
+
+        return FloorResource;
+    }
+    private CoapResource CreateAreaResource (String deviceId){
+
+        CoapResource AreaResource = new CoapResource("area");
         LightActuator PMlightActuator = new LightActuator();
         CoapLightResource PMLightResource = new CoapLightResource("light", deviceId, PMlightActuator);
 
         AlarmActuator PMalarmActuator = new AlarmActuator();
         CoapAlarmResource PMalarmResource = new CoapAlarmResource("alarm", deviceId, PMalarmActuator);
 
-
-
         this.add(CreatePresenceMonitoringResource(deviceId));
         this.add(PMLightResource);
         this.add(PMalarmResource);
 
+        return AreaResource;
 
-
-    }
-
+    };
 
     private CoapResource CreatePresenceMonitoringResource(String deviceId) {
-        CoapResource PresenceMonitoringResource = new CoapResource("PresenceMonitoring");
+        CoapResource PresenceMonitoringResource = new CoapResource("presenceMonitoring");
         PirRawSensor PMPirRawSensor = new PirRawSensor();
         CameraRawSensor PMCameraRawSensor = new CameraRawSensor();
         CoapPirResource PMcoapPirResource = new CoapPirResource("pir", deviceId, PMPirRawSensor);
@@ -48,20 +64,7 @@ public class SmartBuildingCoapSmartObjectProcess extends CoapServer {
 
         return PresenceMonitoringResource;
 
-        //PMPirRawSensor.addDataListener(new ResourceDataListener<Boolean>() {
-        //   @Override
-        //       public void onDataChanged(SmartObjectResource<Boolean> resource, Boolean updatedValue) {
-        //          logger.info("Updated PIR Value: {} ", updatedValue);
-        //          if (isCommunicationRequired()), updatedValue)
 
-        //     }
-        //    });
-        //
-        // }
-
-        //private static boolean isCommunicationRequired (){
-
-        //  return true;
         };
 
 
