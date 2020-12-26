@@ -21,12 +21,7 @@ public class SmartBuildingCoapSmartObjectProcess extends CoapServer {
         String deviceId = String.format("%s", UUID.randomUUID().toString());
 
 
-
-
         this.add(CreateFloorResource(deviceId));
-
-
-
 
     }
 
@@ -67,6 +62,7 @@ public class SmartBuildingCoapSmartObjectProcess extends CoapServer {
 
 
     };
+
 
 
 
