@@ -7,6 +7,9 @@ import BuildingSecurityController.api.exception.IInventoryDataManagerException;
 import BuildingSecurityController.api.model.FloorDescriptor;
 import BuildingSecurityController.api.model.PolicyDescriptor;
 import BuildingSecurityController.api.model.UserDescriptor;
+import SmartBuildingResources.Server.Resource.coap.CoapCameraResource;
+import SmartBuildingResources.Server.Resource.coap.CoapPirResource;
+import org.eclipse.californium.core.server.resources.CoapExchange;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,6 +24,9 @@ public class DefaultInventoryDataManager implements IInventoryDataManager {
     private HashMap<String, PolicyDescriptor> policyMap;
     private HashMap<String, UserDescriptor> userMap;
     private HashMap<Integer, FloorDescriptor> floorMap;
+    private HashMap<String, CoapPirResource> pirMap;
+    private HashMap<String, CoapCameraResource> camMap;
+
 
 
     public DefaultInventoryDataManager() {
@@ -124,6 +130,7 @@ public class DefaultInventoryDataManager implements IInventoryDataManager {
     }
 
     ///BUILDING RESOURCE MANAGEMENT
+    //TODO questa parte di floors andrà riadattata alle modifiche di design architetturale
 
     @Override
     public List<FloorDescriptor> getFloorList() throws IInventoryDataManagerException{
@@ -155,6 +162,39 @@ public class DefaultInventoryDataManager implements IInventoryDataManager {
     @Override
     public FloorDescriptor deleteFloor(int floor_number) throws IInventoryDataManagerException {
         return this.floorMap.remove(floor_number);
+    }
+
+
+
+    //TODO ANCHE QUI CONTROLLARE SE FUNZIONA, è INVENTATO
+    @Override
+    public List<CoapPirResource> getPirList() throws IInventoryDataManagerException {
+        ArrayList<CoapPirResource> servicelist = new ArrayList<>(this.pirMap.values());
+        servicelist.stream().forEach(pir ->{
+            CoapExchange coapExchange = new CoapExchange(null, pir);
+            pir.handleGET(coapExchange);
+        });
+        return null;
+    }
+
+    @Override
+    public CoapPirResource createNewPir(CoapPirResource coapPirResource) throws IInventoryDataManagerException, IInventoryDataManagerConflict {
+        return null;
+    }
+
+    @Override
+    public Optional<CoapPirResource> getPir(String device_id) throws IInventoryDataManagerException {
+        return Optional.empty();
+    }
+
+    @Override
+    public CoapPirResource updatePir(CoapPirResource coapPirResource) throws IInventoryDataManagerException {
+        return null;
+    }
+
+    @Override
+    public CoapPirResource deletePir(String device_id) throws IInventoryDataManagerException {
+        return null;
     }
 
     //TODO

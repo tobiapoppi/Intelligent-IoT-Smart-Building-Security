@@ -30,7 +30,7 @@ public class CoapCameraResource extends CoapResource {
 
     private String deviceId;
 
-    private Integer updatedValue = 0;
+    private Integer value = 0;
 
     private CameraRawSensor cameraRawSensor;
 
@@ -66,7 +66,7 @@ public class CoapCameraResource extends CoapResource {
             @Override
             public void onDataChanged(SmartObjectResource<Integer> resource, Integer updatedSensorValue) {
 
-                updatedValue=updatedSensorValue;
+                value=updatedSensorValue;
                 changed();
             }
         });
@@ -83,7 +83,7 @@ public class CoapCameraResource extends CoapResource {
             senMLRecord.setBn(String.format("%s:%s", this.deviceId, this.getName()));
             senMLRecord.setBver(SENSOR_VERSION);
             senMLRecord.setU(UNIT);
-            senMLRecord.setV(updatedValue);
+            senMLRecord.setV(value);
             senMLRecord.setT(System.currentTimeMillis());
 
             senMLPack.add(senMLRecord);
@@ -113,7 +113,7 @@ public class CoapCameraResource extends CoapResource {
         }
         //Otherwise respond with the default textplain payload
         else
-            exchange.respond(CoAP.ResponseCode.CONTENT, String.valueOf(updatedValue), MediaTypeRegistry.TEXT_PLAIN);
+            exchange.respond(CoAP.ResponseCode.CONTENT, String.valueOf(value), MediaTypeRegistry.TEXT_PLAIN);
 
 
     }

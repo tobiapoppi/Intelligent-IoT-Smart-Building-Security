@@ -18,14 +18,13 @@ public class SmartBuildingCoapSmartObjectProcess extends CoapServer {
     public SmartBuildingCoapSmartObjectProcess() {
 
         super();
-        String deviceId = String.format("dipi:iot:%s", UUID.randomUUID().toString());
+        String deviceId = String.format("%s", UUID.randomUUID().toString());
 
         LightActuator PMlightActuator = new LightActuator();
         CoapLightResource PMLightResource = new CoapLightResource("light", deviceId, PMlightActuator);
 
         AlarmActuator PMalarmActuator = new AlarmActuator();
         CoapAlarmResource PMalarmResource = new CoapAlarmResource("alarm", deviceId, PMalarmActuator);
-
 
 
         this.add(CreatePresenceMonitoringResource(deviceId));

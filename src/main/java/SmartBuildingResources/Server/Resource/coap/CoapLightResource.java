@@ -37,6 +37,8 @@ public class CoapLightResource extends CoapResource {
     public CoapLightResource(String name, String deviceId, LightActuator lightActuator) {
         super(name);
 
+
+
         if (lightActuator != null && deviceId != null)
         {
             this.deviceId = deviceId;
