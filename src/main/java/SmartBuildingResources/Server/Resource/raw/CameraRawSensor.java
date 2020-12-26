@@ -50,7 +50,7 @@ public class CameraRawSensor extends SmartObjectResource<Integer>{
         try{
 
             this.random = new Random(System.currentTimeMillis());
-            this.updatedValue = (Integer) (MIN_VALUE + this.random.nextDouble()*(MAX_VALUE - MIN_VALUE));
+            this.updatedValue = ((int) (MIN_VALUE + this.random.nextDouble()*(MAX_VALUE - MIN_VALUE)));
 
             startPeriodicEventValueUpdateTask();
 
@@ -71,7 +71,7 @@ public class CameraRawSensor extends SmartObjectResource<Integer>{
                 @Override
                 public void run() {
 
-                    int people = (MIN_VARIATION + MAX_VARIATION*random.nextInt());
+                    int people = (int) (MIN_VARIATION + MAX_VARIATION*random.nextDouble());
                     if (random.nextDouble()>0.5){
                         updatedValue = updatedValue + people;
                     }
