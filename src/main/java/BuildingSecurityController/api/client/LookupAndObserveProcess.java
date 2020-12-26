@@ -30,7 +30,7 @@ public class LookupAndObserveProcess {
 
     //private static final String COAP_ENDPOINT = "coap://127.0.0.1:<porta>/rd-lookup/res";
 
-    private static final String TARGET_RD_IP = "0.0.0.0";
+    private static final String TARGET_RD_IP = "192.168.1.108";
     private static final int TARGET_RD_PORT = 5683;
     private static final String RD_LOOKUP_URI = "/rd-lookup/res";
 

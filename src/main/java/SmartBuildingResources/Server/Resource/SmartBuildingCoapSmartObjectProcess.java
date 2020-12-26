@@ -64,6 +64,9 @@ public class SmartBuildingCoapSmartObjectProcess extends CoapServer {
 
     };
 
+    //TODO metodo "regosterToCoapResourceDirectory" - VIDEO LABORATORIO 8 PARTE 2 MINUTO 12:00
+    //serve per registrare tutte le risorse dell'object sul resource directory
+
 
 
 
