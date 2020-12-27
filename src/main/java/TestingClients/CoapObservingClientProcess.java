@@ -1,4 +1,4 @@
-package Client;
+package TestingClients;
 
 import org.eclipse.californium.core.CoapClient;
 import org.eclipse.californium.core.CoapHandler;
@@ -8,14 +8,7 @@ import org.eclipse.californium.core.coap.Request;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * A simple CoAP Synchronous Client implemented using Californium Java Library
- * The client Observe a target resource for n Seconds and then cancel the request and ends the execution
- *
- * @author Marco Picone, Ph.D. - picone.m@gmail.com
- * @project coap-demo-smartobject
- * @created 20/10/2020 - 21:54
- */
+
 public class CoapObservingClientProcess {
 
     private final static Logger logger = LoggerFactory.getLogger(CoapObservingClientProcess.class);

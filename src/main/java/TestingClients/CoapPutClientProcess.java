@@ -1,4 +1,4 @@
-package Client;
+package it.unimore.dipi.iot.client;
 
 import org.eclipse.californium.core.CoapClient;
 import org.eclipse.californium.core.CoapResponse;
@@ -12,34 +12,30 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 
 
-/**
- * A simple CoAP Synchronous Client implemented using Californium Java Library
- * The simple client send a POST request to a target CoAP Resource with some custom request parameters
- * and Payload (if necessary)
- *
- * @author Marco Picone, Ph.D. - picone.m@gmail.com
- * @project coap-demo-smartobject
- * @created 20/10/2020 - 09:19
- */
-public class CoapPostClientProcess {
+public class CoapPutClientProcess {
 
-	private final static Logger logger = LoggerFactory.getLogger(CoapPostClientProcess.class);
+	private final static Logger logger = LoggerFactory.getLogger(CoapPutClientProcess.class);
 
-	private static final String COAP_ENDPOINT = "coap://127.0.0.1:5683/alarm";
+	private static final String COAP_ENDPOINT = "coap://127.0.0.1:5683/compressor/switch";
 
 	public static void main(String[] args) {
 		
 		//Initialize coapClient
 		CoapClient coapClient = new CoapClient(COAP_ENDPOINT);
 
-		//Request Class is a generic CoAP message: in this case we want a GET.
+		//Request Class is a generic CoAP message: in this case we want a PUT.
 		//"Message ID", "Token" and other header's fields can be set 
-		Request request = new Request(Code.POST);
+		Request request = new Request(Code.PUT);
+
+		//Set PUT request's payload
+		String myPayload = "false";
+		logger.info("PUT Request Random Payload: {}", myPayload);
+		request.setPayload(myPayload);
 
 		//Set Request as Confirmable
 		request.setConfirmable(true);
 
-		logger.info("Request Pretty Print:\n{}", Utils.prettyPrint(request));
+		logger.info("Request Pretty Print: \n{}", Utils.prettyPrint(request));
 
 		//Synchronously send the POST request (blocking call)
 		CoapResponse coapResp = null;

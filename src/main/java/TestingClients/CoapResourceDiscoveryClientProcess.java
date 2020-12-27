@@ -16,14 +16,7 @@ import java.io.IOException;
 import java.util.Set;
 
 
-/**
- * A simple CoAP Client implemented using the Java Californium Library sending a GET requesto to
- * the stardard Resource Discovery endpoint /.well-known/core
- *
- * @author Marco Picone, Ph.D. - picone.m@gmail.com
- * @project coap-demo-smartobject
- * @created 20/10/2020 - 09:19
- */
+
 public class CoapResourceDiscoveryClientProcess {
 
 	private final static Logger logger = LoggerFactory.getLogger(CoapResourceDiscoveryClientProcess.class);
