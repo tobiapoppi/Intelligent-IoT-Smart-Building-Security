@@ -17,6 +17,8 @@ public class CoapGetClientProcess {
 
     private static final String COAP_ENDPOINT = "coap://127.0.0.1:5683/light";
 
+    //TODO public static String getCoap
+
     public static void main(String[] args) {
 
         //Initialize coapClient
@@ -51,4 +53,5 @@ public class CoapGetClientProcess {
             e.printStackTrace();
         }
     }
+
 }
