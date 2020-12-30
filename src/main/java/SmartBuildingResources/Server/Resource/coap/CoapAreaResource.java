@@ -26,17 +26,14 @@ public class CoapAreaResource extends CoapResource {
 
     private AreaResource areaResource;
 
-    private String areaId;
-
     private ObjectMapper objectMapper;
 
 
-    public CoapAreaResource(String name, String areaId, AreaResource areaResource) throws InterruptedException {
+    public CoapAreaResource(String name, AreaResource areaResource) throws InterruptedException {
         super(name);
 
-        if (areaResource != null && areaId != null)
+        if (areaResource != null)
         {
-            this.areaId = areaId;
             this.areaResource = areaResource;
             this.objectMapper=new ObjectMapper();
             this.objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
@@ -66,9 +63,7 @@ public class CoapAreaResource extends CoapResource {
             SenMLPack senMLPack = new SenMLPack();
 
             SenMLRecord senMLRecord = new SenMLRecord();
-            senMLRecord.setBn(String.format("%s:%s", this.areaId, this.getName()));
-            senMLRecord.setT(System.currentTimeMillis());
-
+            senMLRecord.setBn(String.format("%s", this.getName()));
             senMLPack.add(senMLRecord);
 
             return Optional.of(this.objectMapper.writeValueAsString(senMLPack));

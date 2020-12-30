@@ -45,7 +45,9 @@ public class SmartBuildingCoapSmartObjectProcess extends CoapServer {
 
     private CoapResource createAreaResource(String deviceId, String areaId) throws InterruptedException {
 
-        CoapResource areaResource = new CoapResource(String.format("area%s", areaId));
+        AreaResource areaResource = new AreaResource();
+        CoapAreaResource coapAreaResource = new CoapAreaResource(String.format("area%s", areaId), areaResource);
+
         LightActuator pmlightactuator = new LightActuator();
         CoapLightResource PMLightResource = new CoapLightResource("light", deviceId, pmlightactuator);
 
@@ -53,11 +55,11 @@ public class SmartBuildingCoapSmartObjectProcess extends CoapServer {
         CoapAlarmResource PMalarmResource = new CoapAlarmResource("alarm", deviceId, pmalarmactuator);
 
 
-        areaResource.add(CreatePresenceMonitoringResource(deviceId));
-        areaResource.add(PMLightResource);
-        areaResource.add(PMalarmResource);
+        coapAreaResource.add(CreatePresenceMonitoringResource(deviceId));
+        coapAreaResource.add(PMLightResource);
+        coapAreaResource.add(PMalarmResource);
 
-        return areaResource;
+        return coapAreaResource;
 
     };
 

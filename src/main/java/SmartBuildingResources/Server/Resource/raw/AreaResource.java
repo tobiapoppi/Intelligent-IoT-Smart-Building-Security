@@ -13,6 +13,11 @@ public class AreaResource extends SmartObjectResource<Boolean> {
 
     private static final String RESOURCE_TYPE = "iot.area";
 
+    public AreaResource(){
+        super(UUID.randomUUID().toString(), RESOURCE_TYPE);
+
+    }
+
 
 
     public AreaResource(String nome) {
