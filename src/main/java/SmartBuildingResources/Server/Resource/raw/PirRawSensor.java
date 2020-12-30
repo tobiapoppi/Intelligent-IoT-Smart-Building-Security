@@ -29,10 +29,6 @@ public class PirRawSensor extends SmartObjectResource<Boolean> {
 
     private Boolean updatedValue;
 
-    private Integer floor_number;
-
-    private String area_id;
-
     private Random random;
 
 

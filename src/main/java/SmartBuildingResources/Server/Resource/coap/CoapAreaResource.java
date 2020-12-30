@@ -26,35 +26,29 @@ public class CoapAreaResource extends CoapResource {
 
     private AreaResource areaResource;
 
-
-    private String nArea;
-
-    private Integer nSensors=0;
-
-    private Integer nPiano;
+    private String areaId;
 
     private ObjectMapper objectMapper;
 
 
-    public CoapAreaResource(String name, String nArea, AreaResource areaResource) throws InterruptedException {
+    public CoapAreaResource(String name, String areaId, AreaResource areaResource) throws InterruptedException {
         super(name);
 
-        if (areaResource != null && nArea != null)
+        if (areaResource != null && areaId != null)
         {
-            this.nArea = nArea;
+            this.areaId = areaId;
             this.areaResource = areaResource;
             this.objectMapper=new ObjectMapper();
             this.objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
 
-            setObservable(true);
+            setObservable(false);
             setObserveType(CoAP.Type.CON);
 
             getAttributes().setTitle(OBJECT_TITLE);
             getAttributes().setObservable();
             getAttributes().addAttribute("rt", areaResource.getType());
-            getAttributes().addAttribute("if", CoreInterfaces.CORE_A.getValue());
-            getAttributes().addAttribute("ct", Integer.toString(MediaTypeRegistry.APPLICATION_SENML_JSON));
-            getAttributes().addAttribute("ct", Integer.toString(MediaTypeRegistry.TEXT_PLAIN));
+            getAttributes().addAttribute("if", CoreInterfaces.CORE_LL.getValue());
+            getAttributes().addAttribute("ct", Integer.toString(MediaTypeRegistry.APPLICATION_LINK_FORMAT));
 
 
         }
@@ -72,8 +66,7 @@ public class CoapAreaResource extends CoapResource {
             SenMLPack senMLPack = new SenMLPack();
 
             SenMLRecord senMLRecord = new SenMLRecord();
-            senMLRecord.setBn(String.format("%s:%s", this.nArea, this.getName()));
-            senMLRecord.setV(nSensors);
+            senMLRecord.setBn(String.format("%s:%s", this.areaId, this.getName()));
             senMLRecord.setT(System.currentTimeMillis());
 
             senMLPack.add(senMLRecord);

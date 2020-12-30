@@ -78,14 +78,14 @@ public class CoapPirResource extends CoapResource {
 
             SenMLPack senMLPack = new SenMLPack();
 
-            SenMLRecord senMLRecord = new SenMLRecord();
-            senMLRecord.setBn(String.format("%s:%s", this.deviceId, this.getName()));
-            senMLRecord.setBver(SENSOR_VERSION);
-            senMLRecord.setU(UNIT);
-            senMLRecord.setVb(value);
-            senMLRecord.setT(System.currentTimeMillis());
+            SenMLRecord senMLRecordValue = new SenMLRecord();
+            senMLRecordValue.setBn(String.format("%s:%s", this.deviceId, this.getName()));
+            senMLRecordValue.setBver(SENSOR_VERSION);
+            senMLRecordValue.setU(UNIT);
+            senMLRecordValue.setVb(value);
+            senMLRecordValue.setT(System.currentTimeMillis());
 
-            senMLPack.add(senMLRecord);
+            senMLPack.add(senMLRecordValue);
 
             return Optional.of(this.objectMapper.writeValueAsString(senMLPack));
 

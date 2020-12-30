@@ -15,8 +15,6 @@ public class AlarmActuator extends SmartObjectResource<Boolean> {
 
     private Boolean isActive;
 
-    private String location_id;
-
     public AlarmActuator() {
         super(UUID.randomUUID().toString(), RESOURCE_TYPE);
         this.isActive = true;

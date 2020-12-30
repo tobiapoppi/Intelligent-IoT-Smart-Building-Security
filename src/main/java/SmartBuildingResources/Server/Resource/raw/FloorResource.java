@@ -12,10 +12,6 @@ public class FloorResource extends SmartObjectResource<Boolean> {
     private static final String RESOURCE_TYPE = "iot.area";
 
 
-    private Integer nAree;
-
-    private Integer nPiano;
-
     public FloorResource(String nome) {
         super( nome, RESOURCE_TYPE);
 

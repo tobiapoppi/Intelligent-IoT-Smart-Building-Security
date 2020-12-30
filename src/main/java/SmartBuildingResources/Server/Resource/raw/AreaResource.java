@@ -13,18 +13,13 @@ public class AreaResource extends SmartObjectResource<Boolean> {
 
     private static final String RESOURCE_TYPE = "iot.area";
 
-    private String nArea;
+    private String areaId;
 
-    private Integer nSensors=0;
 
-    private Integer nPiano;
-
-    public AreaResource(String nome, Integer nPiano) {
+    public AreaResource(String nome) {
         super(nome, RESOURCE_TYPE);
 
-        this.nArea= nome;
-        this.nPiano=nPiano;
-
+        this.areaId= nome;
     }
 
     @Override

@@ -15,8 +15,6 @@ public class LightActuator extends SmartObjectResource<Boolean> {
 
     private Boolean isActive;
 
-    private String location_id;
-
     public LightActuator() {
         super(UUID.randomUUID().toString(), RESOURCE_TYPE);
         this.isActive = true;
