@@ -23,20 +23,14 @@ public class CoapFloorResource extends CoapResource {
 
     private FloorResource floorResource;
 
-
-    private Integer nArea;
-
-    private String nPiano;
-
     private ObjectMapper objectMapper;
 
 
-    public CoapFloorResource(String name, String nPiano, FloorResource floorResource) throws InterruptedException {
+    public CoapFloorResource(String name, FloorResource floorResource) throws InterruptedException {
         super(name);
 
-        if (floorResource != null && nArea != null)
+        if (floorResource != null)
         {
-            this.nArea = nArea;
             this.floorResource = floorResource;
             this.objectMapper=new ObjectMapper();
             this.objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
@@ -47,14 +41,12 @@ public class CoapFloorResource extends CoapResource {
             getAttributes().setTitle(OBJECT_TITLE);
             getAttributes().setObservable();
             getAttributes().addAttribute("rt", floorResource.getType());
-            getAttributes().addAttribute("if", CoreInterfaces.CORE_A.getValue());
-            getAttributes().addAttribute("ct", Integer.toString(MediaTypeRegistry.APPLICATION_SENML_JSON));
-            getAttributes().addAttribute("ct", Integer.toString(MediaTypeRegistry.TEXT_PLAIN));
-
+            getAttributes().addAttribute("if", CoreInterfaces.CORE_LL.getValue());
+            getAttributes().addAttribute("ct", Integer.toString(MediaTypeRegistry.APPLICATION_LINK_FORMAT));
 
         }
         else {
-            logger.error(" ERROR -->NULL Raw References");
+            logger.error( "ERROR -->NULL Raw References" );
         }
 
     }
@@ -67,10 +59,7 @@ public class CoapFloorResource extends CoapResource {
             SenMLPack senMLPack = new SenMLPack();
 
             SenMLRecord senMLRecord = new SenMLRecord();
-            senMLRecord.setBn(String.format("%s:%s", this.nArea, this.getName()));
-            senMLRecord.setV(nArea);
-            senMLRecord.setT(System.currentTimeMillis());
-
+            senMLRecord.setBn(String.format("%s", this.getName()));
             senMLPack.add(senMLRecord);
 
             return Optional.of(this.objectMapper.writeValueAsString(senMLPack));

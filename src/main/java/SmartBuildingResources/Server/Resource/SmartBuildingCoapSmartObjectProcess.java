@@ -34,9 +34,13 @@ public class SmartBuildingCoapSmartObjectProcess extends CoapServer {
     }
 
     private CoapResource createFloorResource(String deviceId, Integer floorNumber) throws InterruptedException {
-        CoapResource floorResource = new CoapResource(String.format("floor%s", floorNumber));
-        floorResource.add(createAreaResource(deviceId, "A"));
-        return floorResource;
+
+        FloorResource floorResource = new FloorResource();
+        CoapFloorResource coapFloorResource = new CoapFloorResource(String.format("floor%s", floorNumber), floorResource);
+
+        //CoapResource floorResource = new CoapResource(String.format("floor%s", floorNumber));
+        coapFloorResource.add(createAreaResource(deviceId, "A"));
+        return coapFloorResource;
     }
 
     private CoapResource createAreaResource(String deviceId, String areaId) throws InterruptedException {
