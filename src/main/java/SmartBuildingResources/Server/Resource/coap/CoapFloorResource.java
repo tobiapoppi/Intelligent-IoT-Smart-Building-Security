@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.eclipse.californium.core.CoapResource;
 import org.eclipse.californium.core.coap.CoAP;
 import org.eclipse.californium.core.coap.MediaTypeRegistry;
+import org.eclipse.californium.core.server.resources.CoapExchange;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import utils.CoreInterfaces;
@@ -24,6 +25,8 @@ public class CoapFloorResource extends CoapResource {
     private FloorResource floorResource;
 
     private ObjectMapper objectMapper;
+
+
 
 
     public CoapFloorResource(String name, FloorResource floorResource) throws InterruptedException {
@@ -51,8 +54,14 @@ public class CoapFloorResource extends CoapResource {
 
     }
 
+    private CoapResource createAreaResource(String areaId) throws InterruptedException {
 
-    private Optional<String> getJsonSenmlResponse() {
+        AreaResource areaResource = new AreaResource();
+        CoapAreaResource coapAreaResource = new CoapAreaResource(String.format("area%s", areaId), areaResource);
+        return coapAreaResource;
+    };
+
+        private Optional<String> getJsonSenmlResponse() {
 
         try {
 
@@ -68,72 +77,65 @@ public class CoapFloorResource extends CoapResource {
             return Optional.empty();
         }
     }
-//
-//    @Override
-//    public void handleGET(CoapExchange exchange){
-//
-//        if(exchange.getRequestOptions().getAccept() == MediaTypeRegistry.APPLICATION_SENML_JSON ||
-//                exchange.getRequestOptions().getAccept() == MediaTypeRegistry.APPLICATION_JSON){
-//
-//            Optional<String> senmlPayload = getJsonSenmlResponse();
-//
-//            if(senmlPayload.isPresent())
-//                exchange.respond(CoAP.ResponseCode.CONTENT, senmlPayload.get(), exchange.getRequestOptions().getAccept());
-//            else
-//                exchange.respond(CoAP.ResponseCode.INTERNAL_SERVER_ERROR);
-//        }
-//        //Otherwise respond with the default textplain payload
-//        else
-//            exchange.respond(CoAP.ResponseCode.CONTENT, String.valueOf(isActive), MediaTypeRegistry.TEXT_PLAIN);
-//    }
-//    @Override
-//    public void handlePOST(CoapExchange exchange){
-//        try{
-//            //Empty request
-//            if(exchange.getRequestPayload() == null){
-//
-//                //Update internal status
-//                this.isActive = !isActive;
-//                this.alarmActuator.setActive(isActive);
-//
-//                logger.info("Resource Status Updated: {}", this.isActive);
-//
-//                exchange.respond(CoAP.ResponseCode.CHANGED);
-//            }
-//            else
-//                exchange.respond(CoAP.ResponseCode.BAD_REQUEST);
-//
-//        }catch (Exception e){
-//            logger.error("Error Handling POST -> {}", e.getLocalizedMessage());
-//            exchange.respond(CoAP.ResponseCode.INTERNAL_SERVER_ERROR);
-//        }
-//    }
-//    @Override
-//    public void handlePUT(CoapExchange exchange){
-//        try{
-//
-//            //If the request body is available
-//            if(exchange.getRequestPayload() != null){
-//
-//                boolean submittedValue = Boolean.parseBoolean(new String(exchange.getRequestPayload()));
-//
-//                logger.info("Submitted value: {}", submittedValue);
-//
-//                //Update internal status
-//                this.isActive = submittedValue;
-//                this.alarmActuator.setActive(this.isActive);
-//
-//                logger.info("Resource Status Updated: {}", this.isActive);
-//
-//                exchange.respond(CoAP.ResponseCode.CHANGED);
-//            }
-//            else
-//                exchange.respond(CoAP.ResponseCode.BAD_REQUEST);
-//
-//        }catch (Exception e){
-//            logger.error("Error Handling POST -> {}", e.getLocalizedMessage());
-//            exchange.respond(CoAP.ResponseCode.INTERNAL_SERVER_ERROR);
-//        }
-//
-//    }
+    @Override
+    public void handleGET(CoapExchange exchange){
+
+        if(exchange.getRequestOptions().getAccept() == MediaTypeRegistry.APPLICATION_SENML_JSON ||
+                exchange.getRequestOptions().getAccept() == MediaTypeRegistry.APPLICATION_JSON){
+
+            Optional<String> senmlPayload = getJsonSenmlResponse();
+
+            if(senmlPayload.isPresent())
+                exchange.respond(CoAP.ResponseCode.CONTENT, senmlPayload.get(), exchange.getRequestOptions().getAccept());
+            else
+                exchange.respond(CoAP.ResponseCode.INTERNAL_SERVER_ERROR);
+        }
+    }
+    @Override
+    public void handlePOST(CoapExchange exchange){
+        try{
+            //Empty request
+   //         if(exchange.getRequestPayload() == (int)){
+                String areaId = new String(exchange.getRequestPayload());
+
+                this.add(createAreaResource(areaId));
+
+
+                logger.info("Resource Status Updated: Area {} Created", areaId);
+
+                exchange.respond(CoAP.ResponseCode.CHANGED);
+   //         }
+   //         else
+   //             exchange.respond(CoAP.ResponseCode.BAD_REQUEST);
+
+        }catch (Exception e){
+            logger.error("Error Handling POST -> {}", e.getLocalizedMessage());
+            exchange.respond(CoAP.ResponseCode.INTERNAL_SERVER_ERROR);
+        }
+    }
+    @Override
+    public void handlePUT(CoapExchange exchange){
+        try{
+
+            //If the request body is available
+            if(exchange.getRequestPayload() != null){
+
+                String submittedValue = new String(exchange.getRequestPayload());
+
+                //Update internal status
+                this.setName(submittedValue);
+
+                logger.info("Resource Status Updated: {}", submittedValue);
+
+                exchange.respond(CoAP.ResponseCode.CHANGED);
+            }
+            else
+                exchange.respond(CoAP.ResponseCode.BAD_REQUEST);
+
+        }catch (Exception e){
+            logger.error("Error Handling POST -> {}", e.getLocalizedMessage());
+            exchange.respond(CoAP.ResponseCode.INTERNAL_SERVER_ERROR);
+        }
+
+    }
 }
