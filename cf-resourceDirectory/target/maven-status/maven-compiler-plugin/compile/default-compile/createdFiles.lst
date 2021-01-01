@@ -1,0 +1,11 @@
+org/eclipse/californium/tools/resources/RDLookUpEPResource.class
+org/eclipse/californium/tools/resources/RDTagTopResource.class
+org/eclipse/californium/tools/resources/RDTagResource.class
+org/eclipse/californium/tools/resources/RDLookUpResResource.class
+org/eclipse/californium/tools/resources/RDNodeResource.class
+org/eclipse/californium/tools/resources/RDNodeResource$1.class
+org/eclipse/californium/tools/ResourceDirectory.class
+org/eclipse/californium/tools/resources/KeyValuePair.class
+org/eclipse/californium/tools/resources/RDLookUpTopResource.class
+org/eclipse/californium/tools/resources/RDResource.class
+org/eclipse/californium/tools/resources/RDNodeResource$ExpiryTask.class
