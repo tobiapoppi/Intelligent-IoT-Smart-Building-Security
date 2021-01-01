@@ -4,7 +4,11 @@ package BuildingSecurityController.api.services;
 import BuildingSecurityController.api.auth.ExampleAuthorizer;
 import BuildingSecurityController.api.auth.ExampleAuthenticator;
 import BuildingSecurityController.api.auth.User;
+import BuildingSecurityController.api.resources.BuildingResource;
 import BuildingSecurityController.api.resources.PolicyResource;
+import BuildingSecurityController.api.resources.UserResource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import utils.DummyDataGenerator;
 import io.dropwizard.Application;
 import io.dropwizard.auth.AuthDynamicFeature;
@@ -19,9 +23,14 @@ import org.glassfish.jersey.server.filter.RolesAllowedDynamicFeature;
 
 import javax.servlet.DispatcherType;
 import javax.servlet.FilterRegistration;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.util.ArrayList;
 import java.util.EnumSet;
 
 public class OperatorAppService extends Application<OperatorAppConfig> {
+
+    private static final Logger logger = LoggerFactory.getLogger(OperatorAppService.class);
 
     public static void main(String[] args) throws Exception {
 
@@ -51,6 +60,8 @@ public class OperatorAppService extends Application<OperatorAppConfig> {
 
 
 
+        environment.jersey().register(new BuildingResource(operatorAppConfig));
+        environment.jersey().register(new UserResource(operatorAppConfig));
         environment.jersey().register(new PolicyResource(operatorAppConfig));
 
 

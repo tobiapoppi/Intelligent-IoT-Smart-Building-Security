@@ -7,6 +7,7 @@ import SmartBuildingResources.Server.Resource.raw.SmartObjectResource;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.eclipse.californium.core.CoapResource;
+import org.eclipse.californium.core.Utils;
 import org.eclipse.californium.core.coap.CoAP;
 import org.eclipse.californium.core.coap.MediaTypeRegistry;
 import org.eclipse.californium.core.server.resources.CoapExchange;
@@ -86,6 +87,8 @@ public class CoapLightResource extends CoapResource {
 
             senMLPack.add(senMLRecord);
 
+            logger.info("{}", senMLPack);
+
             return Optional.of(this.objectMapper.writeValueAsString(senMLPack));
 
         } catch (Exception e) {
@@ -97,8 +100,11 @@ public class CoapLightResource extends CoapResource {
     @Override
     public void handleGET(CoapExchange exchange){
 
-        if(exchange.getRequestOptions().getAccept() == MediaTypeRegistry.APPLICATION_SENML_JSON ||
-                exchange.getRequestOptions().getAccept() == MediaTypeRegistry.APPLICATION_JSON){
+        //if(exchange.getRequestOptions().getAccept() == MediaTypeRegistry.APPLICATION_SENML_JSON ||
+        //        exchange.getRequestOptions().getAccept() == MediaTypeRegistry.APPLICATION_JSON){
+
+            logger.info("Pretty Print: \n{}", Utils.prettyPrint(exchange.advanced().getRequest()));
+            logger.info("Pretty Print: \n{}", exchange.getRequestOptions());
 
             Optional<String> senmlPayload = getJsonSenmlResponse();
 
@@ -106,10 +112,10 @@ public class CoapLightResource extends CoapResource {
                 exchange.respond(CoAP.ResponseCode.CONTENT, senmlPayload.get(), exchange.getRequestOptions().getAccept());
             else
                 exchange.respond(CoAP.ResponseCode.INTERNAL_SERVER_ERROR);
-        }
+        //}
         //Otherwise respond with the default textplain payload
-        else
-            exchange.respond(CoAP.ResponseCode.CONTENT, String.valueOf(Is_Active), MediaTypeRegistry.TEXT_PLAIN);
+        //else
+          //  exchange.respond(CoAP.ResponseCode.CONTENT, String.valueOf(Is_Active), MediaTypeRegistry.TEXT_PLAIN);
     }
     @Override
     public void handlePOST(CoapExchange exchange){

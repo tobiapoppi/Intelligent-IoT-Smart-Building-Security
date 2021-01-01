@@ -44,7 +44,7 @@ public class CoapAreaResource extends CoapResource {
             getAttributes().setTitle(OBJECT_TITLE);
             getAttributes().setObservable();
             getAttributes().addAttribute("rt", areaResource.getType());
-            getAttributes().addAttribute("if", CoreInterfaces.CORE_LL.getValue());
+            getAttributes().addAttribute("if", CoreInterfaces.CORE_B.getValue());
             getAttributes().addAttribute("ct", Integer.toString(MediaTypeRegistry.APPLICATION_LINK_FORMAT));
 
 

@@ -20,7 +20,7 @@ public class CoapGetSenmlClientProcess {
 
     private final static Logger logger = LoggerFactory.getLogger(CoapGetSenmlClientProcess.class);
 
-    private static final String COAP_ENDPOINT = "coap://127.0.0.1:5683/PresenceMonitoring/camera";
+    private static final String COAP_ENDPOINT = "coap://127.0.0.1:5683/floor0/areaA/light";
 
     public static void main(String[] args) {
 

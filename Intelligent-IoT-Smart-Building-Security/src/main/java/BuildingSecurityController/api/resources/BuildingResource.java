@@ -1,6 +1,7 @@
 package BuildingSecurityController.api.resources;
 
 
+import BuildingSecurityController.api.client.LookupAndObserveProcess;
 import BuildingSecurityController.api.data_transfer_object.FloorCreationRequest;
 import BuildingSecurityController.api.data_transfer_object.FloorUpdateRequest;
 import BuildingSecurityController.api.data_transfer_object.PolicyCreationRequest;
@@ -24,20 +25,26 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 import java.awt.*;
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 @Path("/building/floor")
 @Api("IoT Building Resource Endpoint")
 public class BuildingResource {
+
     final protected Logger logger = LoggerFactory.getLogger(BuildingResource.class);
 
     @SuppressWarnings("serial")
     public static class MissingKeyException extends Exception{}
     final OperatorAppConfig conf;
 
-    public BuildingResource(OperatorAppConfig conf) {this.conf = conf;}
+    public BuildingResource(OperatorAppConfig conf) throws InterruptedException {
+        this.conf = conf;
+    }
 
     //TODO
 
@@ -49,15 +56,28 @@ public class BuildingResource {
     @ApiOperation(value = "Get all the Floors of the building")
     public Response GetFloors(@Context ContainerRequestContext requestContext){
         try{
-            List<FloorDescriptor> floorList = null;
+
+            //TODO PENSARE SE VERAMENTE è MEGLIO SALVARE SU FILE, E PROVARE SE FUNZIONA ANCHE CON IL METODO DI PRIMA(NON AVEVO ANCORA REGISTRATO LA RESOURCE NELLA APP)
+            BufferedReader bufReader = new BufferedReader(new FileReader("floors.txt"));
+            ArrayList<String> listOfLines = new ArrayList<>();
+
+            String line = bufReader.readLine();
+            while (line != null) {
+                listOfLines.add(line);
+                line = bufReader.readLine();
+            }
+
+            bufReader.close();
+
+            logger.info("{}", listOfLines);
 
             logger.info("Loading all the building's Floors");
-            floorList = this.conf.getInventoryDataManager().getFloorList();
+            //floorList = this.conf.getInventoryDataManager().getFloorList();
 
-            if (floorList == null)
-                return Response.status(Response.Status.NOT_FOUND).type(MediaType.APPLICATION_JSON_TYPE).entity(new ErrorMessage(Response.Status.NOT_FOUND.getStatusCode(), "Floors not found")).build();
+            //if (listOfLines == null)
+            //    return Response.status(Response.Status.NOT_FOUND).type(MediaType.APPLICATION_JSON_TYPE).entity(new ErrorMessage(Response.Status.NOT_FOUND.getStatusCode(), "Floors not found")).build();
 
-            return Response.ok(floorList).build();
+            return Response.ok(listOfLines).build();
 
         }catch(Exception e){
             e.printStackTrace();
