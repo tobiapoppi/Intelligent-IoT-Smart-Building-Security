@@ -138,4 +138,29 @@ public class CoapFloorResource extends CoapResource {
         }
 
     }
+    @Override
+    public void handleDELETE(CoapExchange exchange){
+        try{
+
+            //If the request body is available
+            if(exchange.getRequestPayload() != null){
+
+                String deletedValue = new String(exchange.getRequestPayload());
+
+                //Update internal status
+                this.delete(deletedValue);
+
+                logger.info("Resource Status Updated: Area {} deleted", deletedValue);
+
+                exchange.respond(CoAP.ResponseCode.CHANGED);
+            }
+            else
+                exchange.respond(CoAP.ResponseCode.BAD_REQUEST);
+
+        }catch (Exception e){
+            logger.error("Error Handling DELETE -> {}", e.getLocalizedMessage());
+            exchange.respond(CoAP.ResponseCode.INTERNAL_SERVER_ERROR);
+        }
+
+    }
 }

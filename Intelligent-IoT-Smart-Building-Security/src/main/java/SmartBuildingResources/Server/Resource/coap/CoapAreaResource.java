@@ -54,6 +54,12 @@ public class CoapAreaResource extends CoapResource {
         }
 
     }
+    private CoapResource createDevice(String deviceId) throws InterruptedException {
+
+        AreaResource areaResource = new AreaResource();
+        CoapAreaResource coapAreaResource = new CoapAreaResource(String.format("area%s", deviceId), areaResource);
+        return coapAreaResource;
+    };
 
 
     private Optional<String> getJsonSenmlResponse() {
@@ -72,72 +78,65 @@ public class CoapAreaResource extends CoapResource {
             return Optional.empty();
         }
     }
-//
-//    @Override
-//    public void handleGET(CoapExchange exchange){
-//
-//        if(exchange.getRequestOptions().getAccept() == MediaTypeRegistry.APPLICATION_SENML_JSON ||
-//                exchange.getRequestOptions().getAccept() == MediaTypeRegistry.APPLICATION_JSON){
-//
-//            Optional<String> senmlPayload = getJsonSenmlResponse();
-//
-//            if(senmlPayload.isPresent())
-//                exchange.respond(CoAP.ResponseCode.CONTENT, senmlPayload.get(), exchange.getRequestOptions().getAccept());
-//            else
-//                exchange.respond(CoAP.ResponseCode.INTERNAL_SERVER_ERROR);
-//        }
-//        //Otherwise respond with the default textplain payload
-//        else
-//            exchange.respond(CoAP.ResponseCode.CONTENT, String.valueOf(isActive), MediaTypeRegistry.TEXT_PLAIN);
-//    }
-//    @Override
-//    public void handlePOST(CoapExchange exchange){
-//        try{
-//            //Empty request
-//            if(exchange.getRequestPayload() == null){
-//
-//                //Update internal status
-//                this.isActive = !isActive;
-//                this.alarmActuator.setActive(isActive);
-//
-//                logger.info("Resource Status Updated: {}", this.isActive);
-//
-//                exchange.respond(CoAP.ResponseCode.CHANGED);
-//            }
-//            else
-//                exchange.respond(CoAP.ResponseCode.BAD_REQUEST);
-//
-//        }catch (Exception e){
-//            logger.error("Error Handling POST -> {}", e.getLocalizedMessage());
-//            exchange.respond(CoAP.ResponseCode.INTERNAL_SERVER_ERROR);
-//        }
-//    }
-//    @Override
-//    public void handlePUT(CoapExchange exchange){
-//        try{
-//
-//            //If the request body is available
-//            if(exchange.getRequestPayload() != null){
-//
-//                boolean submittedValue = Boolean.parseBoolean(new String(exchange.getRequestPayload()));
-//
-//                logger.info("Submitted value: {}", submittedValue);
-//
-//                //Update internal status
-//                this.isActive = submittedValue;
-//                this.alarmActuator.setActive(this.isActive);
-//
-//                logger.info("Resource Status Updated: {}", this.isActive);
-//
-//                exchange.respond(CoAP.ResponseCode.CHANGED);
-//            }
-//            else
-//                exchange.respond(CoAP.ResponseCode.BAD_REQUEST);
-//
-//        }catch (Exception e){
-//            logger.error("Error Handling POST -> {}", e.getLocalizedMessage());
-//            exchange.respond(CoAP.ResponseCode.INTERNAL_SERVER_ERROR);
-//        }
-//
-//    }
+    @Override
+    public void handleGET(CoapExchange exchange){
+
+        if(exchange.getRequestOptions().getAccept() == MediaTypeRegistry.APPLICATION_SENML_JSON ||
+                exchange.getRequestOptions().getAccept() == MediaTypeRegistry.APPLICATION_JSON){
+
+            Optional<String> senmlPayload = getJsonSenmlResponse();
+
+            if(senmlPayload.isPresent())
+                exchange.respond(CoAP.ResponseCode.CONTENT, senmlPayload.get(), exchange.getRequestOptions().getAccept());
+            else
+                exchange.respond(CoAP.ResponseCode.INTERNAL_SERVER_ERROR);
+        }
+    }
+    @Override
+    public void handlePOST(CoapExchange exchange){
+        try{
+            //Empty request
+            //         if(exchange.getRequestPayload() == (int)){
+            String deviceId = new String(exchange.getRequestPayload());
+
+            this.add(createDevice(deviceId));
+
+
+            logger.info("Resource Status Updated: Device {} Created", deviceId);
+
+            exchange.respond(CoAP.ResponseCode.CHANGED);
+            //         }
+            //         else
+            //             exchange.respond(CoAP.ResponseCode.BAD_REQUEST);
+
+        }catch (Exception e){
+            logger.error("Error Handling POST -> {}", e.getLocalizedMessage());
+            exchange.respond(CoAP.ResponseCode.INTERNAL_SERVER_ERROR);
+        }
+    }
+    @Override
+    public void handlePUT(CoapExchange exchange){
+        try{
+
+            //If the request body is available
+            if(exchange.getRequestPayload() != null){
+
+                String submittedValue = new String(exchange.getRequestPayload());
+
+                //Update internal status
+                this.setName(submittedValue);
+
+                logger.info("Resource Status Updated: {}", submittedValue);
+
+                exchange.respond(CoAP.ResponseCode.CHANGED);
+            }
+            else
+                exchange.respond(CoAP.ResponseCode.BAD_REQUEST);
+
+        }catch (Exception e){
+            logger.error("Error Handling POST -> {}", e.getLocalizedMessage());
+            exchange.respond(CoAP.ResponseCode.INTERNAL_SERVER_ERROR);
+        }
+
+    }
 }
