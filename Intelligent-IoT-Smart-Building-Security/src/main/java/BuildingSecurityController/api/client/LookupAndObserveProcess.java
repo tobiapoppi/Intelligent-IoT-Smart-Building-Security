@@ -25,7 +25,7 @@ import static org.eclipse.californium.core.coap.LinkFormat.RESOURCE_TYPE;
 automaticamente ad osservarle, implementando tutti i metody onLoad invocati in maniera asincrona.
 l'observing va fatto su tutti e soli i sensori (no attuatori). */
 
-public class LookupAndObserveProcess {
+public class LookupAndObserveProcess implements Runnable{
 
     private final static Logger logger = LoggerFactory.getLogger(LookupAndObserveProcess.class);
 
@@ -97,8 +97,16 @@ public class LookupAndObserveProcess {
     }
 
     public static List<String> getFloors(){
-        return floorTargetObservableList;
+        List<String> floorList = floorTargetObservableList;
+        List<String> formattedFloorsList = new ArrayList<>();
+        floorList.forEach(floor ->  {
+                    floor = floor.replace("coap://192.168.1.107:5683/", "");
+                    formattedFloorsList.add(floor);
+                }
+        );
+        return formattedFloorsList;
     }
+
 
     private static void lookupTarget(CoapClient coapClient){
 
@@ -395,5 +403,48 @@ public class LookupAndObserveProcess {
     }
 
 
+    @Override
+    public void run() {
+        //init coap client
+        CoapClient coapClient = new CoapClient();
 
+        //init target resource list array and observing relations
+        pirTargetObservableList = new ArrayList<>();
+        camTargetObservableList = new ArrayList<>();
+        lightTargetObservableList = new ArrayList<>();
+        alarmTargetObservableList = new ArrayList<>();
+        floorTargetObservableList = new ArrayList<>();
+        areaTargetObservableList = new ArrayList<>();
+        observingRelationMap = new HashMap<>();
+
+        //discover all available sensors and actuators
+        lookupTarget(coapClient);
+
+        //start observing resources
+        pirTargetObservableList.forEach(targetResourceUrl -> {
+            startObservingPir(coapClient, targetResourceUrl);
+        });
+        camTargetObservableList.forEach(targetResourceUrl -> {
+            startObservingCam(coapClient, targetResourceUrl);
+        });
+        floorTargetObservableList.forEach(targetResourceUrl -> {
+            try {
+                startObservingFloor(coapClient, targetResourceUrl);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
+        areaTargetObservableList.forEach(targetResourceUrl -> {
+            startObservingArea(coapClient, targetResourceUrl);
+        });
+        lightTargetObservableList.forEach(targetResourceUrl -> {
+            startObservingLight(coapClient, targetResourceUrl);
+        });
+        alarmTargetObservableList.forEach(targetResourceUrl -> {
+            startObservingAlarm(coapClient, targetResourceUrl);
+        });
+
+        while(true);
+
+    }
 }

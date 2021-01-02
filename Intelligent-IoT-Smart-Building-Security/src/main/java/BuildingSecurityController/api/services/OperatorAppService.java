@@ -4,6 +4,7 @@ package BuildingSecurityController.api.services;
 import BuildingSecurityController.api.auth.ExampleAuthorizer;
 import BuildingSecurityController.api.auth.ExampleAuthenticator;
 import BuildingSecurityController.api.auth.User;
+import BuildingSecurityController.api.client.LookupAndObserveProcess;
 import BuildingSecurityController.api.resources.BuildingResource;
 import BuildingSecurityController.api.resources.PolicyResource;
 import BuildingSecurityController.api.resources.UserResource;
@@ -34,7 +35,14 @@ public class OperatorAppService extends Application<OperatorAppConfig> {
 
     public static void main(String[] args) throws Exception {
 
+        LookupAndObserveProcess lookupAndObserveProcess = new LookupAndObserveProcess();
+
         new OperatorAppService().run(new String[]{"server", args.length > 0 ? args[0] : "configuration.yml"});
+
+        Thread newThread = new Thread(() -> {
+            lookupAndObserveProcess.run();
+        });
+        newThread.start();
 
     }
 

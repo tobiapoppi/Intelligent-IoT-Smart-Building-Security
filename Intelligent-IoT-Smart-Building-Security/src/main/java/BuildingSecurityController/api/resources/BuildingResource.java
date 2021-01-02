@@ -42,8 +42,14 @@ public class BuildingResource {
     public static class MissingKeyException extends Exception{}
     final OperatorAppConfig conf;
 
+    LookupAndObserveProcess lookupAndObserveProcess = new LookupAndObserveProcess();
+
     public BuildingResource(OperatorAppConfig conf) throws InterruptedException {
         this.conf = conf;
+        Thread newThread = new Thread(() -> {
+            lookupAndObserveProcess.run();
+        });
+        newThread.start();
     }
 
     //TODO
@@ -58,26 +64,15 @@ public class BuildingResource {
         try{
 
             //TODO PENSARE SE VERAMENTE è MEGLIO SALVARE SU FILE, E PROVARE SE FUNZIONA ANCHE CON IL METODO DI PRIMA(NON AVEVO ANCORA REGISTRATO LA RESOURCE NELLA APP)
-            BufferedReader bufReader = new BufferedReader(new FileReader("floors.txt"));
-            ArrayList<String> listOfLines = new ArrayList<>();
 
-            String line = bufReader.readLine();
-            while (line != null) {
-                listOfLines.add(line);
-                line = bufReader.readLine();
-            }
-
-            bufReader.close();
-
-            logger.info("{}", listOfLines);
 
             logger.info("Loading all the building's Floors");
-            //floorList = this.conf.getInventoryDataManager().getFloorList();
+            List<String> floorList = LookupAndObserveProcess.getFloors();
 
-            //if (listOfLines == null)
-            //    return Response.status(Response.Status.NOT_FOUND).type(MediaType.APPLICATION_JSON_TYPE).entity(new ErrorMessage(Response.Status.NOT_FOUND.getStatusCode(), "Floors not found")).build();
+            if (floorList == null)
+                return Response.status(Response.Status.NOT_FOUND).type(MediaType.APPLICATION_JSON_TYPE).entity(new ErrorMessage(Response.Status.NOT_FOUND.getStatusCode(), "Floors not found")).build();
 
-            return Response.ok(listOfLines).build();
+            return Response.ok(floorList).build();
 
         }catch(Exception e){
             e.printStackTrace();
@@ -127,22 +122,23 @@ public class BuildingResource {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value="Get a Floor's infos")
     public Response getFloor(@Context ContainerRequestContext requestContext,
-                                @PathParam("floor_number") Integer floor_number) {
+                                @PathParam("floor_number") String floor_id) {
 
         try {
 
-            logger.info("Loading infos for floor: {}", floor_number);
+            List<String> floorList = LookupAndObserveProcess.getFloors();
+
+            logger.info("Loading infos for floor: {}", floor_id);
 
             //Check the request
-            if(floor_number == null)
-                return Response.status(Response.Status.BAD_REQUEST).type(MediaType.APPLICATION_JSON_TYPE).entity(new ErrorMessage(Response.Status.BAD_REQUEST.getStatusCode(),"Invalid Floor number Provided !")).build();
+            if(floor_id == null)
+                return Response.status(Response.Status.BAD_REQUEST).type(MediaType.APPLICATION_JSON_TYPE).entity(new ErrorMessage(Response.Status.BAD_REQUEST.getStatusCode(),"Invalid Floor id Provided !")).build();
 
-            Optional<FloorDescriptor> floorDescriptor = this.conf.getInventoryDataManager().getFloor(floor_number);
-
-            if(!floorDescriptor.isPresent())
+            if(!floorList.contains(floor_id))
                 return Response.status(Response.Status.NOT_FOUND).type(MediaType.APPLICATION_JSON_TYPE).entity(new ErrorMessage(Response.Status.NOT_FOUND.getStatusCode(),"Floor Not Found !")).build();
 
-            return Response.ok(floorDescriptor.get()).build();
+
+            return Response.ok(floor_id).build();
 
         } catch (Exception e){
             e.printStackTrace();
