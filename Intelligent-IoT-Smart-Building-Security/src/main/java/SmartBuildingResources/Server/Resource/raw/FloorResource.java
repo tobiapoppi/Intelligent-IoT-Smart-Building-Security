@@ -5,7 +5,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.UUID;
 
-public class FloorResource extends SmartObjectResource<Boolean> {
+public class FloorResource extends SmartObjectResource<String> {
 
     private static Logger logger = LoggerFactory.getLogger(FloorResource.class);
 
@@ -22,7 +22,7 @@ public class FloorResource extends SmartObjectResource<Boolean> {
     }
 
     @Override
-    public Boolean loadUpdatedValue() {
+    public String loadUpdatedValue() {
         return null;
     }
 

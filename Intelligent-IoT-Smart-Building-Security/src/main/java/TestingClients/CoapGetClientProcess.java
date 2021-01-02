@@ -4,6 +4,8 @@ import org.eclipse.californium.core.CoapClient;
 import org.eclipse.californium.core.CoapResponse;
 import org.eclipse.californium.core.Utils;
 import org.eclipse.californium.core.coap.CoAP.Code;
+import org.eclipse.californium.core.coap.MediaTypeRegistry;
+import org.eclipse.californium.core.coap.OptionSet;
 import org.eclipse.californium.core.coap.Request;
 import org.eclipse.californium.elements.exception.ConnectorException;
 import org.slf4j.Logger;
@@ -15,7 +17,7 @@ public class CoapGetClientProcess {
 
     private final static Logger logger = LoggerFactory.getLogger(CoapGetClientProcess.class);
 
-    private static final String COAP_ENDPOINT = "coap://127.0.0.1:5683/light";
+    private static final String COAP_ENDPOINT = "coap://127.0.0.1:5683/floor0/areaA";
 
     //TODO public static String getCoap
 
@@ -30,6 +32,7 @@ public class CoapGetClientProcess {
 
         //Set Request as Confirmable
         request.setConfirmable(true);
+        request.setOptions(new OptionSet().setAccept(MediaTypeRegistry.APPLICATION_SENML_JSON));
 
         logger.info("Request Pretty Print: \n{}", Utils.prettyPrint(request));
 

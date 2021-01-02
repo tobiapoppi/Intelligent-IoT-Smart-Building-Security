@@ -15,7 +15,7 @@ public class CoapObservingClientProcess {
 
     public static void main(String[] args) {
 
-        String targetCoapResourceURL = "coap://127.0.0.1:5683/alarm";
+        String targetCoapResourceURL = "coap://192.168.1.107:5683/floor0/areaA/alarm";
 
         CoapClient client = new CoapClient(targetCoapResourceURL);
 

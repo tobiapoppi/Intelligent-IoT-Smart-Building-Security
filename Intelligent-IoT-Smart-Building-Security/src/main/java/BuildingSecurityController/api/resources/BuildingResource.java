@@ -1,6 +1,7 @@
 package BuildingSecurityController.api.resources;
 
 
+import BuildingSecurityController.api.client.LookupAndObserveProcess;
 import BuildingSecurityController.api.data_transfer_object.FloorCreationRequest;
 import BuildingSecurityController.api.data_transfer_object.FloorUpdateRequest;
 import BuildingSecurityController.api.data_transfer_object.PolicyCreationRequest;
@@ -24,20 +25,32 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 import java.awt.*;
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 @Path("/building/floor")
 @Api("IoT Building Resource Endpoint")
 public class BuildingResource {
+
     final protected Logger logger = LoggerFactory.getLogger(BuildingResource.class);
 
     @SuppressWarnings("serial")
     public static class MissingKeyException extends Exception{}
     final OperatorAppConfig conf;
 
-    public BuildingResource(OperatorAppConfig conf) {this.conf = conf;}
+    LookupAndObserveProcess lookupAndObserveProcess = new LookupAndObserveProcess();
+
+    public BuildingResource(OperatorAppConfig conf) throws InterruptedException {
+        this.conf = conf;
+        Thread newThread = new Thread(() -> {
+            lookupAndObserveProcess.run();
+        });
+        newThread.start();
+    }
 
     //TODO
 
@@ -49,10 +62,12 @@ public class BuildingResource {
     @ApiOperation(value = "Get all the Floors of the building")
     public Response GetFloors(@Context ContainerRequestContext requestContext){
         try{
-            List<FloorDescriptor> floorList = null;
+
+            //TODO PENSARE SE VERAMENTE è MEGLIO SALVARE SU FILE, E PROVARE SE FUNZIONA ANCHE CON IL METODO DI PRIMA(NON AVEVO ANCORA REGISTRATO LA RESOURCE NELLA APP)
+
 
             logger.info("Loading all the building's Floors");
-            floorList = this.conf.getInventoryDataManager().getFloorList();
+            List<String> floorList = LookupAndObserveProcess.getFloors();
 
             if (floorList == null)
                 return Response.status(Response.Status.NOT_FOUND).type(MediaType.APPLICATION_JSON_TYPE).entity(new ErrorMessage(Response.Status.NOT_FOUND.getStatusCode(), "Floors not found")).build();
@@ -107,22 +122,23 @@ public class BuildingResource {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value="Get a Floor's infos")
     public Response getFloor(@Context ContainerRequestContext requestContext,
-                                @PathParam("floor_number") Integer floor_number) {
+                                @PathParam("floor_number") String floor_id) {
 
         try {
 
-            logger.info("Loading infos for floor: {}", floor_number);
+            List<String> floorList = LookupAndObserveProcess.getFloors();
+
+            logger.info("Loading infos for floor: {}", floor_id);
 
             //Check the request
-            if(floor_number == null)
-                return Response.status(Response.Status.BAD_REQUEST).type(MediaType.APPLICATION_JSON_TYPE).entity(new ErrorMessage(Response.Status.BAD_REQUEST.getStatusCode(),"Invalid Floor number Provided !")).build();
+            if(floor_id == null)
+                return Response.status(Response.Status.BAD_REQUEST).type(MediaType.APPLICATION_JSON_TYPE).entity(new ErrorMessage(Response.Status.BAD_REQUEST.getStatusCode(),"Invalid Floor id Provided !")).build();
 
-            Optional<FloorDescriptor> floorDescriptor = this.conf.getInventoryDataManager().getFloor(floor_number);
-
-            if(!floorDescriptor.isPresent())
+            if(!floorList.contains(floor_id))
                 return Response.status(Response.Status.NOT_FOUND).type(MediaType.APPLICATION_JSON_TYPE).entity(new ErrorMessage(Response.Status.NOT_FOUND.getStatusCode(),"Floor Not Found !")).build();
 
-            return Response.ok(floorDescriptor.get()).build();
+
+            return Response.ok(floor_id).build();
 
         } catch (Exception e){
             e.printStackTrace();

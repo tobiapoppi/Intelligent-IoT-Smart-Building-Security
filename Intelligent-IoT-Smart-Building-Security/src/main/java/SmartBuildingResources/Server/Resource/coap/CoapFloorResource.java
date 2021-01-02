@@ -2,12 +2,16 @@ package SmartBuildingResources.Server.Resource.coap;
 
 import SmartBuildingResources.Server.Resource.raw.AreaResource;
 import SmartBuildingResources.Server.Resource.raw.FloorResource;
+import SmartBuildingResources.Server.Resource.raw.ResourceDataListener;
+import SmartBuildingResources.Server.Resource.raw.SmartObjectResource;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.eclipse.californium.core.CoapResource;
+import org.eclipse.californium.core.Utils;
 import org.eclipse.californium.core.coap.CoAP;
 import org.eclipse.californium.core.coap.MediaTypeRegistry;
 import org.eclipse.californium.core.server.resources.CoapExchange;
+import org.eclipse.californium.elements.EndpointContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import utils.CoreInterfaces;
@@ -27,8 +31,6 @@ public class CoapFloorResource extends CoapResource {
     private ObjectMapper objectMapper;
 
 
-
-
     public CoapFloorResource(String name, FloorResource floorResource) throws InterruptedException {
         super(name);
 
@@ -44,8 +46,10 @@ public class CoapFloorResource extends CoapResource {
             getAttributes().setTitle(OBJECT_TITLE);
             getAttributes().setObservable();
             getAttributes().addAttribute("rt", floorResource.getType());
-            getAttributes().addAttribute("if", CoreInterfaces.CORE_LL.getValue());
+            getAttributes().addAttribute("if", CoreInterfaces.CORE_B.getValue());
             getAttributes().addAttribute("ct", Integer.toString(MediaTypeRegistry.APPLICATION_LINK_FORMAT));
+            getAttributes().addAttribute("ct", Integer.toString(MediaTypeRegistry.TEXT_PLAIN));
+
 
         }
         else {
@@ -61,7 +65,7 @@ public class CoapFloorResource extends CoapResource {
         return coapAreaResource;
     };
 
-        private Optional<String> getJsonSenmlResponse() {
+    private Optional<String> getJsonSenmlResponse() {
 
         try {
 
@@ -70,6 +74,8 @@ public class CoapFloorResource extends CoapResource {
             SenMLRecord senMLRecord = new SenMLRecord();
             senMLRecord.setBn(String.format("%s", this.getName()));
             senMLPack.add(senMLRecord);
+
+            logger.info("{}", senMLPack);
 
             return Optional.of(this.objectMapper.writeValueAsString(senMLPack));
 
@@ -80,13 +86,23 @@ public class CoapFloorResource extends CoapResource {
     @Override
     public void handleGET(CoapExchange exchange){
 
+        logger.info("sto cercando di fare una get su floor");
+
+        //Pretty print for the received response
+        logger.info("Pretty Print: \n{}", Utils.prettyPrint(exchange.advanced().getRequest()));
+        logger.info("Pretty Print: \n{}", exchange.getRequestOptions());
+
+
         if(exchange.getRequestOptions().getAccept() == MediaTypeRegistry.APPLICATION_SENML_JSON ||
                 exchange.getRequestOptions().getAccept() == MediaTypeRegistry.APPLICATION_JSON){
 
+
             Optional<String> senmlPayload = getJsonSenmlResponse();
 
-            if(senmlPayload.isPresent())
+            if(senmlPayload.isPresent()){
+                logger.info("sto cercando di fare una get su floor PIM PIM PIM PIM PIM");
                 exchange.respond(CoAP.ResponseCode.CONTENT, senmlPayload.get(), exchange.getRequestOptions().getAccept());
+            }
             else
                 exchange.respond(CoAP.ResponseCode.INTERNAL_SERVER_ERROR);
         }

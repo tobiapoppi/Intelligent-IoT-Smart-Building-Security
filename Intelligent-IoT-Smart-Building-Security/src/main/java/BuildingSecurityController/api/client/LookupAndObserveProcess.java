@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import utils.CoreInterfaces;
 
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.*;
 
@@ -24,7 +25,7 @@ import static org.eclipse.californium.core.coap.LinkFormat.RESOURCE_TYPE;
 automaticamente ad osservarle, implementando tutti i metody onLoad invocati in maniera asincrona.
 l'observing va fatto su tutti e soli i sensori (no attuatori). */
 
-public class LookupAndObserveProcess {
+public class LookupAndObserveProcess implements Runnable{
 
     private final static Logger logger = LoggerFactory.getLogger(LookupAndObserveProcess.class);
 
@@ -40,13 +41,18 @@ public class LookupAndObserveProcess {
 
     private static List<String> pirTargetObservableList = null;
     private static List<String> camTargetObservableList = null;
+    private static List<String> lightTargetObservableList = null;
+    private static List<String> alarmTargetObservableList = null;
+    private static List<String> floorTargetObservableList = null;
+    private static List<String> areaTargetObservableList = null;
     private static Map<String, CoapObserveRelation> observingRelationMap = null;
     private static CoapPirResource newPir = null;
     private static CoapCameraResource newCam = null;
 
     private static ObjectMapper objectMapper = new ObjectMapper();
 
-    public static void main(String[] args){
+
+    public static void main(String[] args) throws InterruptedException {
 
         //init coap client
         CoapClient coapClient = new CoapClient();
@@ -54,6 +60,10 @@ public class LookupAndObserveProcess {
         //init target resource list array and observing relations
         pirTargetObservableList = new ArrayList<>();
         camTargetObservableList = new ArrayList<>();
+        lightTargetObservableList = new ArrayList<>();
+        alarmTargetObservableList = new ArrayList<>();
+        floorTargetObservableList = new ArrayList<>();
+        areaTargetObservableList = new ArrayList<>();
         observingRelationMap = new HashMap<>();
 
         //discover all available sensors and actuators
@@ -66,8 +76,37 @@ public class LookupAndObserveProcess {
         camTargetObservableList.forEach(targetResourceUrl -> {
             startObservingCam(coapClient, targetResourceUrl);
         });
+        floorTargetObservableList.forEach(targetResourceUrl -> {
+            try {
+                startObservingFloor(coapClient, targetResourceUrl);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
+        areaTargetObservableList.forEach(targetResourceUrl -> {
+            startObservingArea(coapClient, targetResourceUrl);
+        });
+        lightTargetObservableList.forEach(targetResourceUrl -> {
+            startObservingLight(coapClient, targetResourceUrl);
+        });
+        alarmTargetObservableList.forEach(targetResourceUrl -> {
+            startObservingAlarm(coapClient, targetResourceUrl);
+        });
 
+        while(true);
     }
+
+    public static List<String> getFloors(){
+        List<String> floorList = floorTargetObservableList;
+        List<String> formattedFloorsList = new ArrayList<>();
+        floorList.forEach(floor ->  {
+                    floor = floor.replace("coap://192.168.1.107:5683/", "");
+                    formattedFloorsList.add(floor);
+                }
+        );
+        return formattedFloorsList;
+    }
+
 
     private static void lookupTarget(CoapClient coapClient){
 
@@ -104,14 +143,12 @@ public class LookupAndObserveProcess {
 
                             //considero solamente le risorse osservabili, che abbiano interface core attribute, e che sia di tipo sensor
                             if (webLink.getAttributes().containsAttribute(OBSERVABLE_CORE_ATTRIBUTE) &&
-                                    webLink.getAttributes().containsAttribute(INTERFACE_CORE_ATTRIBUTE) &&
-                                    (webLink.getAttributes().getAttributeValues(INTERFACE_CORE_ATTRIBUTE)
-                                            .contains(CoreInterfaces.CORE_S.getValue()))){
+                                    webLink.getAttributes().containsAttribute(INTERFACE_CORE_ATTRIBUTE)){
                                 if (webLink.getAttributes().getAttributeValues(RESOURCE_TYPE).contains("iot.sensor.pir")){
 
                                     logger.info("Target Resource found! URI: {}", webLink.getURI());
 
-                                    String targetResourceUrl = String.format("coap://%s:%d%s", TARGET_RD_IP, TARGET_RD_PORT, webLink.getURI());
+                                    String targetResourceUrl = String.format("%s", webLink.getURI());
                                     pirTargetObservableList.add(targetResourceUrl);
                                     logger.info("Target Resource URL: {} correctly saved!", targetResourceUrl);
 
@@ -119,25 +156,48 @@ public class LookupAndObserveProcess {
 
                                     logger.info("Target Resource found! URI: {}", webLink.getURI());
 
-                                    String targetResourceUrl = String.format("coap://%s:%d%s", TARGET_RD_IP, TARGET_RD_PORT, webLink.getURI());
+                                    String targetResourceUrl = String.format("%s", webLink.getURI());
                                     camTargetObservableList.add(targetResourceUrl);
                                     logger.info("Target Resource URL: {} correctly saved!", targetResourceUrl);
-                                }
+                                } else if (webLink.getAttributes().getAttributeValues(RESOURCE_TYPE).contains("iot.actuator.light")){
 
+                                    logger.info("Target Resource found! URI: {}", webLink.getURI());
+
+                                    String targetResourceUrl = String.format("%s", webLink.getURI());
+                                    lightTargetObservableList.add(targetResourceUrl);
+                                    logger.info("Target Resource URL: {} correctly saved!", targetResourceUrl);
+                                } else if (webLink.getAttributes().getAttributeValues(RESOURCE_TYPE).contains("iot.actuator.alarm")){
+
+                                    logger.info("Target Resource found! URI: {}", webLink.getURI());
+
+                                    String targetResourceUrl = String.format("%s", webLink.getURI());
+                                    alarmTargetObservableList.add(targetResourceUrl);
+                                    logger.info("Target Resource URL: {} correctly saved!", targetResourceUrl);
+                                } else if (webLink.getAttributes().getAttributeValues(RESOURCE_TYPE).contains("iot.floor")){
+
+                                    logger.info("Target Resource found! URI: {}", webLink.getURI());
+
+                                    String targetResourceUrl = String.format("%s", webLink.getURI());
+                                    floorTargetObservableList.add(targetResourceUrl);
+                                    logger.info("Target Resource URL: {} correctly saved!", targetResourceUrl);
+                                } else if (webLink.getAttributes().getAttributeValues(RESOURCE_TYPE).contains("iot.area")){
+
+                                    logger.info("Target Resource found! URI: {}", webLink.getURI());
+
+                                    String targetResourceUrl = String.format("%s", webLink.getURI());
+                                    areaTargetObservableList.add(targetResourceUrl);
+                                    logger.info("Target Resource URL: {} correctly saved!", targetResourceUrl);
+                                }
                             }
                             else{
                                 logger.info("Resource {} does not match filtering parameters.", webLink.getURI());
                             }
-
                         }
-
                     });
-
                 }
                 else{
                     logger.info("Core Link Format Response not found.");
                 }
-
             }
 
             String text = coapResponse.getResponseText();
@@ -157,7 +217,7 @@ public class LookupAndObserveProcess {
         }
     }
 
-    private static void startObservingPir (CoapClient coapClient, String targetUrl){
+    private static void startObservingPir (CoapClient coapClient, String targetUrl) {
 
         logger.info("OBSERVING ... {}", targetUrl);
         Request request = Request.newGet().setURI(targetUrl).setObserve();
@@ -171,16 +231,8 @@ public class LookupAndObserveProcess {
                 String content = response.getResponseText();
 
                 //TODO PER NIENTE SICURO, C'è DA PROVARE SE VA
-                try {
 
-                    logger.info("Notification -> Resource Target: {} -> Body: {}", targetUrl, objectMapper);
-                    newPir = objectMapper.readValue(content, CoapPirResource.class);
-
-                } catch (JsonProcessingException e) {
-                    e.printStackTrace();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+                logger.info("Notification -> Resource Target: {} -> Body: {}", targetUrl, content);
 
                 /*TODO QUI DEVO ANALIZZARE "content" E CONTROLLARE CHE TUTTI I CAMBIAMENTI CHE SONO AVVENUTI NEL SENSORE,
                 SIANO CONSONI CON TUTTE LE POLICY DEL BUILDING, E IN CASO CONTRARIO, FAR SCATTARE L'ALLARME COLLEATO
@@ -193,7 +245,6 @@ public class LookupAndObserveProcess {
                 //TODO
                 /*DECIDERE SE E' MEGLIO LASCIARE TUTTO SU RAM O SE SCRIVERE SU FILE PER POI ACCEDERE ALL'ARCHIVIO
                 DA ALTRI OGGETTI */
-
             }
 
             @Override
@@ -220,19 +271,8 @@ public class LookupAndObserveProcess {
                 String content = response.getResponseText();
 
                 //TODO PER NIENTE SICURO, C'è DA PROVARE SE VA
-                try {
 
-                    logger.info("Notification -> Resource Target: {} -> Body: {}", targetUrl, objectMapper);
-                    newCam = objectMapper.readValue(content, CoapCameraResource.class);
-
-
-
-
-                } catch (JsonProcessingException e) {
-                    e.printStackTrace();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+                logger.info("Notification -> Resource Target: {} -> Body: {}", targetUrl, content);
 
                 /*TODO QUI DEVO ANALIZZARE "content" E CONTROLLARE CHE TUTTI I CAMBIAMENTI CHE SONO AVVENUTI NEL SENSORE,
                 SIANO CONSONI CON TUTTE LE POLICY DEL BUILDING, E IN CASO CONTRARIO, FAR SCATTARE L'ALLARME COLLEATO
@@ -257,6 +297,154 @@ public class LookupAndObserveProcess {
 
     }
 
+    private static void startObservingFloor (CoapClient coapClient, String targetUrl) throws IOException {
+
+        FileWriter writer = new FileWriter("floors.txt");
+        for(String str: floorTargetObservableList) {
+            writer.write(str + System.lineSeparator());
+        }
+        writer.close();
+
+        logger.info("OBSERVING ... {}", targetUrl);
+        Request request = Request.newGet().setURI(targetUrl).setObserve();
+        request.setConfirmable(true);
+        CoapObserveRelation relation = coapClient.observe(request, new CoapHandler() {
+            @Override
+            public void onLoad(CoapResponse response) {
+
+                //this is the method asynchronously invoked when an observed resource is sending data;
+
+                String content = response.getResponseText();
+
+                logger.info("Notification -> Resource Target: {} -> Body: {}", targetUrl, content);
+
+            }
+
+            @Override
+            public void onError() {
+                logger.error("OBSERVE {} FAILED", targetUrl);
+            }
+        });
+        observingRelationMap.put(targetUrl, relation);
+    }
+    private static void startObservingArea (CoapClient coapClient, String targetUrl){
+
+        logger.info("OBSERVING ... {}", targetUrl);
+        Request request = Request.newGet().setURI(targetUrl).setObserve();
+        request.setConfirmable(true);
+        CoapObserveRelation relation = coapClient.observe(request, new CoapHandler() {
+            @Override
+            public void onLoad(CoapResponse response) {
+
+                //this is the method asynchronously invoked when an observed resource is sending data;
+
+                String content = response.getResponseText();
 
 
+                logger.info("Notification -> Resource Target: {} -> Body: {}", targetUrl, content);
+
+            }
+
+            @Override
+            public void onError() {
+                logger.error("OBSERVE {} FAILED", targetUrl);
+            }
+        });
+        observingRelationMap.put(targetUrl, relation);
+    }
+    private static void startObservingLight (CoapClient coapClient, String targetUrl){
+
+        logger.info("OBSERVING ... {}", targetUrl);
+        Request request = Request.newGet().setURI(targetUrl).setObserve();
+        request.setConfirmable(true);
+        CoapObserveRelation relation = coapClient.observe(request, new CoapHandler() {
+            @Override
+            public void onLoad(CoapResponse response) {
+
+                //this is the method asynchronously invoked when an observed resource is sending data;
+
+                String content = response.getResponseText();
+
+                logger.info("Notification -> Resource Target: {} -> Body: {}", targetUrl, content);
+
+            }
+
+            @Override
+            public void onError() {
+                logger.error("OBSERVE {} FAILED", targetUrl);
+            }
+        });
+        observingRelationMap.put(targetUrl, relation);
+    }
+    private static void startObservingAlarm (CoapClient coapClient, String targetUrl){
+
+        logger.info("OBSERVING ... {}", targetUrl);
+        Request request = Request.newGet().setURI(targetUrl).setObserve();
+        request.setConfirmable(true);
+        CoapObserveRelation relation = coapClient.observe(request, new CoapHandler() {
+            @Override
+            public void onLoad(CoapResponse response) {
+
+                //this is the method asynchronously invoked when an observed resource is sending data;
+
+                String content = response.getResponseText();
+
+
+                logger.info("Notification -> Resource Target: {} -> Body: {}", targetUrl, content);
+
+            }
+
+            @Override
+            public void onError() {
+                logger.error("OBSERVE {} FAILED", targetUrl);
+            }
+        });
+        observingRelationMap.put(targetUrl, relation);
+    }
+
+
+    @Override
+    public void run() {
+        //init coap client
+        CoapClient coapClient = new CoapClient();
+
+        //init target resource list array and observing relations
+        pirTargetObservableList = new ArrayList<>();
+        camTargetObservableList = new ArrayList<>();
+        lightTargetObservableList = new ArrayList<>();
+        alarmTargetObservableList = new ArrayList<>();
+        floorTargetObservableList = new ArrayList<>();
+        areaTargetObservableList = new ArrayList<>();
+        observingRelationMap = new HashMap<>();
+
+        //discover all available sensors and actuators
+        lookupTarget(coapClient);
+
+        //start observing resources
+        pirTargetObservableList.forEach(targetResourceUrl -> {
+            startObservingPir(coapClient, targetResourceUrl);
+        });
+        camTargetObservableList.forEach(targetResourceUrl -> {
+            startObservingCam(coapClient, targetResourceUrl);
+        });
+        floorTargetObservableList.forEach(targetResourceUrl -> {
+            try {
+                startObservingFloor(coapClient, targetResourceUrl);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
+        areaTargetObservableList.forEach(targetResourceUrl -> {
+            startObservingArea(coapClient, targetResourceUrl);
+        });
+        lightTargetObservableList.forEach(targetResourceUrl -> {
+            startObservingLight(coapClient, targetResourceUrl);
+        });
+        alarmTargetObservableList.forEach(targetResourceUrl -> {
+            startObservingAlarm(coapClient, targetResourceUrl);
+        });
+
+        while(true);
+
+    }
 }
