@@ -1,9 +1,6 @@
 package SmartBuildingResources.Server.Resource.coap;
 
-import SmartBuildingResources.Server.Resource.raw.AlarmActuator;
-import SmartBuildingResources.Server.Resource.raw.AreaResource;
-import SmartBuildingResources.Server.Resource.raw.ResourceDataListener;
-import SmartBuildingResources.Server.Resource.raw.SmartObjectResource;
+import SmartBuildingResources.Server.Resource.raw.*;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.eclipse.californium.core.CoapResource;
@@ -17,6 +14,7 @@ import utils.SenMLPack;
 import utils.SenMLRecord;
 
 import java.util.Optional;
+import java.util.UUID;
 
 public class CoapAreaResource extends CoapResource {
 
@@ -32,6 +30,7 @@ public class CoapAreaResource extends CoapResource {
     public CoapAreaResource(String name, AreaResource areaResource) throws InterruptedException {
         super(name);
 
+
         if (areaResource != null)
         {
             this.areaResource = areaResource;
@@ -40,6 +39,11 @@ public class CoapAreaResource extends CoapResource {
 
             setObservable(false);
             setObserveType(CoAP.Type.CON);
+
+            this.add(createDeviceLight());
+            this.add(createDeviceAlarm());
+            this.add(createDevicePM());
+
 
             getAttributes().setTitle(OBJECT_TITLE);
             getAttributes().setObservable();
@@ -54,11 +58,53 @@ public class CoapAreaResource extends CoapResource {
         }
 
     }
-    private CoapResource createDevice(String deviceId) throws InterruptedException {
+    private CoapResource createDevicePir() throws InterruptedException {
 
-        AreaResource areaResource = new AreaResource();
-        CoapAreaResource coapAreaResource = new CoapAreaResource(String.format("area%s", deviceId), areaResource);
-        return coapAreaResource;
+        String deviceId = String.format("%s", UUID.randomUUID().toString());
+        PirRawSensor pirRawSensor = new PirRawSensor();
+        CoapPirResource coapPirResource = new CoapPirResource("pir", deviceId, pirRawSensor);
+
+
+        return coapPirResource;
+    };
+    private CoapResource createDeviceAlarm() throws InterruptedException {
+
+        String deviceId = String.format("%s", UUID.randomUUID().toString());
+        AlarmActuator alarmRawSensor = new AlarmActuator();
+        CoapAlarmResource coapAlarmResource = new CoapAlarmResource("alarm", deviceId, alarmRawSensor);
+
+
+        return coapAlarmResource;
+    };
+    private CoapResource createDeviceLight() throws InterruptedException {
+
+        String deviceId = String.format("%s", UUID.randomUUID().toString());
+        LightActuator lightRawSensor = new LightActuator();
+        CoapLightResource coapLightResource = new CoapLightResource("light", deviceId, lightRawSensor);
+
+
+        return coapLightResource;
+    };
+
+    private CoapResource createDeviceCamera() throws InterruptedException {
+
+
+        String deviceId = String.format("%s", UUID.randomUUID().toString());
+        CameraRawSensor cameraRawSensor = new CameraRawSensor();
+        CoapCameraResource coapCameraResource = new CoapCameraResource("camera", deviceId, cameraRawSensor);
+
+
+        return coapCameraResource;
+    };
+    private CoapResource createDevicePM() throws InterruptedException {
+
+        CoapResource PresenceMonitoringResource = new CoapResource("presenceMonitoring");
+
+
+        PresenceMonitoringResource.add(createDeviceCamera());
+        PresenceMonitoringResource.add(createDevicePir());
+
+        return PresenceMonitoringResource;
     };
 
 
@@ -92,28 +138,7 @@ public class CoapAreaResource extends CoapResource {
                 exchange.respond(CoAP.ResponseCode.INTERNAL_SERVER_ERROR);
         }
     }
-    @Override
-    public void handlePOST(CoapExchange exchange){
-        try{
-            //Empty request
-            //         if(exchange.getRequestPayload() == (int)){
-            String deviceId = new String(exchange.getRequestPayload());
 
-            this.add(createDevice(deviceId));
-
-
-            logger.info("Resource Status Updated: Device {} Created", deviceId);
-
-            exchange.respond(CoAP.ResponseCode.CHANGED);
-            //         }
-            //         else
-            //             exchange.respond(CoAP.ResponseCode.BAD_REQUEST);
-
-        }catch (Exception e){
-            logger.error("Error Handling POST -> {}", e.getLocalizedMessage());
-            exchange.respond(CoAP.ResponseCode.INTERNAL_SERVER_ERROR);
-        }
-    }
     @Override
     public void handlePUT(CoapExchange exchange){
         try{
@@ -134,7 +159,30 @@ public class CoapAreaResource extends CoapResource {
                 exchange.respond(CoAP.ResponseCode.BAD_REQUEST);
 
         }catch (Exception e){
-            logger.error("Error Handling POST -> {}", e.getLocalizedMessage());
+            logger.error("Error Handling PUT -> {}", e.getLocalizedMessage());
+            exchange.respond(CoAP.ResponseCode.INTERNAL_SERVER_ERROR);
+        }
+
+    }
+    @Override
+    public void handleDELETE(CoapExchange exchange){
+        try{
+
+            //If the request body is available
+            if(exchange.getRequestPayload() == null){
+
+                //Update internal status
+                this.delete();
+
+                logger.info("Resource Status Updated: Area {} deleted", this.getName());
+
+                exchange.respond(CoAP.ResponseCode.CHANGED);
+            }
+            else
+                exchange.respond(CoAP.ResponseCode.BAD_REQUEST);
+
+        }catch (Exception e){
+            logger.error("Error Handling DELETE -> {}", e.getLocalizedMessage());
             exchange.respond(CoAP.ResponseCode.INTERNAL_SERVER_ERROR);
         }
 

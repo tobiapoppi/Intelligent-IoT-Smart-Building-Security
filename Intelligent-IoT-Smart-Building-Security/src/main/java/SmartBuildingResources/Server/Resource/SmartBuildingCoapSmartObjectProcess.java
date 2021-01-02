@@ -33,6 +33,8 @@ public class SmartBuildingCoapSmartObjectProcess extends CoapServer {
 
   }
 
+
+
     private static void registerToCoapResourceDirectory(Resource rootResource, String endpointName, String sourceIp, int sourcePort){
 
         String finalRdUrl = String.format("%s?ep=%s&base=coap://%s:%d", RD_COAP_ENDPOINT_BASE_URL, endpointName, sourceIp, sourcePort);

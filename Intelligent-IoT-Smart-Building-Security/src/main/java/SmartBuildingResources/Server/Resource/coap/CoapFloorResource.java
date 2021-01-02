@@ -86,12 +86,6 @@ public class CoapFloorResource extends CoapResource {
     @Override
     public void handleGET(CoapExchange exchange){
 
-        logger.info("sto cercando di fare una get su floor");
-
-        //Pretty print for the received response
-        logger.info("Pretty Print: \n{}", Utils.prettyPrint(exchange.advanced().getRequest()));
-        logger.info("Pretty Print: \n{}", exchange.getRequestOptions());
-
 
         if(exchange.getRequestOptions().getAccept() == MediaTypeRegistry.APPLICATION_SENML_JSON ||
                 exchange.getRequestOptions().getAccept() == MediaTypeRegistry.APPLICATION_JSON){
@@ -100,7 +94,6 @@ public class CoapFloorResource extends CoapResource {
             Optional<String> senmlPayload = getJsonSenmlResponse();
 
             if(senmlPayload.isPresent()){
-                logger.info("sto cercando di fare una get su floor PIM PIM PIM PIM PIM");
                 exchange.respond(CoAP.ResponseCode.CONTENT, senmlPayload.get(), exchange.getRequestOptions().getAccept());
             }
             else
@@ -108,26 +101,24 @@ public class CoapFloorResource extends CoapResource {
         }
     }
     @Override
-    public void handlePOST(CoapExchange exchange){
-        try{
-            //Empty request
-   //         if(exchange.getRequestPayload() == (int)){
-                String areaId = new String(exchange.getRequestPayload());
+    public void handlePOST(CoapExchange exchange) {
+        try {
+                if (exchange.getRequestPayload() != null) {
+                    String areaId = new String(exchange.getRequestPayload());
 
-                this.add(createAreaResource(areaId));
+                    this.add(createAreaResource(areaId));
 
 
-                logger.info("Resource Status Updated: Area {} Created", areaId);
+                    logger.info("Resource Status Updated: Area {} Created", areaId);
 
-                exchange.respond(CoAP.ResponseCode.CHANGED);
-   //         }
-   //         else
-   //             exchange.respond(CoAP.ResponseCode.BAD_REQUEST);
+                    exchange.respond(CoAP.ResponseCode.CHANGED);
+                } else
+                    exchange.respond(CoAP.ResponseCode.BAD_REQUEST);
 
-        }catch (Exception e){
-            logger.error("Error Handling POST -> {}", e.getLocalizedMessage());
-            exchange.respond(CoAP.ResponseCode.INTERNAL_SERVER_ERROR);
-        }
+            } catch (Exception e) {
+                logger.error("Error Handling POST -> {}", e.getLocalizedMessage());
+                exchange.respond(CoAP.ResponseCode.INTERNAL_SERVER_ERROR);
+            }
     }
     @Override
     public void handlePUT(CoapExchange exchange){
@@ -149,7 +140,7 @@ public class CoapFloorResource extends CoapResource {
                 exchange.respond(CoAP.ResponseCode.BAD_REQUEST);
 
         }catch (Exception e){
-            logger.error("Error Handling POST -> {}", e.getLocalizedMessage());
+            logger.error("Error Handling PUT -> {}", e.getLocalizedMessage());
             exchange.respond(CoAP.ResponseCode.INTERNAL_SERVER_ERROR);
         }
 
@@ -159,14 +150,12 @@ public class CoapFloorResource extends CoapResource {
         try{
 
             //If the request body is available
-            if(exchange.getRequestPayload() != null){
-
-                String deletedValue = new String(exchange.getRequestPayload());
+            if(exchange.getRequestPayload() == null){
 
                 //Update internal status
-                this.delete(deletedValue);
+                this.delete();
 
-                logger.info("Resource Status Updated: Area {} deleted", deletedValue);
+                logger.info("Resource Status Updated: Floor {} deleted", this.getName());
 
                 exchange.respond(CoAP.ResponseCode.CHANGED);
             }

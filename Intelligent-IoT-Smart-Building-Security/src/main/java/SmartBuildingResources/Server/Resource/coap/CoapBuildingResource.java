@@ -1,11 +1,12 @@
 package SmartBuildingResources.Server.Resource.coap;
 
 import SmartBuildingResources.Server.Resource.raw.AreaResource;
+import SmartBuildingResources.Server.Resource.raw.BuildingResource;
 import SmartBuildingResources.Server.Resource.raw.FloorResource;
-import SmartBuildingResources.Server.Resource.raw.PresenceMonitoringResource;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.eclipse.californium.core.CoapResource;
+import org.eclipse.californium.core.Utils;
 import org.eclipse.californium.core.coap.CoAP;
 import org.eclipse.californium.core.coap.MediaTypeRegistry;
 import org.eclipse.californium.core.server.resources.CoapExchange;
@@ -17,25 +18,23 @@ import utils.SenMLRecord;
 
 import java.util.Optional;
 
-public class CoapPresenceMonitoringResource extends CoapResource {
+public class CoapBuildingResource extends CoapResource {
 
-    private final static Logger logger = LoggerFactory.getLogger(CoapPresenceMonitoringResource.class);
+    private final static Logger logger = LoggerFactory.getLogger(CoapBuildingResource.class);
 
-    private final static String OBJECT_TITLE = "PresenceMonitoring";
+    private final static String OBJECT_TITLE = "Building";
 
-    private PresenceMonitoringResource presenceMonitoringResource;
+    private BuildingResource buildingResource;
 
     private ObjectMapper objectMapper;
 
 
-
-
-    public CoapPresenceMonitoringResource(String name, PresenceMonitoringResource presenceMonitoringResource) throws InterruptedException {
+    public CoapBuildingResource(String name, BuildingResource buildingResource) throws InterruptedException {
         super(name);
 
-        if (presenceMonitoringResource != null)
+        if (buildingResource != null)
         {
-            this.presenceMonitoringResource = presenceMonitoringResource;
+            this.buildingResource = buildingResource;
             this.objectMapper=new ObjectMapper();
             this.objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
 
@@ -44,9 +43,11 @@ public class CoapPresenceMonitoringResource extends CoapResource {
 
             getAttributes().setTitle(OBJECT_TITLE);
             getAttributes().setObservable();
-            getAttributes().addAttribute("rt", presenceMonitoringResource.getType());
-            getAttributes().addAttribute("if", CoreInterfaces.CORE_LL.getValue());
+            getAttributes().addAttribute("rt", buildingResource.getType());
+            getAttributes().addAttribute("if", CoreInterfaces.CORE_B.getValue());
             getAttributes().addAttribute("ct", Integer.toString(MediaTypeRegistry.APPLICATION_LINK_FORMAT));
+            getAttributes().addAttribute("ct", Integer.toString(MediaTypeRegistry.TEXT_PLAIN));
+
 
         }
         else {
@@ -55,14 +56,14 @@ public class CoapPresenceMonitoringResource extends CoapResource {
 
     }
 
-    private CoapResource createAreaResource(String areaId) throws InterruptedException {
+    private CoapResource createFloorResource(String floorId) throws InterruptedException {
 
-        AreaResource areaResource = new AreaResource();
-        CoapAreaResource coapAreaResource = new CoapAreaResource(String.format("area%s", areaId), areaResource);
-        return coapAreaResource;
+        FloorResource floorResource = new FloorResource();
+        CoapFloorResource coapFloorResource = new CoapFloorResource(String.format("floor%s", floorId), floorResource);
+        return coapFloorResource;
     };
 
-        private Optional<String> getJsonSenmlResponse() {
+    private Optional<String> getJsonSenmlResponse() {
 
         try {
 
@@ -71,6 +72,8 @@ public class CoapPresenceMonitoringResource extends CoapResource {
             SenMLRecord senMLRecord = new SenMLRecord();
             senMLRecord.setBn(String.format("%s", this.getName()));
             senMLPack.add(senMLRecord);
+
+            logger.info("{}", senMLPack);
 
             return Optional.of(this.objectMapper.writeValueAsString(senMLPack));
 
@@ -84,35 +87,35 @@ public class CoapPresenceMonitoringResource extends CoapResource {
         if(exchange.getRequestOptions().getAccept() == MediaTypeRegistry.APPLICATION_SENML_JSON ||
                 exchange.getRequestOptions().getAccept() == MediaTypeRegistry.APPLICATION_JSON){
 
+
             Optional<String> senmlPayload = getJsonSenmlResponse();
 
-            if(senmlPayload.isPresent())
+            if(senmlPayload.isPresent()){
                 exchange.respond(CoAP.ResponseCode.CONTENT, senmlPayload.get(), exchange.getRequestOptions().getAccept());
+            }
             else
                 exchange.respond(CoAP.ResponseCode.INTERNAL_SERVER_ERROR);
         }
     }
     @Override
-    public void handlePOST(CoapExchange exchange){
-        try{
-            //Empty request
-   //         if(exchange.getRequestPayload() == (int)){
-                String areaId = new String(exchange.getRequestPayload());
+    public void handlePOST(CoapExchange exchange) {
+        try {
+                if (exchange.getRequestPayload() != null) {
+                    String floorId = new String(exchange.getRequestPayload());
 
-                this.add(createAreaResource(areaId));
+                    this.add(createFloorResource(floorId));
 
 
-                logger.info("Resource Status Updated: Area {} Created", areaId);
+                    logger.info("Resource Status Updated: Floor {} Created", floorId);
 
-                exchange.respond(CoAP.ResponseCode.CHANGED);
-   //         }
-   //         else
-   //             exchange.respond(CoAP.ResponseCode.BAD_REQUEST);
+                    exchange.respond(CoAP.ResponseCode.CHANGED);
+                } else
+                    exchange.respond(CoAP.ResponseCode.BAD_REQUEST);
 
-        }catch (Exception e){
-            logger.error("Error Handling POST -> {}", e.getLocalizedMessage());
-            exchange.respond(CoAP.ResponseCode.INTERNAL_SERVER_ERROR);
-        }
+            } catch (Exception e) {
+                logger.error("Error Handling POST -> {}", e.getLocalizedMessage());
+                exchange.respond(CoAP.ResponseCode.INTERNAL_SERVER_ERROR);
+            }
     }
     @Override
     public void handlePUT(CoapExchange exchange){
@@ -134,7 +137,7 @@ public class CoapPresenceMonitoringResource extends CoapResource {
                 exchange.respond(CoAP.ResponseCode.BAD_REQUEST);
 
         }catch (Exception e){
-            logger.error("Error Handling POST -> {}", e.getLocalizedMessage());
+            logger.error("Error Handling PUT -> {}", e.getLocalizedMessage());
             exchange.respond(CoAP.ResponseCode.INTERNAL_SERVER_ERROR);
         }
 
@@ -144,14 +147,12 @@ public class CoapPresenceMonitoringResource extends CoapResource {
         try{
 
             //If the request body is available
-            if(exchange.getRequestPayload() != null){
-
-                String deletedValue = new String(exchange.getRequestPayload());
+            if(exchange.getRequestPayload() == null){
 
                 //Update internal status
-                this.delete(deletedValue);
+                this.delete();
 
-                logger.info("Resource Status Updated: Area {} deleted", deletedValue);
+                logger.info("Resource Status Updated: Building {} deleted", this.getName());
 
                 exchange.respond(CoAP.ResponseCode.CHANGED);
             }
