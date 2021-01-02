@@ -20,7 +20,7 @@ public class CoapGetSenmlClientProcess {
 
     private final static Logger logger = LoggerFactory.getLogger(CoapGetSenmlClientProcess.class);
 
-    private static final String COAP_ENDPOINT = "coap://127.0.0.1:5683/floor0/areaA/light";
+    private static final String COAP_ENDPOINT = "coap://192.168.1.107:5683/buildingPoppiZaniboniInc/floor1/areabb";
 
     public static void main(String[] args) {
 
@@ -29,7 +29,7 @@ public class CoapGetSenmlClientProcess {
 
         //Request Class is a generic CoAP message: in this case we want a GET.
         //"Message ID", "Token" and other header's fields can be set
-        Request request = new Request(Code.GET);
+        Request request = new Request(Code.DELETE);
 
         //Set Request as Confirmable
         request.setConfirmable(true);

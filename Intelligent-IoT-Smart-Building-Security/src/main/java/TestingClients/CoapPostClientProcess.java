@@ -17,7 +17,7 @@ public class CoapPostClientProcess {
 
 	private final static Logger logger = LoggerFactory.getLogger(CoapPostClientProcess.class);
 
-	private static final String COAP_ENDPOINT = "coap://192.168.1.107:5683/floor0/areaA/alarm";
+	private static final String COAP_ENDPOINT = "coap://192.168.1.107:5683/buildingPoppiZaniboniInc/floor1";
 
 	public static void main(String[] args) {
 		
@@ -32,6 +32,8 @@ public class CoapPostClientProcess {
 		request.setConfirmable(true);
 
 		logger.info("Request Pretty Print:\n{}", Utils.prettyPrint(request));
+
+		request.setPayload("bb");
 
 		//Synchronously send the POST request (blocking call)
 		CoapResponse coapResp = null;

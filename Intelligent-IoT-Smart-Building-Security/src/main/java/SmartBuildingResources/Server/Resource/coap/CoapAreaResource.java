@@ -1,5 +1,6 @@
 package SmartBuildingResources.Server.Resource.coap;
 
+import SmartBuildingResources.Server.Resource.SmartBuildingCoapSmartObjectProcess;
 import SmartBuildingResources.Server.Resource.raw.*;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -22,6 +23,10 @@ public class CoapAreaResource extends CoapResource {
 
     private final static String OBJECT_TITLE = "Area";
 
+    private static final String TARGET_LISTENING_IP = "192.168.1.107";
+
+    private static final int TARGET_PORT = 5683;
+
     private AreaResource areaResource;
 
     private ObjectMapper objectMapper;
@@ -37,12 +42,13 @@ public class CoapAreaResource extends CoapResource {
             this.objectMapper=new ObjectMapper();
             this.objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
 
-            setObservable(false);
+            setObservable(true);
             setObserveType(CoAP.Type.CON);
 
             this.add(createDeviceLight());
             this.add(createDeviceAlarm());
             this.add(createDevicePM());
+
 
 
             getAttributes().setTitle(OBJECT_TITLE);
@@ -58,6 +64,8 @@ public class CoapAreaResource extends CoapResource {
         }
 
     }
+
+
     private CoapResource createDevicePir() throws InterruptedException {
 
         String deviceId = String.format("%s", UUID.randomUUID().toString());
@@ -149,11 +157,13 @@ public class CoapAreaResource extends CoapResource {
                 String submittedValue = new String(exchange.getRequestPayload());
 
                 //Update internal status
-                this.setName(submittedValue);
-
+                this.setName(String.format("area%s", submittedValue));
                 logger.info("Resource Status Updated: {}", submittedValue);
 
                 exchange.respond(CoAP.ResponseCode.CHANGED);
+
+                SmartBuildingCoapSmartObjectProcess.registerToCoapResourceDirectory(this.getParent().getParent().getParent(), "CoapEndpointSmartObject", TARGET_LISTENING_IP, TARGET_PORT);
+
             }
             else
                 exchange.respond(CoAP.ResponseCode.BAD_REQUEST);
@@ -172,11 +182,12 @@ public class CoapAreaResource extends CoapResource {
             if(exchange.getRequestPayload() == null){
 
                 //Update internal status
+
                 this.delete();
 
                 logger.info("Resource Status Updated: Area {} deleted", this.getName());
 
-                exchange.respond(CoAP.ResponseCode.CHANGED);
+                exchange.respond(CoAP.ResponseCode.DELETED);
             }
             else
                 exchange.respond(CoAP.ResponseCode.BAD_REQUEST);

@@ -29,13 +29,13 @@ public class SmartBuildingCoapSmartObjectProcess extends CoapServer {
         super();
         String deviceId = String.format("%s", UUID.randomUUID().toString());
 
-        this.add(SmartBuildingBaseResourceInitClient.createFloorResource(deviceId, 0));
+        this.add(SmartBuildingBaseResourceInitClient.createBuildingResource("PoppiZaniboniInc"));
 
   }
 
 
 
-    private static void registerToCoapResourceDirectory(Resource rootResource, String endpointName, String sourceIp, int sourcePort){
+    public static void registerToCoapResourceDirectory(Resource rootResource, String endpointName, String sourceIp, int sourcePort){
 
         String finalRdUrl = String.format("%s?ep=%s&base=coap://%s:%d", RD_COAP_ENDPOINT_BASE_URL, endpointName, sourceIp, sourcePort);
 
@@ -92,9 +92,12 @@ public class SmartBuildingCoapSmartObjectProcess extends CoapServer {
                 });
             }
         });
+        while(true){
+            registerToCoapResourceDirectory(smartBuildingCoapSmartObjectProcess.getRoot(),
+                    "CoapEndpointSmartObject", TARGET_LISTENING_IP, TARGET_PORT);
+            Thread.sleep(30000);
+        }
 
-        registerToCoapResourceDirectory(smartBuildingCoapSmartObjectProcess.getRoot(),
-                "CoapEndpointSmartObject", TARGET_LISTENING_IP, TARGET_PORT);
 
 
 

@@ -6,13 +6,22 @@ import org.eclipse.californium.core.CoapResource;
 
 public class SmartBuildingBaseResourceInitClient {
 
+    public static CoapResource createBuildingResource(String name) throws InterruptedException {
+
+        BuildingResourceRaw buildingResourceRaw = new BuildingResourceRaw();
+        CoapBuildingResource coapBuildingResource = new CoapBuildingResource(String.format("building%s", name), buildingResourceRaw);
+
+
+        return coapBuildingResource;
+    }
+
     public static CoapResource createFloorResource(String deviceId, Integer floorNumber) throws InterruptedException {
 
         FloorResource floorResource = new FloorResource();
         CoapFloorResource coapFloorResource = new CoapFloorResource(String.format("floor%s", floorNumber), floorResource);
 
         //CoapResource floorResource = new CoapResource(String.format("floor%s", floorNumber));
-        coapFloorResource.add(createAreaResource(deviceId, "A"));
+        //coapFloorResource.add(createAreaResource(deviceId, "A"));
         return coapFloorResource;
     }
 

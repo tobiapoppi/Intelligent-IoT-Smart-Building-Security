@@ -1,4 +1,4 @@
-package it.unimore.dipi.iot.client;
+package TestingClients;
 
 import org.eclipse.californium.core.CoapClient;
 import org.eclipse.californium.core.CoapResponse;
@@ -16,7 +16,7 @@ public class CoapPutClientProcess {
 
 	private final static Logger logger = LoggerFactory.getLogger(CoapPutClientProcess.class);
 
-	private static final String COAP_ENDPOINT = "coap://127.0.0.1:5683/compressor/switch";
+	private static final String COAP_ENDPOINT = "coap://192.168.1.107:5683/buildingPoppiZaniboniInc/floor90";
 
 	public static void main(String[] args) {
 		
@@ -28,7 +28,7 @@ public class CoapPutClientProcess {
 		Request request = new Request(Code.PUT);
 
 		//Set PUT request's payload
-		String myPayload = "false";
+		String myPayload = "WINX";
 		logger.info("PUT Request Random Payload: {}", myPayload);
 		request.setPayload(myPayload);
 

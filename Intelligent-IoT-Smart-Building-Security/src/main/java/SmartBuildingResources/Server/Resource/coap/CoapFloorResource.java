@@ -1,5 +1,6 @@
 package SmartBuildingResources.Server.Resource.coap;
 
+import SmartBuildingResources.Server.Resource.SmartBuildingCoapSmartObjectProcess;
 import SmartBuildingResources.Server.Resource.raw.AreaResource;
 import SmartBuildingResources.Server.Resource.raw.FloorResource;
 import SmartBuildingResources.Server.Resource.raw.ResourceDataListener;
@@ -10,6 +11,8 @@ import org.eclipse.californium.core.CoapResource;
 import org.eclipse.californium.core.Utils;
 import org.eclipse.californium.core.coap.CoAP;
 import org.eclipse.californium.core.coap.MediaTypeRegistry;
+import org.eclipse.californium.core.observe.ObserveRelation;
+import org.eclipse.californium.core.observe.ObserveRelationFilter;
 import org.eclipse.californium.core.server.resources.CoapExchange;
 import org.eclipse.californium.elements.EndpointContext;
 import org.slf4j.Logger;
@@ -26,6 +29,10 @@ public class CoapFloorResource extends CoapResource {
 
     private final static String OBJECT_TITLE = "Floor";
 
+    private static final String TARGET_LISTENING_IP = "192.168.1.107";
+
+    private static final int TARGET_PORT = 5683;
+
     private FloorResource floorResource;
 
     private ObjectMapper objectMapper;
@@ -41,6 +48,7 @@ public class CoapFloorResource extends CoapResource {
             this.objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
 
             setObservable(true);
+            getAttributes().setObservable();
             setObserveType(CoAP.Type.CON);
 
             getAttributes().setTitle(OBJECT_TITLE);
@@ -111,7 +119,11 @@ public class CoapFloorResource extends CoapResource {
 
                     logger.info("Resource Status Updated: Area {} Created", areaId);
 
-                    exchange.respond(CoAP.ResponseCode.CHANGED);
+                    exchange.respond(CoAP.ResponseCode.CREATED);
+
+                    SmartBuildingCoapSmartObjectProcess.registerToCoapResourceDirectory(this.getParent().getParent(), "CoapEndpointSmartObject", TARGET_LISTENING_IP, TARGET_PORT);
+
+
                 } else
                     exchange.respond(CoAP.ResponseCode.BAD_REQUEST);
 
@@ -130,11 +142,25 @@ public class CoapFloorResource extends CoapResource {
                 String submittedValue = new String(exchange.getRequestPayload());
 
                 //Update internal status
-                this.setName(submittedValue);
+                this.setName(String.format("floor%s", submittedValue));
 
                 logger.info("Resource Status Updated: {}", submittedValue);
 
                 exchange.respond(CoAP.ResponseCode.CHANGED);
+
+                SmartBuildingCoapSmartObjectProcess.registerToCoapResourceDirectory(this.getParent().getParent(), "CoapEndpointSmartObject", TARGET_LISTENING_IP, TARGET_PORT);
+
+                //this.notify();
+
+                ObserveRelationFilter filter = new ObserveRelationFilter() {
+                    @Override
+                    public boolean accept(ObserveRelation relation) {
+                        return true;
+                    }
+                };
+
+                this.notifyObserverRelations(filter);
+
             }
             else
                 exchange.respond(CoAP.ResponseCode.BAD_REQUEST);

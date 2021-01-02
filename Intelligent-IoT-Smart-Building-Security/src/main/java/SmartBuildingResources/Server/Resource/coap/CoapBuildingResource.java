@@ -1,12 +1,11 @@
 package SmartBuildingResources.Server.Resource.coap;
 
-import SmartBuildingResources.Server.Resource.raw.AreaResource;
-import SmartBuildingResources.Server.Resource.raw.BuildingResource;
+import SmartBuildingResources.Server.Resource.SmartBuildingCoapSmartObjectProcess;
+import SmartBuildingResources.Server.Resource.raw.BuildingResourceRaw;
 import SmartBuildingResources.Server.Resource.raw.FloorResource;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.eclipse.californium.core.CoapResource;
-import org.eclipse.californium.core.Utils;
 import org.eclipse.californium.core.coap.CoAP;
 import org.eclipse.californium.core.coap.MediaTypeRegistry;
 import org.eclipse.californium.core.server.resources.CoapExchange;
@@ -24,17 +23,21 @@ public class CoapBuildingResource extends CoapResource {
 
     private final static String OBJECT_TITLE = "Building";
 
-    private BuildingResource buildingResource;
+    private static final String TARGET_LISTENING_IP = "192.168.1.107";
+
+    private static final int TARGET_PORT = 5683;
+
+    private BuildingResourceRaw buildingResourceRaw;
 
     private ObjectMapper objectMapper;
 
 
-    public CoapBuildingResource(String name, BuildingResource buildingResource) throws InterruptedException {
+    public CoapBuildingResource(String name, BuildingResourceRaw buildingResourceRaw) throws InterruptedException {
         super(name);
 
-        if (buildingResource != null)
+        if (buildingResourceRaw != null)
         {
-            this.buildingResource = buildingResource;
+            this.buildingResourceRaw = buildingResourceRaw;
             this.objectMapper=new ObjectMapper();
             this.objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
 
@@ -43,7 +46,7 @@ public class CoapBuildingResource extends CoapResource {
 
             getAttributes().setTitle(OBJECT_TITLE);
             getAttributes().setObservable();
-            getAttributes().addAttribute("rt", buildingResource.getType());
+            getAttributes().addAttribute("rt", buildingResourceRaw.getType());
             getAttributes().addAttribute("if", CoreInterfaces.CORE_B.getValue());
             getAttributes().addAttribute("ct", Integer.toString(MediaTypeRegistry.APPLICATION_LINK_FORMAT));
             getAttributes().addAttribute("ct", Integer.toString(MediaTypeRegistry.TEXT_PLAIN));
@@ -108,7 +111,10 @@ public class CoapBuildingResource extends CoapResource {
 
                     logger.info("Resource Status Updated: Floor {} Created", floorId);
 
-                    exchange.respond(CoAP.ResponseCode.CHANGED);
+                    exchange.respond(CoAP.ResponseCode.CREATED);
+
+                    SmartBuildingCoapSmartObjectProcess.registerToCoapResourceDirectory(this.getParent(), "CoapEndpointSmartObject", TARGET_LISTENING_IP, TARGET_PORT);
+
                 } else
                     exchange.respond(CoAP.ResponseCode.BAD_REQUEST);
 
