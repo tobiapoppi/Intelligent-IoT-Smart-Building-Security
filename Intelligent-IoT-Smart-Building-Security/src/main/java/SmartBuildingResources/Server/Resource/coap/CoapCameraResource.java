@@ -76,7 +76,6 @@ public class CoapCameraResource extends CoapResource {
     private Optional<String> getJsonSenmlResponse() {
 
         try {
-
             SenMLPack senMLPack = new SenMLPack();
 
             SenMLRecord senMLRecord = new SenMLRecord();

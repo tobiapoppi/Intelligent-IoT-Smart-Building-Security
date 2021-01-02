@@ -1,6 +1,6 @@
 package BuildingSecurityController.api.resources;
 
-
+import BuildingSecurityController.api.client.CoapResourceClient;
 import BuildingSecurityController.api.client.LookupAndObserveProcess;
 import BuildingSecurityController.api.data_transfer_object.FloorCreationRequest;
 import BuildingSecurityController.api.data_transfer_object.FloorUpdateRequest;
@@ -14,6 +14,7 @@ import com.codahale.metrics.annotation.Timed;
 import io.dropwizard.jersey.errors.ErrorMessage;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import org.eclipse.californium.core.CoapResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -93,6 +94,7 @@ public class BuildingResource {
 
         try {
 
+
             logger.info("Incoming Floor Creation Request: {}", floorCreationRequest);
 
             //Check the request
@@ -117,12 +119,12 @@ public class BuildingResource {
 
     @RolesAllowed("USER")
     @GET
-    @Path("/{floor_number}")
+    @Path("/{floor_id}")
     @Timed
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value="Get a Floor's infos")
     public Response getFloor(@Context ContainerRequestContext requestContext,
-                                @PathParam("floor_number") String floor_id) {
+                                @PathParam("floor_id") String floor_id) {
 
         try {
 
@@ -133,12 +135,11 @@ public class BuildingResource {
             //Check the request
             if(floor_id == null)
                 return Response.status(Response.Status.BAD_REQUEST).type(MediaType.APPLICATION_JSON_TYPE).entity(new ErrorMessage(Response.Status.BAD_REQUEST.getStatusCode(),"Invalid Floor id Provided !")).build();
+            CoapResourceClient coapResourceClient = new CoapResourceClient();
 
-            if(!floorList.contains(floor_id))
-                return Response.status(Response.Status.NOT_FOUND).type(MediaType.APPLICATION_JSON_TYPE).entity(new ErrorMessage(Response.Status.NOT_FOUND.getStatusCode(),"Floor Not Found !")).build();
+            CoapResponse coapResponse = coapResourceClient.getRequest(floor_id);
 
-
-            return Response.ok(floor_id).build();
+            return Response.ok(coapResponse).build();
 
         } catch (Exception e){
             e.printStackTrace();
