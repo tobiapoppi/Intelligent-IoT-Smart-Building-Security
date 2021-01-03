@@ -95,7 +95,7 @@ public class BuildingResource {
             if(floorId == null)
                 return Response.status(Response.Status.BAD_REQUEST).type(MediaType.APPLICATION_JSON_TYPE).entity(new ErrorMessage(Response.Status.BAD_REQUEST.getStatusCode(),"Invalid request payload")).build();
 
-            CoapResponse response = coapResourceClient.postRequest(floorId);
+            CoapResponse response = coapResourceClient.postRequest("",floorId);
 
             return Response.created(new URI(String.format("%s/%s",uriInfo.getAbsolutePath(),response))).build();
 
@@ -169,52 +169,53 @@ public class BuildingResource {
     @Timed
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "Get all the Areas of the floor")
-    public Response GetFloors(@Context ContainerRequestContext requestContext,
+    public Response GetAreas(@Context ContainerRequestContext requestContext,
                                 @PathParam("floorId") String floorId){
         try{
 
-            logger.info("Loading all the building's Floors");
-            List<String> floorList = LookupAndObserveProcess.getFloors();
+            logger.info("Loading all the {} 's Areas", floorId);
 
-            if (floorList == null)
-                return Response.status(Response.Status.NOT_FOUND).type(MediaType.APPLICATION_JSON_TYPE).entity(new ErrorMessage(Response.Status.NOT_FOUND.getStatusCode(), "Floors not found")).build();
+            List<String> areaList = LookupAndObserveProcess.getAreas(floorId);
 
-            return Response.ok(floorList).build();
+            if (areaList.isEmpty())
+                return Response.status(Response.Status.NOT_FOUND).type(MediaType.APPLICATION_JSON_TYPE).entity(new ErrorMessage(Response.Status.NOT_FOUND.getStatusCode(), "No areas found")).build();
+
+            return Response.ok(areaList).build();
 
         }catch(Exception e){
             e.printStackTrace();
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).type(MediaType.APPLICATION_JSON_TYPE).entity(new ErrorMessage(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Internal Server Error!")).build();
         }
     }
-//
-//    @RolesAllowed("USER")
-//    @POST
-//    @Path("/")
-//    @Timed
-//    @Produces(MediaType.APPLICATION_JSON)
-//    @Consumes(MediaType.TEXT_PLAIN)
-//    @ApiOperation(value="Create a new Floor")
-//    public Response createFloor(@Context ContainerRequestContext req,
-//                                @Context UriInfo uriInfo,
-//                                String floorId) {
-//
-//        try {
-//            logger.info("Incoming Floor Creation Request: {}", floorId);
-//
-//            //Check the request
-//            if(floorId == null)
-//                return Response.status(Response.Status.BAD_REQUEST).type(MediaType.APPLICATION_JSON_TYPE).entity(new ErrorMessage(Response.Status.BAD_REQUEST.getStatusCode(),"Invalid request payload")).build();
-//
-//            CoapResponse response = coapResourceClient.postRequest(floorId);
-//
-//            return Response.created(new URI(String.format("%s/%s",uriInfo.getAbsolutePath(),response))).build();
-//
-//        } catch (Exception e){
-//            e.printStackTrace();
-//            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).type(MediaType.APPLICATION_JSON_TYPE).entity(new ErrorMessage(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(),"Internal Server Error !")).build();
-//        }
-//    }
-//
+
+    @RolesAllowed("USER")
+    @POST
+    @Path("/{floor_id}/area")
+    @Timed
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.TEXT_PLAIN)
+    @ApiOperation(value="Create a new Area")
+    public Response createArea(@Context ContainerRequestContext req,
+                                @Context UriInfo uriInfo,String areaId,
+                                @PathParam("floor_id") String floorId){
+
+        try {
+            logger.info("Incoming Area Creation Request: {}", areaId);
+
+            //Check the request
+            if(areaId == null)
+                return Response.status(Response.Status.BAD_REQUEST).type(MediaType.APPLICATION_JSON_TYPE).entity(new ErrorMessage(Response.Status.BAD_REQUEST.getStatusCode(),"Invalid request payload")).build();
+
+            CoapResponse response = coapResourceClient.postRequest(String.format("/%s", floorId), areaId);
+
+            return Response.created(new URI(String.format("%s/%s",uriInfo.getAbsolutePath(),response))).build();
+
+        } catch (Exception e){
+            e.printStackTrace();
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).type(MediaType.APPLICATION_JSON_TYPE).entity(new ErrorMessage(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(),"Internal Server Error !")).build();
+        }
+    }
+
 //    @RolesAllowed("USER")
 //    @GET
 //    @Path("/{floor_id}")

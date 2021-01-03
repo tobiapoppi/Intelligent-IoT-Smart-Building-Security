@@ -1,1 +1,0 @@
-coap://192.168.1.107:5683/buildingPoppiZaniboniInc/floor1

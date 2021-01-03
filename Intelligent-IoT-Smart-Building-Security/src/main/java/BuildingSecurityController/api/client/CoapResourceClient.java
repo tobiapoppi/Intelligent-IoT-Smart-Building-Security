@@ -45,12 +45,12 @@ public class CoapResourceClient {
         return null;
     }
 
-    public CoapResponse postRequest(String uriRequest){
-        CoapClient coapClient = new CoapClient(String.format("%s", SMARTOBJECT_ENDPOINT));
+    public CoapResponse postRequest(String uriRequest, String payload){
+        CoapClient coapClient = new CoapClient(String.format("%s%s", SMARTOBJECT_ENDPOINT, uriRequest));
         Request request = new Request(CoAP.Code.POST);
         request.setConfirmable(true);
         request.setOptions(new OptionSet().setAccept(MediaTypeRegistry.APPLICATION_SENML_JSON));
-        request.setPayload(uriRequest);
+        request.setPayload(payload);
         logger.info("Request Pretty Print:\n{}", Utils.prettyPrint(request));
 
         CoapResponse coapResponse = null;

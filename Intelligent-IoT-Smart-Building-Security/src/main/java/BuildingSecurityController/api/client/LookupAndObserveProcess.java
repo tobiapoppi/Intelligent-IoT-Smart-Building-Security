@@ -100,44 +100,45 @@ public class LookupAndObserveProcess implements Runnable{
     }
 
     public static List<String> getFloors(){
-        List<String> floorList = floorTargetObservableList;
+
         List<String> formattedFloorsList = new ArrayList<>();
-        floorList.forEach(floor ->  {
-                    floor = floor.replace("coap://192.168.1.107:5683/", "");
+        floorTargetObservableList.forEach(floor ->  {
+                    floor = floor.replace("coap://192.168.1.107:5683/buildingPoppiZaniboniInc/", "");
                     formattedFloorsList.add(floor);
                 }
         );
         return formattedFloorsList;
     }
-    public static List<String> getAreas(){
-        List<String> areaList = areaTargetObservableList;
+    public static List<String> getAreas(String floorId){
+
         List<String> formattedAreaList = new ArrayList<>();
-        areaList.forEach(area ->  {
-            area = area.replace("coap://192.168.1.107:5683/", "");
+        areaTargetObservableList.forEach(area ->  {
+                if(area.contains(floorId)){
+                    area = area.replace(String.format("coap://192.168.1.107:5683/buildingPoppiZaniboniInc/%s/", floorId), "");
                     formattedAreaList.add(area);
+                    logger.info("la lista delle aree trovate è : {}", formattedAreaList);
+                }
             }
         );
         return formattedAreaList;
     }
-    public static List<String> getDevices(){
-        List<String> pirList = pirTargetObservableList;
-        List<String> camList = camTargetObservableList;
-        List<String> lightList = lightTargetObservableList;
-        List<String> alarmList = alarmTargetObservableList;
+    public static List<String> getDevices(String uriPrecedente){
+
         List<String> formattedList = new ArrayList<>();
-        pirList.forEach(device -> {
+        pirTargetObservableList.forEach(device -> {
             device = device.replace("coap://192.168.1.107:5683/", "");
                     formattedList.add(device);
+
                 });
-        camList.forEach(device -> {
+        camTargetObservableList.forEach(device -> {
             device = device.replace("coap://192.168.1.107:5683/", "");
             formattedList.add(device);
         });
-        lightList.forEach(device -> {
+        lightTargetObservableList.forEach(device -> {
             device = device.replace("coap://192.168.1.107:5683/", "");
             formattedList.add(device);
         });
-        alarmList.forEach(device -> {
+        alarmTargetObservableList.forEach(device -> {
             device = device.replace("coap://192.168.1.107:5683/", "");
             formattedList.add(device);
         });
