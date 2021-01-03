@@ -33,7 +33,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-@Path("/building/floor")
+@Path("/buildingPoppiZaniboniInc/floor")
 @Api("IoT Building Resource Endpoint")
 public class BuildingResource {
 
@@ -44,6 +44,7 @@ public class BuildingResource {
     final OperatorAppConfig conf;
 
     LookupAndObserveProcess lookupAndObserveProcess = new LookupAndObserveProcess();
+    CoapResourceClient coapResourceClient = new CoapResourceClient();
 
     public BuildingResource(OperatorAppConfig conf) throws InterruptedException {
         this.conf = conf;
@@ -53,8 +54,6 @@ public class BuildingResource {
         newThread.start();
     }
 
-    //TODO
-
     @RolesAllowed("USER")
     @GET
     @Path("/")
@@ -63,9 +62,6 @@ public class BuildingResource {
     @ApiOperation(value = "Get all the Floors of the building")
     public Response GetFloors(@Context ContainerRequestContext requestContext){
         try{
-
-            //TODO PENSARE SE VERAMENTE è MEGLIO SALVARE SU FILE, E PROVARE SE FUNZIONA ANCHE CON IL METODO DI PRIMA(NON AVEVO ANCORA REGISTRATO LA RESOURCE NELLA APP)
-
 
             logger.info("Loading all the building's Floors");
             List<String> floorList = LookupAndObserveProcess.getFloors();
@@ -86,31 +82,23 @@ public class BuildingResource {
     @Path("/")
     @Timed
     @Produces(MediaType.APPLICATION_JSON)
-    @Consumes(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.TEXT_PLAIN)
     @ApiOperation(value="Create a new Floor")
     public Response createFloor(@Context ContainerRequestContext req,
                                    @Context UriInfo uriInfo,
-                                   FloorCreationRequest floorCreationRequest) {
+                                   String floorId) {
 
         try {
-
-
-            logger.info("Incoming Floor Creation Request: {}", floorCreationRequest);
+            logger.info("Incoming Floor Creation Request: {}", floorId);
 
             //Check the request
-            if(floorCreationRequest == null)
+            if(floorId == null)
                 return Response.status(Response.Status.BAD_REQUEST).type(MediaType.APPLICATION_JSON_TYPE).entity(new ErrorMessage(Response.Status.BAD_REQUEST.getStatusCode(),"Invalid request payload")).build();
 
-            FloorDescriptor newFloorDescriptor = (FloorDescriptor) floorCreationRequest;
+            CoapResponse response = coapResourceClient.postRequest(floorId);
 
-            newFloorDescriptor.setFloor_id(null);
+            return Response.created(new URI(String.format("%s/%s",uriInfo.getAbsolutePath(),response))).build();
 
-            newFloorDescriptor = this.conf.getInventoryDataManager().createNewFloor(newFloorDescriptor);
-
-            return Response.created(new URI(String.format("%s/%s",uriInfo.getAbsolutePath(),newFloorDescriptor.getFloor_id()))).build();
-
-        } catch (IInventoryDataManagerConflict e){
-            return Response.status(Response.Status.CONFLICT).type(MediaType.APPLICATION_JSON_TYPE).entity(new ErrorMessage(Response.Status.CONFLICT.getStatusCode(),"Floor already available !")).build();
         } catch (Exception e){
             e.printStackTrace();
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).type(MediaType.APPLICATION_JSON_TYPE).entity(new ErrorMessage(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(),"Internal Server Error !")).build();
@@ -124,56 +112,19 @@ public class BuildingResource {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value="Get a Floor's infos")
     public Response getFloor(@Context ContainerRequestContext requestContext,
-                                @PathParam("floor_id") String floor_id) {
+                                @PathParam("floor_id") String floorId) {
 
         try {
-
-            List<String> floorList = LookupAndObserveProcess.getFloors();
-
-            logger.info("Loading infos for floor: {}", floor_id);
 
             //Check the request
-            if(floor_id == null)
+            if(floorId == null)
                 return Response.status(Response.Status.BAD_REQUEST).type(MediaType.APPLICATION_JSON_TYPE).entity(new ErrorMessage(Response.Status.BAD_REQUEST.getStatusCode(),"Invalid Floor id Provided !")).build();
-            CoapResourceClient coapResourceClient = new CoapResourceClient();
 
-            CoapResponse coapResponse = coapResourceClient.getRequest(floor_id);
+            logger.info("Loading infos for floor: {}", floorId);
 
-            return Response.ok(coapResponse).build();
+            CoapResponse response = coapResourceClient.getRequest(floorId);
 
-        } catch (Exception e){
-            e.printStackTrace();
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).type(MediaType.APPLICATION_JSON_TYPE).entity(new ErrorMessage(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(),"Internal Server Error !")).build();
-        }
-    }
-
-    @RolesAllowed("USER")
-    @PUT
-    @Path("/{floor_number}")
-    @Timed
-    @Produces(MediaType.APPLICATION_JSON)
-    @Consumes(MediaType.APPLICATION_JSON)
-    @ApiOperation(value="Update an existing Floor")
-    public Response updateLocation(@Context ContainerRequestContext req,
-                                   @Context UriInfo uriInfo,
-                                   @PathParam("floor_number") Integer floor_number,
-                                   FloorUpdateRequest floorUpdateRequest) {
-
-        try {
-
-            logger.info("Incoming Floor ({}) Update Request: {}", floor_number, floorUpdateRequest);
-
-            //Check if the request is valid, the id must be the same in the path and in the json request payload
-            if(floorUpdateRequest == null || floorUpdateRequest.getNumber() != floor_number)
-                return Response.status(Response.Status.BAD_REQUEST).type(MediaType.APPLICATION_JSON_TYPE).entity(new ErrorMessage(Response.Status.BAD_REQUEST.getStatusCode(),"Invalid request ! Check Floor Number")).build();
-
-            //Check if the device is available and correctly registered otherwise a 404 response will be sent to the client
-            if(!this.conf.getInventoryDataManager().getFloor(floor_number).isPresent())
-                return Response.status(Response.Status.NOT_FOUND).type(MediaType.APPLICATION_JSON_TYPE).entity(new ErrorMessage(Response.Status.NOT_FOUND.getStatusCode(),"Floor not found !")).build();
-            FloorDescriptor newFloorDescriptor = (FloorDescriptor) floorUpdateRequest;
-            this.conf.getInventoryDataManager().updateFloor(newFloorDescriptor);
-
-            return Response.noContent().build();
+            return Response.ok(response).build();
 
         } catch (Exception e){
             e.printStackTrace();
@@ -183,34 +134,143 @@ public class BuildingResource {
 
     @RolesAllowed("USER")
     @DELETE
-    @Path("/{floor_number}")
+    @Path("/{floor_id}")
     @Timed
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value="Delete a Floor")
     public Response deleteFloor(@Context ContainerRequestContext req,
-                                 @PathParam("floor_number") Integer floor_number) {
+                                 @PathParam("floorId") String floorId) {
 
         try {
 
-            logger.info("Deleting Floor: {}", floor_number);
+            logger.info("Deleting Floor: {}", floorId);
 
             //Check the request
-            if(floor_number == null)
+            if(floorId == null)
                 return Response.status(Response.Status.BAD_REQUEST).type(MediaType.APPLICATION_JSON_TYPE).entity(new ErrorMessage(Response.Status.BAD_REQUEST.getStatusCode(),"Invalid Floor Number Provided !")).build();
 
             //Check if the device is available or not
-            if(!this.conf.getInventoryDataManager().getFloor(floor_number).isPresent())
-                return Response.status(Response.Status.NOT_FOUND).type(MediaType.APPLICATION_JSON_TYPE).entity(new ErrorMessage(Response.Status.NOT_FOUND.getStatusCode(),"Floor Not Found !")).build();
+
+            CoapResponse response = coapResourceClient.deleteRequest(floorId);
 
             //Delete the location
-            this.conf.getInventoryDataManager().deleteFloor(floor_number);
 
-            return Response.noContent().build();
+            return Response.ok(response).build();
 
         } catch (Exception e){
             e.printStackTrace();
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).type(MediaType.APPLICATION_JSON_TYPE).entity(new ErrorMessage(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(),"Internal Server Error !")).build();
         }
     }
+
+    @RolesAllowed("USER")
+    @GET
+    @Path("/{floor_id}/area")
+    @Timed
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "Get all the Areas of the floor")
+    public Response GetFloors(@Context ContainerRequestContext requestContext,
+                                @PathParam("floorId") String floorId){
+        try{
+
+            logger.info("Loading all the building's Floors");
+            List<String> floorList = LookupAndObserveProcess.getFloors();
+
+            if (floorList == null)
+                return Response.status(Response.Status.NOT_FOUND).type(MediaType.APPLICATION_JSON_TYPE).entity(new ErrorMessage(Response.Status.NOT_FOUND.getStatusCode(), "Floors not found")).build();
+
+            return Response.ok(floorList).build();
+
+        }catch(Exception e){
+            e.printStackTrace();
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).type(MediaType.APPLICATION_JSON_TYPE).entity(new ErrorMessage(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Internal Server Error!")).build();
+        }
+    }
+//
+//    @RolesAllowed("USER")
+//    @POST
+//    @Path("/")
+//    @Timed
+//    @Produces(MediaType.APPLICATION_JSON)
+//    @Consumes(MediaType.TEXT_PLAIN)
+//    @ApiOperation(value="Create a new Floor")
+//    public Response createFloor(@Context ContainerRequestContext req,
+//                                @Context UriInfo uriInfo,
+//                                String floorId) {
+//
+//        try {
+//            logger.info("Incoming Floor Creation Request: {}", floorId);
+//
+//            //Check the request
+//            if(floorId == null)
+//                return Response.status(Response.Status.BAD_REQUEST).type(MediaType.APPLICATION_JSON_TYPE).entity(new ErrorMessage(Response.Status.BAD_REQUEST.getStatusCode(),"Invalid request payload")).build();
+//
+//            CoapResponse response = coapResourceClient.postRequest(floorId);
+//
+//            return Response.created(new URI(String.format("%s/%s",uriInfo.getAbsolutePath(),response))).build();
+//
+//        } catch (Exception e){
+//            e.printStackTrace();
+//            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).type(MediaType.APPLICATION_JSON_TYPE).entity(new ErrorMessage(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(),"Internal Server Error !")).build();
+//        }
+//    }
+//
+//    @RolesAllowed("USER")
+//    @GET
+//    @Path("/{floor_id}")
+//    @Timed
+//    @Produces(MediaType.APPLICATION_JSON)
+//    @ApiOperation(value="Get a Floor's infos")
+//    public Response getFloor(@Context ContainerRequestContext requestContext,
+//                             @PathParam("floor_id") String floorId) {
+//
+//        try {
+//
+//            //Check the request
+//            if(floorId == null)
+//                return Response.status(Response.Status.BAD_REQUEST).type(MediaType.APPLICATION_JSON_TYPE).entity(new ErrorMessage(Response.Status.BAD_REQUEST.getStatusCode(),"Invalid Floor id Provided !")).build();
+//
+//            logger.info("Loading infos for floor: {}", floorId);
+//
+//            CoapResponse response = coapResourceClient.getRequest(floorId);
+//
+//            return Response.ok(response).build();
+//
+//        } catch (Exception e){
+//            e.printStackTrace();
+//            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).type(MediaType.APPLICATION_JSON_TYPE).entity(new ErrorMessage(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(),"Internal Server Error !")).build();
+//        }
+//    }
+//
+//    @RolesAllowed("USER")
+//    @DELETE
+//    @Path("/{floor_number}")
+//    @Timed
+//    @Produces(MediaType.APPLICATION_JSON)
+//    @ApiOperation(value="Delete a Floor")
+//    public Response deleteFloor(@Context ContainerRequestContext req,
+//                                @PathParam("floorId") String floorId) {
+//
+//        try {
+//
+//            logger.info("Deleting Floor: {}", floorId);
+//
+//            //Check the request
+//            if(floorId == null)
+//                return Response.status(Response.Status.BAD_REQUEST).type(MediaType.APPLICATION_JSON_TYPE).entity(new ErrorMessage(Response.Status.BAD_REQUEST.getStatusCode(),"Invalid Floor Number Provided !")).build();
+//
+//            //Check if the device is available or not
+//
+//            CoapResponse response = coapResourceClient.deleteRequest(floorId);
+//
+//            //Delete the location
+//
+//            return Response.ok(response).build();
+//
+//        } catch (Exception e){
+//            e.printStackTrace();
+//            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).type(MediaType.APPLICATION_JSON_TYPE).entity(new ErrorMessage(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(),"Internal Server Error !")).build();
+//        }
+//    }
 
 }

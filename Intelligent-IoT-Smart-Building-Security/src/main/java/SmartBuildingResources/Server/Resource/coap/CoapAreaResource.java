@@ -45,6 +45,7 @@ public class CoapAreaResource extends CoapResource {
             setObservable(true);
             setObserveType(CoAP.Type.CON);
 
+
             this.add(createDeviceLight());
             this.add(createDeviceAlarm());
             this.add(createDevicePM());
@@ -183,7 +184,21 @@ public class CoapAreaResource extends CoapResource {
 
                 //Update internal status
 
-                this.delete();
+
+
+                this.getChildren().forEach(child -> {
+                    //child.clearObserveRelations();
+                    delete(child);
+                    logger.info("child!! {}", child);
+                    child.getChildren().forEach(childchild ->{
+                        child.delete(childchild);
+                        logger.info("child!!child!! {}", childchild);
+                    });
+                });
+
+                delete();
+
+                clearAndNotifyObserveRelations(CoAP.ResponseCode.DELETED);
 
                 logger.info("Resource Status Updated: Area {} deleted", this.getName());
 

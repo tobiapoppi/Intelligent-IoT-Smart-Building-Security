@@ -67,33 +67,36 @@ public class LookupAndObserveProcess implements Runnable{
         observingRelationMap = new HashMap<>();
 
         //discover all available sensors and actuators
-        lookupTarget(coapClient);
 
-        //start observing resources
-        pirTargetObservableList.forEach(targetResourceUrl -> {
-            startObservingPir(coapClient, targetResourceUrl);
-        });
-        camTargetObservableList.forEach(targetResourceUrl -> {
-            startObservingCam(coapClient, targetResourceUrl);
-        });
-        floorTargetObservableList.forEach(targetResourceUrl -> {
-            try {
-                startObservingFloor(coapClient, targetResourceUrl);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        });
-        areaTargetObservableList.forEach(targetResourceUrl -> {
-            startObservingArea(coapClient, targetResourceUrl);
-        });
-        lightTargetObservableList.forEach(targetResourceUrl -> {
-            startObservingLight(coapClient, targetResourceUrl);
-        });
-        alarmTargetObservableList.forEach(targetResourceUrl -> {
-            startObservingAlarm(coapClient, targetResourceUrl);
-        });
+        while(true){
+            lookupTarget(coapClient);
 
-        while(true);
+            //start observing resources
+            pirTargetObservableList.forEach(targetResourceUrl -> {
+                startObservingPir(coapClient, targetResourceUrl);
+            });
+            camTargetObservableList.forEach(targetResourceUrl -> {
+                startObservingCam(coapClient, targetResourceUrl);
+            });
+            floorTargetObservableList.forEach(targetResourceUrl -> {
+                try {
+                    startObservingFloor(coapClient, targetResourceUrl);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            });
+            areaTargetObservableList.forEach(targetResourceUrl -> {
+                startObservingArea(coapClient, targetResourceUrl);
+            });
+            lightTargetObservableList.forEach(targetResourceUrl -> {
+                startObservingLight(coapClient, targetResourceUrl);
+            });
+            alarmTargetObservableList.forEach(targetResourceUrl -> {
+                startObservingAlarm(coapClient, targetResourceUrl);
+            });
+            Thread.sleep(5000);
+        }
+
     }
 
     public static List<String> getFloors(){
@@ -105,6 +108,40 @@ public class LookupAndObserveProcess implements Runnable{
                 }
         );
         return formattedFloorsList;
+    }
+    public static List<String> getAreas(){
+        List<String> areaList = areaTargetObservableList;
+        List<String> formattedAreaList = new ArrayList<>();
+        areaList.forEach(area ->  {
+            area = area.replace("coap://192.168.1.107:5683/", "");
+                    formattedAreaList.add(area);
+            }
+        );
+        return formattedAreaList;
+    }
+    public static List<String> getDevices(){
+        List<String> pirList = pirTargetObservableList;
+        List<String> camList = camTargetObservableList;
+        List<String> lightList = lightTargetObservableList;
+        List<String> alarmList = alarmTargetObservableList;
+        List<String> formattedList = new ArrayList<>();
+        pirList.forEach(device -> {
+            device = device.replace("coap://192.168.1.107:5683/", "");
+                    formattedList.add(device);
+                });
+        camList.forEach(device -> {
+            device = device.replace("coap://192.168.1.107:5683/", "");
+            formattedList.add(device);
+        });
+        lightList.forEach(device -> {
+            device = device.replace("coap://192.168.1.107:5683/", "");
+            formattedList.add(device);
+        });
+        alarmList.forEach(device -> {
+            device = device.replace("coap://192.168.1.107:5683/", "");
+            formattedList.add(device);
+        });
+        return formattedList;
     }
 
 
@@ -149,7 +186,9 @@ public class LookupAndObserveProcess implements Runnable{
                                     logger.info("Target Resource found! URI: {}", webLink.getURI());
 
                                     String targetResourceUrl = String.format("%s", webLink.getURI());
-                                    pirTargetObservableList.add(targetResourceUrl);
+                                    if (!pirTargetObservableList.contains(targetResourceUrl))
+                                        pirTargetObservableList.add(targetResourceUrl);
+
                                     logger.info("Target Resource URL: {} correctly saved!", targetResourceUrl);
 
                                 } else if (webLink.getAttributes().getAttributeValues(RESOURCE_TYPE).contains("iot.sensor.camera")){
@@ -157,35 +196,40 @@ public class LookupAndObserveProcess implements Runnable{
                                     logger.info("Target Resource found! URI: {}", webLink.getURI());
 
                                     String targetResourceUrl = String.format("%s", webLink.getURI());
-                                    camTargetObservableList.add(targetResourceUrl);
+                                    if (!camTargetObservableList.contains(targetResourceUrl))
+                                        camTargetObservableList.add(targetResourceUrl);
                                     logger.info("Target Resource URL: {} correctly saved!", targetResourceUrl);
                                 } else if (webLink.getAttributes().getAttributeValues(RESOURCE_TYPE).contains("iot.actuator.light")){
 
                                     logger.info("Target Resource found! URI: {}", webLink.getURI());
 
                                     String targetResourceUrl = String.format("%s", webLink.getURI());
-                                    lightTargetObservableList.add(targetResourceUrl);
+                                    if (!lightTargetObservableList.contains(targetResourceUrl))
+                                        lightTargetObservableList.add(targetResourceUrl);
                                     logger.info("Target Resource URL: {} correctly saved!", targetResourceUrl);
                                 } else if (webLink.getAttributes().getAttributeValues(RESOURCE_TYPE).contains("iot.actuator.alarm")){
 
                                     logger.info("Target Resource found! URI: {}", webLink.getURI());
 
                                     String targetResourceUrl = String.format("%s", webLink.getURI());
-                                    alarmTargetObservableList.add(targetResourceUrl);
+                                    if (!alarmTargetObservableList.contains(targetResourceUrl))
+                                        alarmTargetObservableList.add(targetResourceUrl);
                                     logger.info("Target Resource URL: {} correctly saved!", targetResourceUrl);
                                 } else if (webLink.getAttributes().getAttributeValues(RESOURCE_TYPE).contains("iot.floor")){
 
                                     logger.info("Target Resource found! URI: {}", webLink.getURI());
 
                                     String targetResourceUrl = String.format("%s", webLink.getURI());
-                                    floorTargetObservableList.add(targetResourceUrl);
+                                    if (!floorTargetObservableList.contains(targetResourceUrl))
+                                        floorTargetObservableList.add(targetResourceUrl);
                                     logger.info("Target Resource URL: {} correctly saved!", targetResourceUrl);
                                 } else if (webLink.getAttributes().getAttributeValues(RESOURCE_TYPE).contains("iot.area")){
 
                                     logger.info("Target Resource found! URI: {}", webLink.getURI());
 
                                     String targetResourceUrl = String.format("%s", webLink.getURI());
-                                    areaTargetObservableList.add(targetResourceUrl);
+                                    if (!areaTargetObservableList.contains(targetResourceUrl))
+                                        areaTargetObservableList.add(targetResourceUrl);
                                     logger.info("Target Resource URL: {} correctly saved!", targetResourceUrl);
                                 }
                             }
@@ -293,7 +337,9 @@ public class LookupAndObserveProcess implements Runnable{
             }
         });
 
+
         observingRelationMap.put(targetUrl, relation);
+
 
     }
 
@@ -350,6 +396,8 @@ public class LookupAndObserveProcess implements Runnable{
                 logger.error("OBSERVE {} FAILED", targetUrl);
             }
         });
+
+
         observingRelationMap.put(targetUrl, relation);
     }
     private static void startObservingLight (CoapClient coapClient, String targetUrl){
@@ -417,34 +465,44 @@ public class LookupAndObserveProcess implements Runnable{
         areaTargetObservableList = new ArrayList<>();
         observingRelationMap = new HashMap<>();
 
-        //discover all available sensors and actuators
-        lookupTarget(coapClient);
+        while(true){
+            lookupTarget(coapClient);
 
-        //start observing resources
-        pirTargetObservableList.forEach(targetResourceUrl -> {
-            startObservingPir(coapClient, targetResourceUrl);
-        });
-        camTargetObservableList.forEach(targetResourceUrl -> {
-            startObservingCam(coapClient, targetResourceUrl);
-        });
-        floorTargetObservableList.forEach(targetResourceUrl -> {
+            //start observing resources
+            pirTargetObservableList.forEach(targetResourceUrl -> {
+                if (!observingRelationMap.containsKey(targetResourceUrl))
+                    startObservingPir(coapClient, targetResourceUrl);
+            });
+            camTargetObservableList.forEach(targetResourceUrl -> {
+                if (!observingRelationMap.containsKey(targetResourceUrl))
+                    startObservingCam(coapClient, targetResourceUrl);
+            });
+            floorTargetObservableList.forEach(targetResourceUrl -> {
+                try {
+                    if (!observingRelationMap.containsKey(targetResourceUrl))
+                        startObservingFloor(coapClient, targetResourceUrl);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            });
+            areaTargetObservableList.forEach(targetResourceUrl -> {
+                if (!observingRelationMap.containsKey(targetResourceUrl))
+                    startObservingArea(coapClient, targetResourceUrl);
+            });
+            lightTargetObservableList.forEach(targetResourceUrl -> {
+                if (!observingRelationMap.containsKey(targetResourceUrl))
+                    startObservingLight(coapClient, targetResourceUrl);
+            });
+            alarmTargetObservableList.forEach(targetResourceUrl -> {
+                if (!observingRelationMap.containsKey(targetResourceUrl))
+                    startObservingAlarm(coapClient, targetResourceUrl);
+            });
             try {
-                startObservingFloor(coapClient, targetResourceUrl);
-            } catch (IOException e) {
+                Thread.sleep(5000);
+            } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-        });
-        areaTargetObservableList.forEach(targetResourceUrl -> {
-            startObservingArea(coapClient, targetResourceUrl);
-        });
-        lightTargetObservableList.forEach(targetResourceUrl -> {
-            startObservingLight(coapClient, targetResourceUrl);
-        });
-        alarmTargetObservableList.forEach(targetResourceUrl -> {
-            startObservingAlarm(coapClient, targetResourceUrl);
-        });
-
-        while(true);
+        }
 
     }
 }

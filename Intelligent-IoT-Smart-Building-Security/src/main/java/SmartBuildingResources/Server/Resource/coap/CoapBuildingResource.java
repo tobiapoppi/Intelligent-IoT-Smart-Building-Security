@@ -160,7 +160,7 @@ public class CoapBuildingResource extends CoapResource {
 
                 logger.info("Resource Status Updated: Building {} deleted", this.getName());
 
-                exchange.respond(CoAP.ResponseCode.CHANGED);
+                exchange.respond(CoAP.ResponseCode.DELETED);
             }
             else
                 exchange.respond(CoAP.ResponseCode.BAD_REQUEST);

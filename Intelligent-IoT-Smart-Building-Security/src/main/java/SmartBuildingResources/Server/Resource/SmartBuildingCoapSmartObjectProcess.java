@@ -95,7 +95,7 @@ public class SmartBuildingCoapSmartObjectProcess extends CoapServer {
         while(true){
             registerToCoapResourceDirectory(smartBuildingCoapSmartObjectProcess.getRoot(),
                     "CoapEndpointSmartObject", TARGET_LISTENING_IP, TARGET_PORT);
-            Thread.sleep(30000);
+            Thread.sleep(50000);
         }
 
 

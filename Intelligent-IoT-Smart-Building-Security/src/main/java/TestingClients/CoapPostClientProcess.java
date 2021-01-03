@@ -33,7 +33,7 @@ public class CoapPostClientProcess {
 
 		logger.info("Request Pretty Print:\n{}", Utils.prettyPrint(request));
 
-		request.setPayload("bb");
+		request.setPayload("C");
 
 		//Synchronously send the POST request (blocking call)
 		CoapResponse coapResp = null;

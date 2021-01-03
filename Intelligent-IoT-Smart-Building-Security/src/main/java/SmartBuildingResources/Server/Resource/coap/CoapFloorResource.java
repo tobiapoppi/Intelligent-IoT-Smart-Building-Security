@@ -14,6 +14,8 @@ import org.eclipse.californium.core.coap.MediaTypeRegistry;
 import org.eclipse.californium.core.observe.ObserveRelation;
 import org.eclipse.californium.core.observe.ObserveRelationFilter;
 import org.eclipse.californium.core.server.resources.CoapExchange;
+import org.eclipse.californium.core.server.resources.Resource;
+import org.eclipse.californium.core.server.resources.ResourceObserver;
 import org.eclipse.californium.elements.EndpointContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -142,24 +144,23 @@ public class CoapFloorResource extends CoapResource {
                 String submittedValue = new String(exchange.getRequestPayload());
 
                 //Update internal status
+
                 this.setName(String.format("floor%s", submittedValue));
+
+
+                //FACCIO UN FOR CHE CREA UN NUOVO FLOOR CON IL NUOVO NOME RICORSIVAMENNTE GLI PORTO DENTRO TUTTI I GFIGLI CHE HA QUESTO
+                //POI RICORDIVAMENTE LI RIMUOVO DA QUESTO E POI CANCELLO QUESTA PARTEND DA SUO PADRE.
+
+
 
                 logger.info("Resource Status Updated: {}", submittedValue);
 
-                exchange.respond(CoAP.ResponseCode.CHANGED);
 
                 SmartBuildingCoapSmartObjectProcess.registerToCoapResourceDirectory(this.getParent().getParent(), "CoapEndpointSmartObject", TARGET_LISTENING_IP, TARGET_PORT);
 
-                //this.notify();
+                changed();
 
-                ObserveRelationFilter filter = new ObserveRelationFilter() {
-                    @Override
-                    public boolean accept(ObserveRelation relation) {
-                        return true;
-                    }
-                };
-
-                this.notifyObserverRelations(filter);
+                exchange.respond(CoAP.ResponseCode.CHANGED);
 
             }
             else
@@ -183,7 +184,7 @@ public class CoapFloorResource extends CoapResource {
 
                 logger.info("Resource Status Updated: Floor {} deleted", this.getName());
 
-                exchange.respond(CoAP.ResponseCode.CHANGED);
+                exchange.respond(CoAP.ResponseCode.DELETED);
             }
             else
                 exchange.respond(CoAP.ResponseCode.BAD_REQUEST);

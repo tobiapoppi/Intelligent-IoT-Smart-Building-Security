@@ -18,7 +18,7 @@ public class CoapResourceClient {
 
     private final static Logger logger = LoggerFactory.getLogger(CoapResourceClient.class);
 
-    private static final String SMARTOBJECT_ENDPOINT = "coap://192.168.1.107:5683";
+    private static final String SMARTOBJECT_ENDPOINT = "coap://192.168.1.107:5683/buildingPoppiZaniboniInc";
 
     public CoapResourceClient(){
 
@@ -45,11 +45,12 @@ public class CoapResourceClient {
         return null;
     }
 
-    private CoapResponse postRequest(String uriRequest){
-        CoapClient coapClient = new CoapClient(String.format("%s/%s", SMARTOBJECT_ENDPOINT, uriRequest));
+    public CoapResponse postRequest(String uriRequest){
+        CoapClient coapClient = new CoapClient(String.format("%s", SMARTOBJECT_ENDPOINT));
         Request request = new Request(CoAP.Code.POST);
         request.setConfirmable(true);
         request.setOptions(new OptionSet().setAccept(MediaTypeRegistry.APPLICATION_SENML_JSON));
+        request.setPayload(uriRequest);
         logger.info("Request Pretty Print:\n{}", Utils.prettyPrint(request));
 
         CoapResponse coapResponse = null;
@@ -83,7 +84,7 @@ public class CoapResourceClient {
         return null;
     }
 
-    private CoapResponse deleteRequest(String uriRequest){
+    public CoapResponse deleteRequest(String uriRequest){
         CoapClient coapClient = new CoapClient(String.format("%s/%s", SMARTOBJECT_ENDPOINT, uriRequest));
         Request request = new Request(CoAP.Code.DELETE);
         request.setConfirmable(true);
