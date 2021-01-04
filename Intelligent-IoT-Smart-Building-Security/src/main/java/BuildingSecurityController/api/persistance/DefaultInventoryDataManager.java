@@ -61,7 +61,7 @@ public class DefaultInventoryDataManager implements IInventoryDataManager {
     @Override
     public List<PolicyDescriptor> getPolicyListByLocation(String location_id) throws IInventoryDataManagerException {
         return this.policyMap.values().stream()
-                .filter(policyDescriptor -> policyDescriptor != null && policyDescriptor.getLocation_id().equals(location_id))
+                .filter(policyDescriptor -> policyDescriptor != null && policyDescriptor.getArea_id().equals(location_id))
                 .collect(Collectors.toList());
     }
 
