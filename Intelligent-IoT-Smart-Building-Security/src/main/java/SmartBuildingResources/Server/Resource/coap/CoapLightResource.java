@@ -98,20 +98,22 @@ public class CoapLightResource extends CoapResource {
 
 
     @Override
-    public void handleGET(CoapExchange exchange){
+    public void handleGET(CoapExchange exchange) {
 
         //if(exchange.getRequestOptions().getAccept() == MediaTypeRegistry.APPLICATION_SENML_JSON ||
         //        exchange.getRequestOptions().getAccept() == MediaTypeRegistry.APPLICATION_JSON){
 
-            logger.info("Pretty Print: \n{}", Utils.prettyPrint(exchange.advanced().getRequest()));
+        logger.info("Pretty Print: \n{}", Utils.prettyPrint(exchange.advanced().getRequest()));
+        logger.info("Pretty Print: \n{}", exchange.getRequestOptions());
+
+        Optional<String> senmlPayload = getJsonSenmlResponse();
+
+        if (senmlPayload.isPresent()){
+            exchange.respond(CoAP.ResponseCode.CONTENT, senmlPayload.get(), exchange.getRequestOptions().getAccept());
             logger.info("Pretty Print: \n{}", exchange.getRequestOptions());
-
-            Optional<String> senmlPayload = getJsonSenmlResponse();
-
-            if(senmlPayload.isPresent())
-                exchange.respond(CoAP.ResponseCode.CONTENT, senmlPayload.get(), exchange.getRequestOptions().getAccept());
-            else
-                exchange.respond(CoAP.ResponseCode.INTERNAL_SERVER_ERROR);
+        }
+        else
+            exchange.respond(CoAP.ResponseCode.INTERNAL_SERVER_ERROR);
         //}
         //Otherwise respond with the default textplain payload
         //else

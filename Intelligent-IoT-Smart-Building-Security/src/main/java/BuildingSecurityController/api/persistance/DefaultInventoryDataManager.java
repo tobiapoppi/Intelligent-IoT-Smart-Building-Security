@@ -21,7 +21,7 @@ public class DefaultInventoryDataManager implements IInventoryDataManager {
 
     final protected Logger logger = LoggerFactory.getLogger(ExampleAuthenticator.class);
 
-    private HashMap<String, PolicyDescriptor> policyMap;
+    private static HashMap<String, PolicyDescriptor> policyMap;
     private HashMap<String, UserDescriptor> userMap;
     private HashMap<Integer, FloorDescriptor> floorMap;
     private HashMap<String, CoapPirResource> pirMap;
@@ -30,7 +30,7 @@ public class DefaultInventoryDataManager implements IInventoryDataManager {
 
 
     public DefaultInventoryDataManager() {
-        this.policyMap = new HashMap<>();
+        policyMap = new HashMap<>();
         this.userMap = new HashMap<>();
     }
 

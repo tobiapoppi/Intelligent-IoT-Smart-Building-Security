@@ -75,6 +75,7 @@ public class CoapResourceClient {
         CoapResponse coapResponse = null;
         try{
             coapResponse = coapClient.advanced(request);
+            logger.info("Response Pretty Print:\n{}", Utils.prettyPrint(coapResponse));
             return coapResponse;
         } catch (ConnectorException e) {
             e.printStackTrace();

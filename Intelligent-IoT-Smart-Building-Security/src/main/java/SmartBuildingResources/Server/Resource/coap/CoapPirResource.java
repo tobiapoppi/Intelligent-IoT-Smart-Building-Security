@@ -17,7 +17,7 @@ import utils.SenMLRecord;
 
 import java.util.Optional;
 
-public class CoapPirResource extends CoapResource {
+public class  CoapPirResource extends CoapResource {
 
     private final static Logger logger = LoggerFactory.getLogger(CoapPirResource.class);
 
@@ -84,6 +84,7 @@ public class CoapPirResource extends CoapResource {
             senMLRecordValue.setU(UNIT);
             senMLRecordValue.setVb(value);
             senMLRecordValue.setT(System.currentTimeMillis());
+
 
             senMLPack.add(senMLRecordValue);
 

@@ -15,6 +15,7 @@ import io.dropwizard.jersey.errors.ErrorMessage;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.eclipse.californium.core.CoapResponse;
+import org.eclipse.californium.core.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,15 +44,10 @@ public class BuildingResource {
     public static class MissingKeyException extends Exception{}
     final OperatorAppConfig conf;
 
-    LookupAndObserveProcess lookupAndObserveProcess = new LookupAndObserveProcess();
     CoapResourceClient coapResourceClient = new CoapResourceClient();
 
     public BuildingResource(OperatorAppConfig conf) throws InterruptedException {
         this.conf = conf;
-        Thread newThread = new Thread(() -> {
-            lookupAndObserveProcess.run();
-        });
-        newThread.start();
     }
 
     @RolesAllowed("USER")
@@ -170,7 +166,7 @@ public class BuildingResource {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "Get all the Areas of the floor")
     public Response GetAreas(@Context ContainerRequestContext requestContext,
-                                @PathParam("floorId") String floorId){
+                                @PathParam("floor_id") String floorId){
         try{
 
             logger.info("Loading all the {} 's Areas", floorId);
@@ -243,26 +239,134 @@ public class BuildingResource {
 //        }
 //    }
 //
+
+    //TODO QUESTA DELETE HA DEI PROBLEMI. SE VIENE ELIMINATA L'AREA CONTINUO A RICEVERE LE NOTIFY DA TUTTI I DEVICE.
+    //TODO DA RISOLVERE
+
+    @RolesAllowed("USER")
+    @DELETE
+    @Path("/{floor_id}/area/{area_id}")
+    @Timed
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value="Delete an Area and all her devices")
+    public Response deleteArea(@Context ContainerRequestContext req,
+                                @PathParam("floor_id") String floorId, @PathParam("area_id") String areaId) {
+
+        try {
+
+            logger.info("Deleting Area: {}", areaId);
+
+            //Check the request
+            if(areaId == null)
+                return Response.status(Response.Status.BAD_REQUEST).type(MediaType.APPLICATION_JSON_TYPE).entity(new ErrorMessage(Response.Status.BAD_REQUEST.getStatusCode(),"Invalid AreaId Provided !")).build();
+
+            //Check if the area exists is available or not
+            if(LookupAndObserveProcess.getAreas(floorId).isEmpty()){
+                return Response.status(Response.Status.NOT_FOUND).type(MediaType.APPLICATION_JSON_TYPE).entity(new ErrorMessage(Response.Status.NOT_FOUND.getStatusCode(), "No areas found")).build();
+
+            }
+
+            CoapResponse response = coapResourceClient.deleteRequest(String.format("%s/%s", floorId, areaId));
+
+            LookupAndObserveProcess.deleteRelation(String.format("%s/%s", floorId, areaId));
+
+            //Delete the location
+
+            return Response.ok(response).build();
+
+        } catch (Exception e){
+            e.printStackTrace();
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).type(MediaType.APPLICATION_JSON_TYPE).entity(new ErrorMessage(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(),"Internal Server Error !")).build();
+        }
+    }
+
+    @RolesAllowed("USER")
+    @GET
+    @Path("/{floor_id}/area/{area_id}/device")
+    @Timed
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "Get all the Devices of the Area")
+    public Response GetDevices(@Context ContainerRequestContext requestContext,
+                             @PathParam("floor_id") String floorId, @PathParam("area_id") String areaId){
+        try{
+
+            logger.info("Loading all the {} 's Devices in floor {}", areaId, floorId);
+
+            List<String> devList = LookupAndObserveProcess.getDevices(String.format("%s/%s", floorId, areaId));
+
+            if (devList.isEmpty())
+                return Response.status(Response.Status.NOT_FOUND).type(MediaType.APPLICATION_JSON_TYPE).entity(new ErrorMessage(Response.Status.NOT_FOUND.getStatusCode(), "No devices found")).build();
+
+            return Response.ok(devList).build();
+
+        }catch(Exception e){
+            e.printStackTrace();
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).type(MediaType.APPLICATION_JSON_TYPE).entity(new ErrorMessage(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Internal Server Error!")).build();
+        }
+    }
+
+
+    @RolesAllowed("USER")
+    @GET
+    @Path("/{floor_id}/area/{area_id}/device/{device_id}")
+    @Timed
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value="Get a Device's infos")
+    public Response getDevice(@Context ContainerRequestContext requestContext,
+                             @PathParam("floor_id") String floorId, @PathParam("area_id") String areaId, @PathParam("device_id") String deviceId) {
+
+        try {
+
+            //Check the request
+            if(floorId == null)
+                return Response.status(Response.Status.BAD_REQUEST).type(MediaType.APPLICATION_JSON_TYPE).entity(new ErrorMessage(Response.Status.BAD_REQUEST.getStatusCode(),"Invalid Floor id Provided !")).build();
+
+            logger.info("Loading infos for device: {}, in Area {}, in floor {}", deviceId, areaId, floorId);
+
+            CoapResponse response = coapResourceClient.getRequest(String.format("%s/%s/%s", floorId, areaId, deviceId));
+            logger.info("Response Pretty Print:\n{}", Utils.prettyPrint(response));
+            String text = response.getResponseText();
+            logger.info("Payload: {}", text);
+
+            if(text == null){
+                return Response.status(Response.Status.NOT_FOUND).type(MediaType.APPLICATION_JSON_TYPE).entity(new ErrorMessage(Response.Status.NOT_FOUND.getStatusCode(), "Device not found")).build();
+            }
+
+            return Response.ok(text).build();
+
+        } catch (Exception e){
+            e.printStackTrace();
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).type(MediaType.APPLICATION_JSON_TYPE).entity(new ErrorMessage(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(),"Internal Server Error !")).build();
+        }
+    }
+
+//
 //    @RolesAllowed("USER")
 //    @DELETE
-//    @Path("/{floor_number}")
+//    @Path("/{floor_id}/area/{area_id}")
 //    @Timed
 //    @Produces(MediaType.APPLICATION_JSON)
-//    @ApiOperation(value="Delete a Floor")
-//    public Response deleteFloor(@Context ContainerRequestContext req,
-//                                @PathParam("floorId") String floorId) {
+//    @ApiOperation(value="Delete an Area and all her devices")
+//    public Response deleteArea(@Context ContainerRequestContext req,
+//                               @PathParam("floor_id") String floorId, @PathParam("area_id") String areaId) {
 //
 //        try {
 //
-//            logger.info("Deleting Floor: {}", floorId);
+//            logger.info("Deleting Area: {}", areaId);
 //
 //            //Check the request
-//            if(floorId == null)
-//                return Response.status(Response.Status.BAD_REQUEST).type(MediaType.APPLICATION_JSON_TYPE).entity(new ErrorMessage(Response.Status.BAD_REQUEST.getStatusCode(),"Invalid Floor Number Provided !")).build();
+//            if(areaId == null)
+//                return Response.status(Response.Status.BAD_REQUEST).type(MediaType.APPLICATION_JSON_TYPE).entity(new ErrorMessage(Response.Status.BAD_REQUEST.getStatusCode(),"Invalid AreaId Provided !")).build();
 //
-//            //Check if the device is available or not
+//            //Check if the area exists is available or not
+//            if(LookupAndObserveProcess.getAreas(floorId).isEmpty()){
+//                return Response.status(Response.Status.NOT_FOUND).type(MediaType.APPLICATION_JSON_TYPE).entity(new ErrorMessage(Response.Status.NOT_FOUND.getStatusCode(), "No areas found")).build();
 //
-//            CoapResponse response = coapResourceClient.deleteRequest(floorId);
+//            }
+//
+//            CoapResponse response = coapResourceClient.deleteRequest(String.format("%s/%s", floorId, areaId));
+//
+//            lookupAndObserveProcess.deleteRelation(String.format("%s/%s", floorId, areaId));
 //
 //            //Delete the location
 //
