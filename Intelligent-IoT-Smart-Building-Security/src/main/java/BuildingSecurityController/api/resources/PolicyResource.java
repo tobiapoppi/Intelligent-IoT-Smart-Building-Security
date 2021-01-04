@@ -50,20 +50,20 @@ public class PolicyResource {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "Get all the Policies")
     public Response GetPolicies(@Context ContainerRequestContext requestContext,
-                                @QueryParam("location_id") String location_id){
+                                @QueryParam("floor_id") String floorId){
 
         try{
 
             List<PolicyDescriptor> serviceList = null;
 
-            if(location_id == null) {
+            if(floorId == null) {
                 logger.info("Loading all stored IoT Inventory Policies");
                 serviceList = this.conf.getInventoryDataManager().getPolicyList();
             }
 
-            else if(location_id != null) {
-                logger.info("Loading all stored IoT Inventory Policies filtered by Location: {}", location_id);
-                serviceList = this.conf.getInventoryDataManager().getPolicyListByLocation(location_id);
+            else if(floorId != null) {
+                logger.info("Loading all stored IoT Inventory Policies filtered by Floor: {}", floorId);
+                serviceList = this.conf.getInventoryDataManager().getPolicyListByFloor(floorId);
             }
             else
                 return Response.status(Response.Status.BAD_REQUEST).type(MediaType.APPLICATION_JSON_TYPE).entity(new ErrorMessage(Response.Status.BAD_REQUEST.getStatusCode(), "only policy_id is required for filtering!")).build();
@@ -200,7 +200,7 @@ public class PolicyResource {
             if(!this.conf.getInventoryDataManager().getPolicy(policy_id).isPresent())
                 return Response.status(Response.Status.NOT_FOUND).type(MediaType.APPLICATION_JSON_TYPE).entity(new ErrorMessage(Response.Status.NOT_FOUND.getStatusCode(),"Policy Not Found !")).build();
 
-            //Delete the location
+            //Delete the policy
             this.conf.getInventoryDataManager().deletePolicy(policy_id);
 
             return Response.noContent().build();

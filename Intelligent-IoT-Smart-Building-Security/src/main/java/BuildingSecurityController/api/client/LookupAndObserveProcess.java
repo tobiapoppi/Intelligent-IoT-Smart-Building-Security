@@ -1,5 +1,7 @@
 package BuildingSecurityController.api.client;
 
+import BuildingSecurityController.api.model.PolicyDescriptor;
+import BuildingSecurityController.api.persistance.DefaultInventoryDataManager;
 import SmartBuildingResources.Server.Resource.coap.CoapCameraResource;
 import SmartBuildingResources.Server.Resource.coap.CoapPirResource;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -40,6 +42,8 @@ public class LookupAndObserveProcess implements Runnable{
     private static final String INTERFACE_CORE_ATTRIBUTE = "if";
     private static final String WELL_KNOWN_CORE_URI = "/.well-known/core";
 
+    private static final String SMARTOBJECT_ENDPOINT = "coap://192.168.1.107:5683/buildingPoppiZaniboniInc/";
+
     private static List<String> pirTargetObservableList = null;
     private static List<String> camTargetObservableList = null;
     private static List<String> lightTargetObservableList = null;
@@ -50,7 +54,12 @@ public class LookupAndObserveProcess implements Runnable{
     private static CoapPirResource newPir = null;
     private static CoapCameraResource newCam = null;
 
+    CoapResourceClient coapResourceClient = new CoapResourceClient();
+
+
     private static ObjectMapper objectMapper = new ObjectMapper();
+
+
 
     public static void deleteRelation(String uri){
 
@@ -264,8 +273,99 @@ public class LookupAndObserveProcess implements Runnable{
 
                 logger.info("Notification -> Resource Target: {} -> Body: {}", targetUrl, content);
 
+                if(content.equals("true")){
+                    //accedo alle policy
 
-                //accedo alle policy
+                    HashMap<String, PolicyDescriptor> policyMap = DefaultInventoryDataManager.getPolicies();
+
+                    //controllo se tutte le policy rispettano i cambiamenti
+
+                    //prima ottengo area e floor di questo pir
+
+                    String floor = targetUrl.replace("coap://192.168.1.107:5683/buildingPoppiZaniboniInc/", "").split("/")[0];
+                    String area = targetUrl.replace("coap://192.168.1.107:5683/buildingPoppiZaniboniInc/", "").split("/")[1];
+
+
+                    logger.info("Sto accedendo alle risorse.");
+
+                    policyMap.values().forEach(policy ->{
+                        if (policy.getFloor_id().equals(floor) && policy.getArea_id().equals(area)){
+                            if(policy.getPresence_mode()){
+
+                                int hourStart = Integer.parseInt(policy.getStart_working_time().split(":")[0]);
+                                int minuteStart = Integer.parseInt(policy.getStart_working_time().split(":")[1]);
+                                int hourFin = Integer.parseInt(policy.getEnd_working_time().split(":")[0]);
+                                int minuteFin = Integer.parseInt(policy.getEnd_working_time().split(":")[1]);
+
+                                int hour = java.time.LocalTime.now().getHour();
+                                int minutes = java.time.LocalTime.now().getMinute();
+
+                                logger.info("Ora faccio i controlli sull'ora" );
+
+                                logger.info("{} {}", hour, minutes);
+
+
+
+                                if(hour > hourStart || hour < hourFin){
+
+                                    //I MAKE A PUT REQUEST
+
+                                    //Initialize coapClient
+                                    CoapClient coapClient = new CoapClient("coap://192.168.1.107:5683/buildingPoppiZaniboniInc/floor1/areaA/alarm");
+
+                                    //Request Class is a generic CoAP message: in this case we want a GET.
+                                    //"Message ID", "Token" and other header's fields can be set
+                                    Request request = new Request(Code.PUT);
+
+                                    //Set PUT request's payload
+                                    String myPayload = "true";
+                                    logger.info("PUT Request Random Payload: {}", myPayload);
+                                    request.setPayload(myPayload);
+
+                                    //Set Request as Confirmable
+                                    request.setConfirmable(true);
+
+                                    logger.info("Request Pretty Print: \n{}", Utils.prettyPrint(request));
+                                    logger.info("richiesta: \n{}", request.getURI());
+
+
+                                    //Synchronously send the POST request (blocking call)
+                                    CoapResponse coapResp = null;
+
+                                    try {
+
+                                        coapResp = coapClient.advanced(request);
+
+                                        //Pretty print for the received response
+                                        logger.info("Response Pretty Print: \n{}", Utils.prettyPrint(coapResp));
+
+                                        //The "CoapResponse" message contains the response.
+                                        String text = coapResp.getResponseText();
+                                        logger.info("Payload: {}", text);
+                                        logger.info("Message ID: " + coapResp.advanced().getMID());
+                                        logger.info("Token: " + coapResp.advanced().getTokenString());
+
+                                    } catch (ConnectorException | IOException e) {
+                                        e.printStackTrace();
+                                    }
+
+                                    logger.info("ALARM ACTIVATED FOR FLOOR {} AREA {}", floor, area);
+
+                                }else if(hour == hourStart && minutes > minuteStart){
+                                    //CoapResponse coapResponse = coapResourceClient.putRequest(String.format("%s/%s/alarm", floor, area), "true");
+                                    logger.info("ALARM ACTIVATED FOR FLOOR {} AREA {}", floor, area);
+
+
+                                }else if(hour == hourFin && minutes < minuteFin){
+                                    //CoapResponse coapResponse = coapResourceClient.putRequest(String.format("%s/%s/alarm", floor, area), "true");
+                                    logger.info("ALARM ACTIVATED FOR FLOOR {} AREA {}", floor, area);
+
+                                }
+                            }
+                        }
+                    });
+
+                }
 
 
 
@@ -441,10 +541,13 @@ public class LookupAndObserveProcess implements Runnable{
     }
 
 
+
     @Override
     public void run() {
         //init coap client
         CoapClient coapClient = new CoapClient();
+
+        CoapResourceClient coapResourceClient = new CoapResourceClient();
 
         //init target resource list array and observing relations
 

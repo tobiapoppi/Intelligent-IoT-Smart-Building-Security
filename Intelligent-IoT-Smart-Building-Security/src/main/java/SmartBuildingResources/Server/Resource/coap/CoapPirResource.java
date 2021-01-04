@@ -56,19 +56,21 @@ public class  CoapPirResource extends CoapResource {
             getAttributes().addAttribute("ct", Integer.toString(MediaTypeRegistry.APPLICATION_SENML_JSON));
             getAttributes().addAttribute("ct", Integer.toString(MediaTypeRegistry.TEXT_PLAIN));
 
+            pirRawSensor.addDataListener(new ResourceDataListener<Boolean>() {
+                @Override
+                public void onDataChanged(SmartObjectResource<Boolean> resource, Boolean updatedSensorValue) {
+
+                    value = updatedSensorValue;
+                    changed();
+                }
+            });
+
         }
         else {
             logger.error(" ERROR -->NULL Raw References");
         }
 
-        this.pirRawSensor.addDataListener(new ResourceDataListener<Boolean>() {
-            @Override
-            public void onDataChanged(SmartObjectResource<Boolean> resource, Boolean updatedSensorValue) {
 
-                value = updatedSensorValue;
-                changed();
-            }
-        });
 
 
     }

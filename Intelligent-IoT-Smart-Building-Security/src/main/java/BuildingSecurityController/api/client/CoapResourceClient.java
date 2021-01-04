@@ -24,7 +24,7 @@ public class CoapResourceClient {
 
     }
 
-    public CoapResponse getRequest(String uriRequest){
+    public static CoapResponse getRequest(String uriRequest){
         CoapClient coapClient = new CoapClient(String.format("%s/%s", SMARTOBJECT_ENDPOINT, uriRequest));
         Request request = new Request(CoAP.Code.GET);
         request.setConfirmable(true);
@@ -37,9 +37,7 @@ public class CoapResourceClient {
             coapResponse = coapClient.advanced(request);
             return coapResponse;
 
-        } catch (ConnectorException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
+        } catch (ConnectorException | IOException e) {
             e.printStackTrace();
         }
         return null;
@@ -57,19 +55,18 @@ public class CoapResourceClient {
         try{
             coapResponse = coapClient.advanced(request);
             return coapResponse;
-        } catch (ConnectorException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
+
+        } catch (ConnectorException | IOException e) {
             e.printStackTrace();
         }
         return null;
     }
 
-    private CoapResponse putRequest(String uriRequest){
+    public CoapResponse putRequest(String uriRequest, String payload){
         CoapClient coapClient = new CoapClient(String.format("%s/%s", SMARTOBJECT_ENDPOINT, uriRequest));
         Request request = new Request(CoAP.Code.PUT);
         request.setConfirmable(true);
-        request.setOptions(new OptionSet().setAccept(MediaTypeRegistry.APPLICATION_SENML_JSON));
+        request.setPayload(payload);
         logger.info("Request Pretty Print:\n{}", Utils.prettyPrint(request));
 
         CoapResponse coapResponse = null;
@@ -77,9 +74,7 @@ public class CoapResourceClient {
             coapResponse = coapClient.advanced(request);
             logger.info("Response Pretty Print:\n{}", Utils.prettyPrint(coapResponse));
             return coapResponse;
-        } catch (ConnectorException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
+        } catch (ConnectorException | IOException e) {
             e.printStackTrace();
         }
         return null;
@@ -96,9 +91,7 @@ public class CoapResourceClient {
         try{
             coapResponse = coapClient.advanced(request);
             return coapResponse;
-        } catch (ConnectorException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
+        } catch (ConnectorException | IOException e) {
             e.printStackTrace();
         }
         return null;

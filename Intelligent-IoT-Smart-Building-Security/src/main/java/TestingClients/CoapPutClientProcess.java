@@ -16,7 +16,7 @@ public class CoapPutClientProcess {
 
 	private final static Logger logger = LoggerFactory.getLogger(CoapPutClientProcess.class);
 
-	private static final String COAP_ENDPOINT = "coap://192.168.1.107:5683/buildingPoppiZaniboniInc/floor1";
+	private static final String COAP_ENDPOINT = "coap://192.168.1.107:5683/buildingPoppiZaniboniInc/floor1/areaA/alarm";
 
 	public static void main(String[] args) {
 		
@@ -28,7 +28,7 @@ public class CoapPutClientProcess {
 		Request request = new Request(Code.PUT);
 
 		//Set PUT request's payload
-		String myPayload = "WINX";
+		String myPayload = "true";
 		logger.info("PUT Request Random Payload: {}", myPayload);
 		request.setPayload(myPayload);
 
@@ -36,6 +36,8 @@ public class CoapPutClientProcess {
 		request.setConfirmable(true);
 
 		logger.info("Request Pretty Print: \n{}", Utils.prettyPrint(request));
+		logger.info("richiesta: \n{}", request.getURI());
+
 
 		//Synchronously send the POST request (blocking call)
 		CoapResponse coapResp = null;

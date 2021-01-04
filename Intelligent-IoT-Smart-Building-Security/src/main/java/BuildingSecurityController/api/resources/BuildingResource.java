@@ -2,12 +2,9 @@ package BuildingSecurityController.api.resources;
 
 import BuildingSecurityController.api.client.CoapResourceClient;
 import BuildingSecurityController.api.client.LookupAndObserveProcess;
-import BuildingSecurityController.api.data_transfer_object.FloorCreationRequest;
-import BuildingSecurityController.api.data_transfer_object.FloorUpdateRequest;
 import BuildingSecurityController.api.data_transfer_object.PolicyCreationRequest;
 import BuildingSecurityController.api.data_transfer_object.PolicyUpdateRequest;
 import BuildingSecurityController.api.exception.IInventoryDataManagerConflict;
-import BuildingSecurityController.api.model.FloorDescriptor;
 import BuildingSecurityController.api.model.PolicyDescriptor;
 import BuildingSecurityController.api.services.OperatorAppConfig;
 import com.codahale.metrics.annotation.Timed;
