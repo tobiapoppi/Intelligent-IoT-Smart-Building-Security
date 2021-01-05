@@ -4,9 +4,8 @@ package BuildingSecurityController.api.persistance;
 import BuildingSecurityController.api.auth.ExampleAuthenticator;
 import BuildingSecurityController.api.exception.IInventoryDataManagerConflict;
 import BuildingSecurityController.api.exception.IInventoryDataManagerException;
-import BuildingSecurityController.api.model.FloorDescriptor;
-import BuildingSecurityController.api.model.PolicyDescriptor;
-import BuildingSecurityController.api.model.UserDescriptor;
+import BuildingSecurityController.api.model.*;
+import org.eclipse.californium.core.server.resources.Resource;
 import smartBuilding.server.resource.coap.CoapCameraResource;
 import smartBuilding.server.resource.coap.CoapPirResource;
 import org.eclipse.californium.core.server.resources.CoapExchange;
@@ -23,9 +22,10 @@ public class DefaultInventoryDataManager implements IInventoryDataManager {
 
     private static HashMap<String, PolicyDescriptor> policyMap;
     private HashMap<String, UserDescriptor> userMap;
-    private HashMap<String, CoapPirResource> pirMap;
-    private HashMap<String, CoapCameraResource> camMap;
     private HashMap<String, FloorDescriptor> floorMap;
+    private HashMap<String, AreaDescriptor> areaMap;
+    private HashMap<String, GenericDeviceDescriptor> deviceMap;
+    private HashMap<String, ResourceDescriptor> resourceDeviceMap;
 
 
     public static HashMap<String, PolicyDescriptor> getPolicies(){
@@ -138,40 +138,6 @@ public class DefaultInventoryDataManager implements IInventoryDataManager {
 
 
 
-
-
-    //TODO ANCHE QUI CONTROLLARE SE FUNZIONA, è INVENTATO
-    @Override
-    public List<CoapPirResource> getPirList() throws IInventoryDataManagerException {
-        ArrayList<CoapPirResource> servicelist = new ArrayList<>(this.pirMap.values());
-        servicelist.stream().forEach(pir ->{
-            CoapExchange coapExchange = new CoapExchange(null, pir);
-            pir.handleGET(coapExchange);
-        });
-        return null;
-    }
-
-    @Override
-    public CoapPirResource createNewPir(CoapPirResource coapPirResource) throws IInventoryDataManagerException, IInventoryDataManagerConflict {
-        return null;
-    }
-
-    @Override
-    public Optional<CoapPirResource> getPir(String device_id) throws IInventoryDataManagerException {
-        return Optional.empty();
-    }
-
-    @Override
-    public CoapPirResource updatePir(CoapPirResource coapPirResource) throws IInventoryDataManagerException {
-        return null;
-    }
-
-    @Override
-    public CoapPirResource deletePir(String device_id) throws IInventoryDataManagerException {
-        return null;
-    }
-
-
     @Override
     public List<FloorDescriptor> getFloorList() throws IInventoryDataManagerException{
         return new ArrayList<>(this.floorMap.values());
@@ -187,7 +153,6 @@ public class DefaultInventoryDataManager implements IInventoryDataManager {
         this.floorMap.put(floorDescriptor.getFloor_id(), floorDescriptor);
         return floorDescriptor;
     }
-
 
     @Override
     public Optional<FloorDescriptor> getFloor(String floorId) throws IInventoryDataManagerException {
@@ -205,9 +170,83 @@ public class DefaultInventoryDataManager implements IInventoryDataManager {
         return this.floorMap.remove(floorId);
     }
 
+    @Override
+    public List<AreaDescriptor> getAreaList() throws IInventoryDataManagerException {
+        return new ArrayList<>(this.areaMap.values());
+    }
 
-    //TODO
-    //TODO
-    //TODO
+    @Override
+    public AreaDescriptor createNewArea(AreaDescriptor areaDescriptor) throws IInventoryDataManagerException, IInventoryDataManagerConflict {
+        if(this.getArea(areaDescriptor.getArea_id()).isPresent())
+            throw new IInventoryDataManagerConflict("Area already exists!");
+
+
+        this.areaMap.put(areaDescriptor.getArea_id(), areaDescriptor);
+        return areaDescriptor;
+    }
+
+    @Override
+    public Optional<AreaDescriptor> getArea(String areaId) throws IInventoryDataManagerException {
+        return Optional.ofNullable(this.areaMap.get(areaId));
+    }
+
+    @Override
+    public AreaDescriptor updateArea(AreaDescriptor areaDescriptor) throws IInventoryDataManagerException {
+        this.areaMap.put(areaDescriptor.getArea_id(), areaDescriptor);
+        return areaDescriptor;
+    }
+
+    @Override
+    public AreaDescriptor deleteArea(String areaId) throws IInventoryDataManagerException {
+        return this.areaMap.remove(areaId);
+    }
+
+    @Override
+    public List<GenericDeviceDescriptor> getDeviceList() throws IInventoryDataManagerException {
+        return new ArrayList<>(this.deviceMap.values());
+    }
+
+    @Override
+    public GenericDeviceDescriptor createNewDevice(GenericDeviceDescriptor genericDeviceDescriptor) throws IInventoryDataManagerException, IInventoryDataManagerConflict {
+
+        if(this.getDevice(genericDeviceDescriptor.getDeviceId()).isPresent())
+            throw new IInventoryDataManagerConflict("Device already exists!");
+
+        this.deviceMap.put(genericDeviceDescriptor.getDeviceId(), genericDeviceDescriptor);
+        return genericDeviceDescriptor;
+    }
+
+    @Override
+    public Optional<GenericDeviceDescriptor> getDevice(String device_id) throws IInventoryDataManagerException {
+        return Optional.ofNullable(this.deviceMap.get(device_id));
+    }
+
+    @Override
+    public GenericDeviceDescriptor updateDevice(GenericDeviceDescriptor genericDeviceDescriptor) throws IInventoryDataManagerException {
+        this.deviceMap.put(genericDeviceDescriptor.getDeviceId(), genericDeviceDescriptor);
+        return genericDeviceDescriptor;
+    }
+
+    @Override
+    public GenericDeviceDescriptor deleteDevice(String device_id) throws IInventoryDataManagerException {
+        return this.deviceMap.remove(device_id);
+    }
+
+    @Override
+    public List<ResourceDescriptor> getResourceList() throws IInventoryDataManagerException {
+        return new ArrayList<>(this.resourceDeviceMap.values());
+    }
+
+    @Override
+    public Optional<ResourceDescriptor> getResource(String device_id) throws IInventoryDataManagerException {
+        return Optional.ofNullable(this.resourceDeviceMap.get(device_id));
+    }
+
+    @Override
+    public ResourceDescriptor updateResource(ResourceDescriptor resourceDescriptor) throws IInventoryDataManagerException {
+        this.resourceDeviceMap.put(resourceDescriptor.getResourceId(), resourceDescriptor);
+        return resourceDescriptor;
+    }
+
 
 }

@@ -48,7 +48,7 @@ public class CoapPMResource extends CoapResource {
             getAttributes().setTitle(OBJECT_TITLE);
             getAttributes().setObservable();
             getAttributes().addAttribute("rt", pmRaw.getType());
-            getAttributes().addAttribute("if", CoreInterfaces.CORE_A.getValue());
+            getAttributes().addAttribute("if", CoreInterfaces.CORE_S.getValue());
             getAttributes().addAttribute("ct", Integer.toString(MediaTypeRegistry.APPLICATION_SENML_JSON));
             getAttributes().addAttribute("ct", Integer.toString(MediaTypeRegistry.TEXT_PLAIN));
 

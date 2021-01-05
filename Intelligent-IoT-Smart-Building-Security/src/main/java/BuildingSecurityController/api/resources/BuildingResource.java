@@ -350,7 +350,7 @@ public class BuildingResource {
     @Path("/{floor_id}/area/{area_id}")
     @Timed
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value="Delete a Floor")
+    @ApiOperation(value="Delete a Area")
     public Response deleteFloor(@Context ContainerRequestContext req,
                                 @PathParam("floor_id") String floorId, @PathParam("area_id") String areaId) {
 
@@ -377,30 +377,38 @@ public class BuildingResource {
         }
     }
 
-    @RolesAllowed("USER")
-    @GET
-    @Path("/{floor_id}/area/{area_id}/device")
-    @Timed
-    @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "Get all the Devices of the Area")
-    public Response GetDevices(@Context ContainerRequestContext requestContext,
-                             @PathParam("floor_id") String floorId, @PathParam("area_id") String areaId){
-        try{
-
-            logger.info("Loading all the {} 's Devices in floor {}", areaId, floorId);
-
-            List<String> devList = LookupAndObserveProcess.getDevices(String.format("%s/%s", floorId, areaId));
-
-            if (devList.isEmpty())
-                return Response.status(Response.Status.NOT_FOUND).type(MediaType.APPLICATION_JSON_TYPE).entity(new ErrorMessage(Response.Status.NOT_FOUND.getStatusCode(), "No devices found")).build();
-
-            return Response.ok(devList).build();
-
-        }catch(Exception e){
-            e.printStackTrace();
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).type(MediaType.APPLICATION_JSON_TYPE).entity(new ErrorMessage(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Internal Server Error!")).build();
-        }
-    }
+//    @RolesAllowed("USER")
+//    @GET
+//    @Path("/{floor_id}/area/{area_id}/device")
+//    @Timed
+//    @Produces(MediaType.APPLICATION_JSON)
+//    @ApiOperation(value = "Get all the Areas of the floor")
+//    public Response GetAreas(@Context ContainerRequestContext requestContext,
+//                             @PathParam("floor_id") String floorId){
+//        try{
+//
+//
+//            if(floorId == null)
+//                return Response.status(Response.Status.BAD_REQUEST).type(MediaType.APPLICATION_JSON_TYPE).entity(new ErrorMessage(Response.Status.BAD_REQUEST.getStatusCode(),"Invalid Floor id Provided !")).build();
+//
+//            logger.info("Loading all the Floor {} 's Areas", floorId);
+//
+//            Optional<FloorDescriptor> floorDescriptor = this.conf.getInventoryDataManager().getFloor(floorId);
+//
+//            if(!floorDescriptor.isPresent())
+//                return Response.status(Response.Status.NOT_FOUND).type(MediaType.APPLICATION_JSON_TYPE).entity(new ErrorMessage(Response.Status.NOT_FOUND.getStatusCode(),"Floor Not Found !")).build();
+//
+//
+//            if (floorDescriptor.get().getAreaList().isEmpty())
+//                return Response.status(Response.Status.NOT_FOUND).type(MediaType.APPLICATION_JSON_TYPE).entity(new ErrorMessage(Response.Status.NOT_FOUND.getStatusCode(), "No areas found")).build();
+//
+//            return Response.ok(floorDescriptor.get().getAreaList()).build();
+//
+//        }catch(Exception e){
+//            e.printStackTrace();
+//            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).type(MediaType.APPLICATION_JSON_TYPE).entity(new ErrorMessage(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Internal Server Error!")).build();
+//        }
+//    }
 
 
     @RolesAllowed("USER")

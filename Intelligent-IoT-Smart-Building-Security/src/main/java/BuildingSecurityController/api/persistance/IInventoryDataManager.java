@@ -2,10 +2,7 @@ package BuildingSecurityController.api.persistance;
 
 import BuildingSecurityController.api.exception.IInventoryDataManagerConflict;
 import BuildingSecurityController.api.exception.IInventoryDataManagerException;
-import BuildingSecurityController.api.model.AreaDescriptor;
-import BuildingSecurityController.api.model.FloorDescriptor;
-import BuildingSecurityController.api.model.PolicyDescriptor;
-import BuildingSecurityController.api.model.UserDescriptor;
+import BuildingSecurityController.api.model.*;
 import smartBuilding.server.resource.coap.CoapPirResource;
 
 import java.io.IOException;
@@ -47,14 +44,19 @@ public interface IInventoryDataManager {
     public AreaDescriptor updateArea(AreaDescriptor areaDescriptor) throws IInventoryDataManagerException;
     public AreaDescriptor deleteArea(String areaId) throws IInventoryDataManagerException;
 
-    //PIR Devices management
+    //DEVICES management
 
-    public List<CoapPirResource> getPirList() throws IInventoryDataManagerException;
-    public CoapPirResource createNewPir(CoapPirResource coapPirResource) throws IInventoryDataManagerException, IInventoryDataManagerConflict;
-    public Optional<CoapPirResource> getPir(String device_id) throws IInventoryDataManagerException;
-    public CoapPirResource updatePir(CoapPirResource coapPirResource) throws  IInventoryDataManagerException;
-    public CoapPirResource deletePir(String device_id) throws IInventoryDataManagerException;
+    public List<GenericDeviceDescriptor> getDeviceList() throws IInventoryDataManagerException;
+    public GenericDeviceDescriptor createNewDevice(GenericDeviceDescriptor genericDeviceDescriptor) throws IInventoryDataManagerException, IInventoryDataManagerConflict;
+    public Optional<GenericDeviceDescriptor> getDevice(String device_id) throws IInventoryDataManagerException;
+    public GenericDeviceDescriptor updateDevice(GenericDeviceDescriptor genericDeviceDescriptor) throws  IInventoryDataManagerException;
+    public GenericDeviceDescriptor deleteDevice(String device_id) throws IInventoryDataManagerException;
 
+    //RESOURCE DEVICES management
+
+    public List<ResourceDescriptor> getResourceList() throws IInventoryDataManagerException;
+    public Optional<ResourceDescriptor> getResource(String device_id) throws IInventoryDataManagerException;
+    public ResourceDescriptor updateResource(ResourceDescriptor resourceDescriptor) throws  IInventoryDataManagerException;
 
 
 }
