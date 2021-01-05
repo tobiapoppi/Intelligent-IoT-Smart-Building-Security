@@ -39,19 +39,20 @@ public class SmartBuildingCoapSmartObjectProcess extends CoapServer {
 
   }
 
-    private static CoapResource CreatePresenceMonitoringResource() {
+    private static CoapResource CreatePresenceMonitoringResource() throws InterruptedException {
 
         String deviceId = String.format("%s", UUID.randomUUID().toString());
-        CoapResource PresenceMonitoringResource = new CoapResource("presenceMonitoring");
+        PMRaw pmRaw = new PMRaw();
+        CoapPMResource coapPMResource = new CoapPMResource ("presencemonitoring",deviceId, pmRaw);
         PirRawSensor PMPirRawSensor = new PirRawSensor();
         CameraRawSensor PMCameraRawSensor = new CameraRawSensor();
         CoapPirResource PMcoapPirResource = new CoapPirResource ("pir",deviceId, PMPirRawSensor);
         CoapCameraResource PMcoapCameraRecource = new CoapCameraResource("camera", deviceId,PMCameraRawSensor );
 
-        PresenceMonitoringResource.add(PMcoapPirResource);
-        PresenceMonitoringResource.add(PMcoapCameraRecource);
+        coapPMResource.add(PMcoapPirResource);
+        coapPMResource.add(PMcoapCameraRecource);
 
-        return PresenceMonitoringResource;
+        return coapPMResource;
 
     };
 
