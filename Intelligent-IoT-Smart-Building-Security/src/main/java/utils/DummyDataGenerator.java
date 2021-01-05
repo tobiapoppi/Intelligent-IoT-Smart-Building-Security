@@ -37,8 +37,8 @@ public class DummyDataGenerator {
             pol3.setIs_enabled(true);
             pol3.setArea_id("areaA");
             pol3.setFloor_id("floor1");
-            pol3.setStart_working_time("22:00");
-            pol3.setEnd_working_time("10:00");
+            pol3.setStart_working_time("10:00");
+            pol3.setEnd_working_time("15:00");
             pol3.setPresence_mode(true);
 
             inventoryDataManager.createNewPolicy(pol1);

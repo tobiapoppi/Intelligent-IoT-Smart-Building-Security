@@ -1,4 +1,4 @@
-package SmartBuildingResources.Server.Resource.raw;
+package smartBuilding.server.resource.raw;
 
 public interface ResourceDataListener<T> {
 

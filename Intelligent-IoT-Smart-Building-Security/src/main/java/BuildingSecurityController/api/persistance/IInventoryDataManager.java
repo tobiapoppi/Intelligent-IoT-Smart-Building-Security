@@ -4,7 +4,7 @@ import BuildingSecurityController.api.exception.IInventoryDataManagerConflict;
 import BuildingSecurityController.api.exception.IInventoryDataManagerException;
 import BuildingSecurityController.api.model.PolicyDescriptor;
 import BuildingSecurityController.api.model.UserDescriptor;
-import SmartBuildingResources.Server.Resource.coap.CoapPirResource;
+import smartBuilding.server.resource.coap.CoapPirResource;
 
 import java.io.IOException;
 import java.util.List;

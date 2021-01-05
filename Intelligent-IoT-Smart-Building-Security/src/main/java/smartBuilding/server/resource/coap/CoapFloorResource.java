@@ -1,22 +1,14 @@
-package SmartBuildingResources.Server.Resource.coap;
+package smartBuilding.server.resource.coap;
 
-import SmartBuildingResources.Server.Resource.SmartBuildingCoapSmartObjectProcess;
-import SmartBuildingResources.Server.Resource.raw.AreaResource;
-import SmartBuildingResources.Server.Resource.raw.FloorResource;
-import SmartBuildingResources.Server.Resource.raw.ResourceDataListener;
-import SmartBuildingResources.Server.Resource.raw.SmartObjectResource;
+import smartBuilding.server.resource.SmartBuildingCoapSmartObjectProcess;
+import smartBuilding.server.resource.raw.AreaResource;
+import smartBuilding.server.resource.raw.FloorResource;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.eclipse.californium.core.CoapResource;
-import org.eclipse.californium.core.Utils;
 import org.eclipse.californium.core.coap.CoAP;
 import org.eclipse.californium.core.coap.MediaTypeRegistry;
-import org.eclipse.californium.core.observe.ObserveRelation;
-import org.eclipse.californium.core.observe.ObserveRelationFilter;
 import org.eclipse.californium.core.server.resources.CoapExchange;
-import org.eclipse.californium.core.server.resources.Resource;
-import org.eclipse.californium.core.server.resources.ResourceObserver;
-import org.eclipse.californium.elements.EndpointContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import utils.CoreInterfaces;

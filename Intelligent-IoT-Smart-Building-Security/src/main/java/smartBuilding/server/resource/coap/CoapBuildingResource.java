@@ -1,8 +1,8 @@
-package SmartBuildingResources.Server.Resource.coap;
+package smartBuilding.server.resource.coap;
 
-import SmartBuildingResources.Server.Resource.SmartBuildingCoapSmartObjectProcess;
-import SmartBuildingResources.Server.Resource.raw.BuildingResourceRaw;
-import SmartBuildingResources.Server.Resource.raw.FloorResource;
+import smartBuilding.server.resource.SmartBuildingCoapSmartObjectProcess;
+import smartBuilding.server.resource.raw.BuildingResourceRaw;
+import smartBuilding.server.resource.raw.FloorResource;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.eclipse.californium.core.CoapResource;

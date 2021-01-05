@@ -2,22 +2,18 @@ package BuildingSecurityController.api.client;
 
 import BuildingSecurityController.api.model.PolicyDescriptor;
 import BuildingSecurityController.api.persistance.DefaultInventoryDataManager;
-import SmartBuildingResources.Server.Resource.coap.CoapCameraResource;
-import SmartBuildingResources.Server.Resource.coap.CoapPirResource;
-import com.fasterxml.jackson.core.JsonProcessingException;
+import smartBuilding.server.resource.coap.CoapCameraResource;
+import smartBuilding.server.resource.coap.CoapPirResource;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.eclipse.californium.core.*;
 import org.eclipse.californium.core.coap.CoAP.Code;
 import org.eclipse.californium.core.coap.LinkFormat;
 import org.eclipse.californium.core.coap.MediaTypeRegistry;
-import org.eclipse.californium.core.coap.OptionSet;
 import org.eclipse.californium.core.coap.Request;
 import org.eclipse.californium.elements.exception.ConnectorException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import utils.CoreInterfaces;
 
-import java.io.FileWriter;
 import java.io.IOException;
 import java.util.*;
 
@@ -54,7 +50,6 @@ public class LookupAndObserveProcess implements Runnable{
     private static CoapPirResource newPir = null;
     private static CoapCameraResource newCam = null;
 
-    CoapResourceClient coapResourceClient = new CoapResourceClient();
 
 
     private static ObjectMapper objectMapper = new ObjectMapper();
@@ -258,114 +253,76 @@ public class LookupAndObserveProcess implements Runnable{
         }
     }
 
-    private static void startObservingPir (CoapClient coapClient, String targetUrl) {
 
-        logger.info("OBSERVING ... {}", targetUrl);
-        Request request = Request.newGet().setURI(targetUrl).setObserve();
-        request.setConfirmable(true);
-        CoapObserveRelation relation = coapClient.observe(request, new CoapHandler() {
-            @Override
-            public void onLoad(CoapResponse response) {
-
-                //this is the method asynchronously invoked when an observed resource is sending data;
-
-                String content = response.getResponseText();
-
-                logger.info("Notification -> Resource Target: {} -> Body: {}", targetUrl, content);
-
-                if(content.equals("true")){
-                    //accedo alle policy
-
-                    HashMap<String, PolicyDescriptor> policyMap = DefaultInventoryDataManager.getPolicies();
-
-                    //controllo se tutte le policy rispettano i cambiamenti
-
-                    //prima ottengo area e floor di questo pir
-
-                    String floor = targetUrl.replace("coap://192.168.1.107:5683/buildingPoppiZaniboniInc/", "").split("/")[0];
-                    String area = targetUrl.replace("coap://192.168.1.107:5683/buildingPoppiZaniboniInc/", "").split("/")[1];
+    private static void handleNotification(CoapResponse response, String targetUrl){
+        try{
 
 
-                    logger.info("Sto accedendo alle risorse.");
+            //this is the method asynchronously invoked when an observed resource is sending data;
 
-                    policyMap.values().forEach(policy ->{
-                        if (policy.getFloor_id().equals(floor) && policy.getArea_id().equals(area)){
-                            if(policy.getPresence_mode()){
+            String content = response.getResponseText();
 
-                                int hourStart = Integer.parseInt(policy.getStart_working_time().split(":")[0]);
-                                int minuteStart = Integer.parseInt(policy.getStart_working_time().split(":")[1]);
-                                int hourFin = Integer.parseInt(policy.getEnd_working_time().split(":")[0]);
-                                int minuteFin = Integer.parseInt(policy.getEnd_working_time().split(":")[1]);
+            logger.info("Notification -> Resource Target: {} -> Body: {}", targetUrl, content);
 
-                                int hour = java.time.LocalTime.now().getHour();
-                                int minutes = java.time.LocalTime.now().getMinute();
+            if(content.equals("true")){
+                //accedo alle policy
 
-                                logger.info("Ora faccio i controlli sull'ora" );
+                HashMap<String, PolicyDescriptor> policyMap = DefaultInventoryDataManager.getPolicies();
 
-                                logger.info("{} {}", hour, minutes);
+                //controllo se tutte le policy rispettano i cambiamenti
+
+                //prima ottengo area e floor di questo pir
+
+                String floor = targetUrl.replace("coap://192.168.1.107:5683/buildingPoppiZaniboniInc/", "").split("/")[0];
+                String area = targetUrl.replace("coap://192.168.1.107:5683/buildingPoppiZaniboniInc/", "").split("/")[1];
+
+
+                logger.info("Sto accedendo alle risorse.");
+
+                policyMap.values().forEach(policy ->{
+                    if (policy.getFloor_id().equals(floor) && policy.getArea_id().equals(area)){
+                        if(policy.getPresence_mode()){
+
+                            int hourStart = Integer.parseInt(policy.getStart_working_time().split(":")[0]);
+                            int minuteStart = Integer.parseInt(policy.getStart_working_time().split(":")[1]);
+                            int hourFin = Integer.parseInt(policy.getEnd_working_time().split(":")[0]);
+                            int minuteFin = Integer.parseInt(policy.getEnd_working_time().split(":")[1]);
+
+                            int hour = java.time.LocalTime.now().getHour();
+                            int minutes = java.time.LocalTime.now().getMinute();
+
+                            logger.info("Ora faccio i controlli sull'ora" );
+
+                            logger.info("{} {}", hour, minutes);
 
 
 
-                                if(hour > hourStart || hour < hourFin){
+                            if(hour > hourStart || hour < hourFin){
 
-                                    //I MAKE A PUT REQUEST
+                                //I MAKE A PUT REQUEST
 
-                                    //Initialize coapClient
-                                    CoapClient coapClient = new CoapClient("coap://192.168.1.107:5683/buildingPoppiZaniboniInc/floor1/areaA/alarm");
+                                CoapResourceClient coapResourceClient = new CoapResourceClient();
 
-                                    //Request Class is a generic CoAP message: in this case we want a GET.
-                                    //"Message ID", "Token" and other header's fields can be set
-                                    Request request = new Request(Code.PUT);
-
-                                    //Set PUT request's payload
-                                    String myPayload = "true";
-                                    logger.info("PUT Request Random Payload: {}", myPayload);
-                                    request.setPayload(myPayload);
-
-                                    //Set Request as Confirmable
-                                    request.setConfirmable(true);
-
-                                    logger.info("Request Pretty Print: \n{}", Utils.prettyPrint(request));
-                                    logger.info("richiesta: \n{}", request.getURI());
+                                CoapResponse coapResponse = coapResourceClient.putRequest(String.format("%s/%s/alarm", floor, area), "true");
 
 
-                                    //Synchronously send the POST request (blocking call)
-                                    CoapResponse coapResp = null;
+                                logger.info("ALARM ACTIVATED FOR FLOOR {} AREA {}", floor, area);
 
-                                    try {
-
-                                        coapResp = coapClient.advanced(request);
-
-                                        //Pretty print for the received response
-                                        logger.info("Response Pretty Print: \n{}", Utils.prettyPrint(coapResp));
-
-                                        //The "CoapResponse" message contains the response.
-                                        String text = coapResp.getResponseText();
-                                        logger.info("Payload: {}", text);
-                                        logger.info("Message ID: " + coapResp.advanced().getMID());
-                                        logger.info("Token: " + coapResp.advanced().getTokenString());
-
-                                    } catch (ConnectorException | IOException e) {
-                                        e.printStackTrace();
-                                    }
-
-                                    logger.info("ALARM ACTIVATED FOR FLOOR {} AREA {}", floor, area);
-
-                                }else if(hour == hourStart && minutes > minuteStart){
-                                    //CoapResponse coapResponse = coapResourceClient.putRequest(String.format("%s/%s/alarm", floor, area), "true");
-                                    logger.info("ALARM ACTIVATED FOR FLOOR {} AREA {}", floor, area);
+                            }else if(hour == hourStart && minutes > minuteStart){
+                                //CoapResponse coapResponse = coapResourceClient.putRequest(String.format("%s/%s/alarm", floor, area), "true");
+                                logger.info("ALARM ACTIVATED FOR FLOOR {} AREA {}", floor, area);
 
 
-                                }else if(hour == hourFin && minutes < minuteFin){
-                                    //CoapResponse coapResponse = coapResourceClient.putRequest(String.format("%s/%s/alarm", floor, area), "true");
-                                    logger.info("ALARM ACTIVATED FOR FLOOR {} AREA {}", floor, area);
+                            }else if(hour == hourFin && minutes < minuteFin){
+                                //CoapResponse coapResponse = coapResourceClient.putRequest(String.format("%s/%s/alarm", floor, area), "true");
+                                logger.info("ALARM ACTIVATED FOR FLOOR {} AREA {}", floor, area);
 
-                                }
                             }
                         }
-                    });
+                    }
+                });
 
-                }
+            }
 
 
 
@@ -377,9 +334,32 @@ public class LookupAndObserveProcess implements Runnable{
                 /*IL CONTROLLO VERRA' INVOCATO DA QUI E SARA' SVOLTO DAL "INVENTORY DATA MANAGER" IN QUANTO E'
                 L'UNICO COMPONTE AD AVERE CONTROLLO ED ACCESSO ALLE RISORSE ARCHIVIATE IN MEMORIA RAM.*/
 
-                //TODO
+            //TODO
                 /*DECIDERE SE E' MEGLIO LASCIARE TUTTO SU RAM O SE SCRIVERE SU FILE PER POI ACCEDERE ALL'ARCHIVIO
                 DA ALTRI OGGETTI */
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+
+    }
+
+    private static void startObservingPir (CoapClient coapClient, String targetUrl) {
+
+        logger.info("OBSERVING ... {}", targetUrl);
+        Request request = Request.newGet().setURI(targetUrl).setObserve();
+        request.setConfirmable(true);
+        CoapObserveRelation relation = coapClient.observe(request, new CoapHandler() {
+            @Override
+            public void onLoad(CoapResponse response) {
+
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        handleNotification(response, targetUrl);
+                    }
+                }).start();
+
+
             }
 
             @Override
@@ -397,7 +377,7 @@ public class LookupAndObserveProcess implements Runnable{
         logger.info("OBSERVING ... {}", targetUrl);
         Request request = Request.newGet().setURI(targetUrl).setObserve();
         request.setConfirmable(true);
-        request.setOptions(new OptionSet().setAccept(MediaTypeRegistry.APPLICATION_SENML_JSON));
+        //request.setOptions(new OptionSet().setAccept(MediaTypeRegistry.APPLICATION_SENML_JSON));
         CoapObserveRelation relation = coapClient.observe(request, new CoapHandler() {
             @Override
             public void onLoad(CoapResponse response) {
@@ -435,13 +415,13 @@ public class LookupAndObserveProcess implements Runnable{
 
     }
 
-    private static void startObservingFloor (CoapClient coapClient, String targetUrl) throws IOException {
+    private static void startObservingFloor (CoapClient coapClient, String targetUrl){
 
 
         logger.info("OBSERVING ... {}", targetUrl);
         Request request = Request.newGet().setURI(targetUrl).setObserve();
         request.setConfirmable(true);
-        request.setOptions(new OptionSet().setAccept(MediaTypeRegistry.APPLICATION_SENML_JSON));
+        //request.setOptions(new OptionSet().setAccept(MediaTypeRegistry.APPLICATION_SENML_JSON));
         CoapObserveRelation relation = coapClient.observe(request, new CoapHandler() {
             @Override
             public void onLoad(CoapResponse response) {
@@ -466,7 +446,7 @@ public class LookupAndObserveProcess implements Runnable{
         logger.info("OBSERVING ... {}", targetUrl);
         Request request = Request.newGet().setURI(targetUrl).setObserve();
         request.setConfirmable(true);
-        request.setOptions(new OptionSet().setAccept(MediaTypeRegistry.APPLICATION_SENML_JSON));
+        //request.setOptions(new OptionSet().setAccept(MediaTypeRegistry.APPLICATION_SENML_JSON));
         CoapObserveRelation relation = coapClient.observe(request, new CoapHandler() {
             @Override
             public void onLoad(CoapResponse response) {
@@ -494,7 +474,7 @@ public class LookupAndObserveProcess implements Runnable{
         logger.info("OBSERVING ... {}", targetUrl);
         Request request = Request.newGet().setURI(targetUrl).setObserve();
         request.setConfirmable(true);
-        request.setOptions(new OptionSet().setAccept(MediaTypeRegistry.APPLICATION_SENML_JSON));
+        //request.setOptions(new OptionSet().setAccept(MediaTypeRegistry.APPLICATION_SENML_JSON));
         CoapObserveRelation relation = coapClient.observe(request, new CoapHandler() {
             @Override
             public void onLoad(CoapResponse response) {
@@ -519,7 +499,7 @@ public class LookupAndObserveProcess implements Runnable{
         logger.info("OBSERVING ... {}", targetUrl);
         Request request = Request.newGet().setURI(targetUrl).setObserve();
         request.setConfirmable(true);
-        request.setOptions(new OptionSet().setAccept(MediaTypeRegistry.APPLICATION_SENML_JSON));
+        //request.setOptions(new OptionSet().setAccept(MediaTypeRegistry.APPLICATION_SENML_JSON));
         CoapObserveRelation relation = coapClient.observe(request, new CoapHandler() {
             @Override
             public void onLoad(CoapResponse response) {
@@ -584,42 +564,44 @@ public class LookupAndObserveProcess implements Runnable{
             });
             camTargetObservableList.forEach(targetResourceUrl -> {
                 if (!observingRelationMap.containsKey(targetResourceUrl)){
-                    startObservingPir(coapClient, targetResourceUrl);
+                    startObservingCam(coapClient, targetResourceUrl);
                 }else{
                     if (!observingRelationMap.get(targetResourceUrl).isCanceled())
-                        startObservingPir(coapClient, targetResourceUrl);
+                        startObservingCam(coapClient, targetResourceUrl);
                 }
             });
             floorTargetObservableList.forEach(targetResourceUrl -> {
                 if (!observingRelationMap.containsKey(targetResourceUrl)){
-                    startObservingPir(coapClient, targetResourceUrl);
+                        startObservingFloor(coapClient, targetResourceUrl);
                 }else{
-                    if (!observingRelationMap.get(targetResourceUrl).isCanceled())
-                        startObservingPir(coapClient, targetResourceUrl);
+                    if (!observingRelationMap.get(targetResourceUrl).isCanceled()) {
+                        startObservingFloor(coapClient, targetResourceUrl);
+
+                    }
                 }
             });
             areaTargetObservableList.forEach(targetResourceUrl -> {
                 if (!observingRelationMap.containsKey(targetResourceUrl)){
-                    startObservingPir(coapClient, targetResourceUrl);
+                    startObservingArea(coapClient, targetResourceUrl);
                 }else{
                     if (!observingRelationMap.get(targetResourceUrl).isCanceled())
-                        startObservingPir(coapClient, targetResourceUrl);
+                        startObservingArea(coapClient, targetResourceUrl);
                 }
             });
             lightTargetObservableList.forEach(targetResourceUrl -> {
                 if (!observingRelationMap.containsKey(targetResourceUrl)){
-                    startObservingPir(coapClient, targetResourceUrl);
+                    startObservingLight(coapClient, targetResourceUrl);
                 }else{
                     if (!observingRelationMap.get(targetResourceUrl).isCanceled())
-                        startObservingPir(coapClient, targetResourceUrl);
+                        startObservingLight(coapClient, targetResourceUrl);
                 }
             });
             alarmTargetObservableList.forEach(targetResourceUrl -> {
                 if (!observingRelationMap.containsKey(targetResourceUrl)){
-                    startObservingPir(coapClient, targetResourceUrl);
+                    startObservingAlarm(coapClient, targetResourceUrl);
                 }else{
                     if (!observingRelationMap.get(targetResourceUrl).isCanceled())
-                        startObservingPir(coapClient, targetResourceUrl);
+                        startObservingAlarm(coapClient, targetResourceUrl);
                 }
             });
             logger.info("{}", observingRelationMap);

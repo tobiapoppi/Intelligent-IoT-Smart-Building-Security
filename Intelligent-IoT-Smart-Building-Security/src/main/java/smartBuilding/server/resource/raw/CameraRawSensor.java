@@ -1,4 +1,4 @@
-package SmartBuildingResources.Server.Resource.raw;
+package smartBuilding.server.resource.raw;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

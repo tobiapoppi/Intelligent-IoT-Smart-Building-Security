@@ -1,4 +1,4 @@
-package SmartBuildingResources.Server.Resource;
+package smartBuilding.server.resource;
 
 import SmartBuildingResources.Server.Resource.coap.*;
 import SmartBuildingResources.Server.Resource.raw.*;

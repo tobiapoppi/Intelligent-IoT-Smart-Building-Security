@@ -40,7 +40,12 @@ public class OperatorAppService extends Application<OperatorAppConfig> {
         new OperatorAppService().run(new String[]{"server", args.length > 0 ? args[0] : "configuration.yml"});
 
         Thread newThread = new Thread(() -> {
-            lookupAndObserveProcess.run();
+            try{
+                lookupAndObserveProcess.run();
+            }catch (Exception e){
+                e.printStackTrace();
+            }
+
         });
         newThread.start();
 

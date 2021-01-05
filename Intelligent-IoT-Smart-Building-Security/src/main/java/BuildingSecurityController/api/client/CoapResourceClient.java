@@ -24,7 +24,7 @@ public class CoapResourceClient {
 
     }
 
-    public static CoapResponse getRequest(String uriRequest){
+    public CoapResponse getRequest(String uriRequest){
         CoapClient coapClient = new CoapClient(String.format("%s/%s", SMARTOBJECT_ENDPOINT, uriRequest));
         Request request = new Request(CoAP.Code.GET);
         request.setConfirmable(true);
@@ -67,12 +67,19 @@ public class CoapResourceClient {
         Request request = new Request(CoAP.Code.PUT);
         request.setConfirmable(true);
         request.setPayload(payload);
+        logger.info(String.format("%s/%s", SMARTOBJECT_ENDPOINT, uriRequest));
         logger.info("Request Pretty Print:\n{}", Utils.prettyPrint(request));
 
         CoapResponse coapResponse = null;
         try{
             coapResponse = coapClient.advanced(request);
             logger.info("Response Pretty Print:\n{}", Utils.prettyPrint(coapResponse));
+
+            String text = coapResponse.getResponseText();
+            logger.info("Payload: {}", text);
+            logger.info("Message ID: " + coapResponse.advanced().getMID());
+            logger.info("Token: " + coapResponse.advanced().getTokenString());
+
             return coapResponse;
         } catch (ConnectorException | IOException e) {
             e.printStackTrace();

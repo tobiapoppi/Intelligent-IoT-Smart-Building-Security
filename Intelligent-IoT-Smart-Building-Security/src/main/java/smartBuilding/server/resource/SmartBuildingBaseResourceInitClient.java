@@ -1,8 +1,10 @@
-package SmartBuildingResources.Server.Resource;
+package smartBuilding.server.resource;
 
 import SmartBuildingResources.Server.Resource.coap.*;
 import SmartBuildingResources.Server.Resource.raw.*;
 import org.eclipse.californium.core.CoapResource;
+import smartBuilding.server.resource.coap.*;
+import smartBuilding.server.resource.raw.*;
 
 public class SmartBuildingBaseResourceInitClient {
 
@@ -11,35 +13,38 @@ public class SmartBuildingBaseResourceInitClient {
         BuildingResourceRaw buildingResourceRaw = new BuildingResourceRaw();
         CoapBuildingResource coapBuildingResource = new CoapBuildingResource(String.format("building%s", name), buildingResourceRaw);
 
+        coapBuildingResource.add(createFloorResource("1"));
+
+
 
         return coapBuildingResource;
     }
 
-    public static CoapResource createFloorResource(String deviceId, Integer floorNumber) throws InterruptedException {
+    public static CoapResource createFloorResource(String floorId) throws InterruptedException {
 
         FloorResource floorResource = new FloorResource();
-        CoapFloorResource coapFloorResource = new CoapFloorResource(String.format("floor%s", floorNumber), floorResource);
+        CoapFloorResource coapFloorResource = new CoapFloorResource(String.format("floor%s", floorId), floorResource);
 
         //CoapResource floorResource = new CoapResource(String.format("floor%s", floorNumber));
-        //coapFloorResource.add(createAreaResource(deviceId, "A"));
+        coapFloorResource.add(createAreaResource("A"));
         return coapFloorResource;
     }
 
-    private static CoapResource createAreaResource(String deviceId, String areaId) throws InterruptedException {
+    private static CoapResource createAreaResource(String areaId) throws InterruptedException {
 
         AreaResource areaResource = new AreaResource();
         CoapAreaResource coapAreaResource = new CoapAreaResource(String.format("area%s", areaId), areaResource);
 
-        LightActuator pmlightactuator = new LightActuator();
-        CoapLightResource PMLightResource = new CoapLightResource("light", deviceId, pmlightactuator);
+//        LightActuator pmlightactuator = new LightActuator();
+//        CoapLightResource PMLightResource = new CoapLightResource("light", deviceId, pmlightactuator);
+//
+//        AlarmActuator pmalarmactuator = new AlarmActuator();
+//        CoapAlarmResource PMalarmResource = new CoapAlarmResource("alarm", deviceId, pmalarmactuator);
 
-        AlarmActuator pmalarmactuator = new AlarmActuator();
-        CoapAlarmResource PMalarmResource = new CoapAlarmResource("alarm", deviceId, pmalarmactuator);
 
-
-        coapAreaResource.add(CreatePresenceMonitoringResource(deviceId));
-        coapAreaResource.add(PMLightResource);
-        coapAreaResource.add(PMalarmResource);
+//        coapAreaResource.add(CreatePresenceMonitoringResource(deviceId));
+//        coapAreaResource.add(PMLightResource);
+//        coapAreaResource.add(PMalarmResource);
 
         return coapAreaResource;
 
