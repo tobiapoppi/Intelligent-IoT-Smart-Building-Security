@@ -1,7 +1,7 @@
 package smartBuilding.server.resource;
 
-import SmartBuildingResources.Server.Resource.coap.*;
-import SmartBuildingResources.Server.Resource.raw.*;
+import smartBuilding.server.resource.coap.*;
+import smartBuilding.server.resource.raw.*;
 import org.eclipse.californium.core.CoapResource;
 import smartBuilding.server.resource.coap.*;
 import smartBuilding.server.resource.raw.*;

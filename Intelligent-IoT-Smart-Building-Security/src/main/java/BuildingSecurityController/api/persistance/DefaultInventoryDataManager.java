@@ -4,6 +4,7 @@ package BuildingSecurityController.api.persistance;
 import BuildingSecurityController.api.auth.ExampleAuthenticator;
 import BuildingSecurityController.api.exception.IInventoryDataManagerConflict;
 import BuildingSecurityController.api.exception.IInventoryDataManagerException;
+import BuildingSecurityController.api.model.FloorDescriptor;
 import BuildingSecurityController.api.model.PolicyDescriptor;
 import BuildingSecurityController.api.model.UserDescriptor;
 import smartBuilding.server.resource.coap.CoapCameraResource;
@@ -24,6 +25,7 @@ public class DefaultInventoryDataManager implements IInventoryDataManager {
     private HashMap<String, UserDescriptor> userMap;
     private HashMap<String, CoapPirResource> pirMap;
     private HashMap<String, CoapCameraResource> camMap;
+    private HashMap<String, FloorDescriptor> floorMap;
 
 
     public static HashMap<String, PolicyDescriptor> getPolicies(){
@@ -168,6 +170,41 @@ public class DefaultInventoryDataManager implements IInventoryDataManager {
     public CoapPirResource deletePir(String device_id) throws IInventoryDataManagerException {
         return null;
     }
+
+
+    @Override
+    public List<FloorDescriptor> getFloorList() throws IInventoryDataManagerException{
+        return new ArrayList<>(this.floorMap.values());
+    }
+
+    @Override
+    public FloorDescriptor createNewFloor(FloorDescriptor floorDescriptor) throws IInventoryDataManagerException, IInventoryDataManagerConflict {
+        if(this.getFloor(floorDescriptor.getFloor_id()).isPresent())
+            throw new IInventoryDataManagerConflict("Floor already exists!");
+
+        floorDescriptor.setFloor_id(UUID.randomUUID().toString());
+
+        this.floorMap.put(floorDescriptor.getFloor_id(), floorDescriptor);
+        return floorDescriptor;
+    }
+
+
+    @Override
+    public Optional<FloorDescriptor> getFloor(String floorId) throws IInventoryDataManagerException {
+        return Optional.ofNullable(this.floorMap.get(floorId));
+    }
+
+    @Override
+    public FloorDescriptor updateFloor(FloorDescriptor floorDescriptor) throws IInventoryDataManagerException {
+        this.floorMap.put(floorDescriptor.getFloor_id(), floorDescriptor);
+        return floorDescriptor;
+    }
+
+    @Override
+    public FloorDescriptor deleteFloor(String floorId) throws IInventoryDataManagerException {
+        return this.floorMap.remove(floorId);
+    }
+
 
     //TODO
     //TODO

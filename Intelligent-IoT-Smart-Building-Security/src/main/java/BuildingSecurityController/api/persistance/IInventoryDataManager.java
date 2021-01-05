@@ -2,6 +2,8 @@ package BuildingSecurityController.api.persistance;
 
 import BuildingSecurityController.api.exception.IInventoryDataManagerConflict;
 import BuildingSecurityController.api.exception.IInventoryDataManagerException;
+import BuildingSecurityController.api.model.AreaDescriptor;
+import BuildingSecurityController.api.model.FloorDescriptor;
 import BuildingSecurityController.api.model.PolicyDescriptor;
 import BuildingSecurityController.api.model.UserDescriptor;
 import smartBuilding.server.resource.coap.CoapPirResource;
@@ -29,7 +31,21 @@ public interface IInventoryDataManager {
     public UserDescriptor updateUser(UserDescriptor userDescriptor) throws IInventoryDataManagerException;
     public UserDescriptor deleteUser(String username) throws IInventoryDataManagerException;
 
+    //BUILDING MANAGEMENT
 
+    public List<FloorDescriptor> getFloorList() throws IInventoryDataManagerException;
+    public FloorDescriptor createNewFloor(FloorDescriptor floorDescriptor) throws IInventoryDataManagerException, IInventoryDataManagerConflict;
+    public Optional<FloorDescriptor> getFloor(String floorId) throws IInventoryDataManagerException;
+    public FloorDescriptor updateFloor(FloorDescriptor floorDescriptor) throws IInventoryDataManagerException;
+    public FloorDescriptor deleteFloor(String floorId) throws IInventoryDataManagerException;
+
+    //AREA MANAGEMENT
+
+    public List<AreaDescriptor> getAreaList() throws IInventoryDataManagerException;
+    public AreaDescriptor createNewArea(AreaDescriptor areaDescriptor) throws IInventoryDataManagerException, IInventoryDataManagerConflict;
+    public Optional<AreaDescriptor> getArea(String areaId) throws IInventoryDataManagerException;
+    public AreaDescriptor updateArea(AreaDescriptor areaDescriptor) throws IInventoryDataManagerException;
+    public AreaDescriptor deleteArea(String areaId) throws IInventoryDataManagerException;
 
     //PIR Devices management
 
