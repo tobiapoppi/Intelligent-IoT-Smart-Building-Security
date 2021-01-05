@@ -37,10 +37,11 @@ public class  CoapPirResource extends CoapResource {
 
 
     public CoapPirResource(String name, String deviceId, PirRawSensor pirRawSensor) {
-        super(name);
+        super(String.format("%s:%s", deviceId,name));
 
         if (pirRawSensor != null && deviceId != null)
         {
+
             this.deviceId = deviceId;
             this.pirRawSensor = pirRawSensor;
             this.objectMapper=new ObjectMapper();
@@ -81,7 +82,7 @@ public class  CoapPirResource extends CoapResource {
             SenMLPack senMLPack = new SenMLPack();
 
             SenMLRecord senMLRecordValue = new SenMLRecord();
-            senMLRecordValue.setBn(String.format("%s:%s", this.deviceId, this.getName()));
+            senMLRecordValue.setBn(String.format("%s:%s", this.deviceId, "pir"));
             senMLRecordValue.setBver(SENSOR_VERSION);
             senMLRecordValue.setU(UNIT);
             senMLRecordValue.setVb(value);
@@ -136,7 +137,7 @@ public class  CoapPirResource extends CoapResource {
             }
         });
 
-        CoapPirResource coapPirResource = new CoapPirResource("pir", "idcazzodiboia", rawResource);
+        CoapPirResource coapPirResource = new CoapPirResource ("idcazzodiboia","9090", rawResource);
 
         logger.info("New {} Resource Created with Id: {} ! {} New Value: {}",
                 rawResource.getType(),

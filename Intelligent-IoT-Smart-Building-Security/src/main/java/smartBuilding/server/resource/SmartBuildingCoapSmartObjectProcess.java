@@ -1,7 +1,7 @@
 package smartBuilding.server.resource;
 
-import SmartBuildingResources.Server.Resource.coap.*;
-import SmartBuildingResources.Server.Resource.raw.*;
+import smartBuilding.server.resource.coap.*;
+import smartBuilding.server.resource.raw.*;
 import org.eclipse.californium.core.*;
 import org.eclipse.californium.core.coap.CoAP;
 import org.eclipse.californium.core.coap.LinkFormat;
@@ -27,11 +27,48 @@ public class SmartBuildingCoapSmartObjectProcess extends CoapServer {
     public SmartBuildingCoapSmartObjectProcess() throws InterruptedException {
 
         super();
-        String deviceId = String.format("%s", UUID.randomUUID().toString());
 
-        this.add(SmartBuildingBaseResourceInitClient.createBuildingResource("PoppiZaniboniInc"));
+
+        this.add(CreatePresenceMonitoringResource());
+        this.add(CreateAlarmResource());
+        this.add(CreateAlarmResource());
+        this.add(CreateLightResource());
+        this.add(CreateLightResource());
+
+
 
   }
+
+    private static CoapResource CreatePresenceMonitoringResource() {
+
+        String deviceId = String.format("%s", UUID.randomUUID().toString());
+        CoapResource PresenceMonitoringResource = new CoapResource("presenceMonitoring");
+        PirRawSensor PMPirRawSensor = new PirRawSensor();
+        CameraRawSensor PMCameraRawSensor = new CameraRawSensor();
+        CoapPirResource PMcoapPirResource = new CoapPirResource ("pir",deviceId, PMPirRawSensor);
+        CoapCameraResource PMcoapCameraRecource = new CoapCameraResource("camera", deviceId,PMCameraRawSensor );
+
+        PresenceMonitoringResource.add(PMcoapPirResource);
+        PresenceMonitoringResource.add(PMcoapCameraRecource);
+
+        return PresenceMonitoringResource;
+
+    };
+
+    private static CoapResource CreateAlarmResource () throws InterruptedException {
+        String deviceId = String.format("%s", UUID.randomUUID().toString());
+        AlarmActuator alarmRawSensor = new AlarmActuator();
+        CoapAlarmResource coapAlarmResource = new CoapAlarmResource ("alarm",deviceId, alarmRawSensor);
+        return coapAlarmResource;
+
+    };
+    private static CoapResource CreateLightResource () throws InterruptedException {
+        String deviceId = String.format("%s", UUID.randomUUID().toString());
+        LightActuator lightRawSensor = new LightActuator();
+        CoapLightResource coapLightResource = new CoapLightResource ("light",deviceId, lightRawSensor);
+        return coapLightResource;
+
+    };
 
 
 
