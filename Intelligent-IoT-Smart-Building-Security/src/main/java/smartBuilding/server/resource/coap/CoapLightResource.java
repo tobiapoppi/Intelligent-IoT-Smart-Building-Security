@@ -34,8 +34,8 @@ public class CoapLightResource extends CoapResource {
     private ObjectMapper objectMapper;
 
 
-    public CoapLightResource(String name, String deviceId, LightActuator lightActuator) {
-        super(name);
+    public CoapLightResource(String name,String deviceId, LightActuator lightActuator) {
+        super(String.format("%s:%s", deviceId, name));
 
 
 
@@ -79,7 +79,7 @@ public class CoapLightResource extends CoapResource {
             SenMLPack senMLPack = new SenMLPack();
 
             SenMLRecord senMLRecord = new SenMLRecord();
-            senMLRecord.setBn(String.format("%s:%s", this.deviceId, this.getName()));
+            senMLRecord.setBn(String.format("%s:%s", this.deviceId, "light"));
             senMLRecord.setBver(ACTUATOR_VERSION);
             senMLRecord.setVb(Is_Active);
             senMLRecord.setT(System.currentTimeMillis());

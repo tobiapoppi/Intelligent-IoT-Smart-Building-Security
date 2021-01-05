@@ -21,7 +21,7 @@ public class CoapAlarmResource extends CoapResource {
 
     private final static Logger logger = LoggerFactory.getLogger(CoapAlarmResource.class);
 
-    private final static String OBJECT_TITLE = "Light Actuator";
+    private final static String OBJECT_TITLE = "Alarm Actuator";
 
     private Double ACTUATOR_VERSION = 0.5;
 
@@ -34,7 +34,7 @@ public class CoapAlarmResource extends CoapResource {
 
 
     public CoapAlarmResource(String name, String deviceId, AlarmActuator alarmActuator) throws InterruptedException {
-        super(name);
+        super(String.format("%s:%s", deviceId,name));
 
         if (alarmActuator != null && deviceId != null)
         {
@@ -77,7 +77,7 @@ public class CoapAlarmResource extends CoapResource {
             SenMLPack senMLPack = new SenMLPack();
 
             SenMLRecord senMLRecord = new SenMLRecord();
-            senMLRecord.setBn(String.format("%s:%s", this.deviceId, this.getName()));
+            senMLRecord.setBn(String.format("%s:%s", this.deviceId, "alarm"));
             senMLRecord.setBver(ACTUATOR_VERSION);
             senMLRecord.setVb(isActive);
             senMLRecord.setT(System.currentTimeMillis());

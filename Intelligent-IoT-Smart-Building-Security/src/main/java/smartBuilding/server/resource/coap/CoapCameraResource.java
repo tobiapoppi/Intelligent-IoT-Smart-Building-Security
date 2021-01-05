@@ -37,7 +37,7 @@ public class CoapCameraResource extends CoapResource {
 
 
     public CoapCameraResource(String name, String deviceId, CameraRawSensor cameraRawSensor) {
-        super(name);
+        super(String.format("%s:%s", deviceId,name));
 
         if (cameraRawSensor != null && deviceId != null)
         {
@@ -78,7 +78,7 @@ public class CoapCameraResource extends CoapResource {
             SenMLPack senMLPack = new SenMLPack();
 
             SenMLRecord senMLRecord = new SenMLRecord();
-            senMLRecord.setBn(String.format("%s:%s", this.deviceId, this.getName()));
+            senMLRecord.setBn(String.format("%s:%s", this.deviceId,"camera"));
             senMLRecord.setBver(SENSOR_VERSION);
             senMLRecord.setU(UNIT);
             senMLRecord.setV(value);
