@@ -22,7 +22,7 @@ public class CoapLightResource extends CoapResource {
 
     private final static Logger logger = LoggerFactory.getLogger(CoapLightResource.class);
 
-    private final static String OBJECT_TITLE =" Light Actuator";
+    private final static String OBJECT_TITLE = "Light Actuator";
 
     private Double ACTUATOR_VERSION = 0.5;
 
@@ -34,7 +34,7 @@ public class CoapLightResource extends CoapResource {
     private ObjectMapper objectMapper;
 
 
-    public CoapLightResource(String name,String deviceId, LightActuator lightActuator) {
+    public CoapLightResource(String name, String deviceId, LightActuator lightActuator) {
         super(String.format("%s:%s", deviceId, name));
 
 

@@ -42,11 +42,10 @@ public class CoapPMResource extends CoapResource {
             this.objectMapper=new ObjectMapper();
             this.objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
 
-            setObservable(true);
+            setObservable(false);
             setObserveType(CoAP.Type.CON);
 
             getAttributes().setTitle(OBJECT_TITLE);
-            getAttributes().setObservable();
             getAttributes().addAttribute("rt", pmRaw.getType());
             getAttributes().addAttribute("if", CoreInterfaces.CORE_S.getValue());
             getAttributes().addAttribute("ct", Integer.toString(MediaTypeRegistry.APPLICATION_SENML_JSON));

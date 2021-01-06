@@ -29,29 +29,23 @@ public class SmartBuildingCoapSmartObjectProcess extends CoapServer {
 
         super();
 
-        createRoot();
-
-
-
-        add(CreatePresenceMonitoringResource());
-        add(CreateAlarmResource());
-        add(CreateAlarmResource());
-        add(CreateLightResource());
-        add(CreateLightResource());
-
-
+        this.add(createPresenceMonitoringResource());
+        this.add(createAlarmResource());
+        this.add(createLightResource());
 
   }
 
-    private static CoapResource CreatePresenceMonitoringResource() throws InterruptedException {
+
+    private static CoapResource createPresenceMonitoringResource() throws InterruptedException {
 
         String deviceId = String.format("%s", UUID.randomUUID().toString());
+
         PMRaw pmRaw = new PMRaw();
-        CoapPMResource coapPMResource = new CoapPMResource ("presencemonitoring",deviceId, pmRaw);
+        CoapPMResource coapPMResource = new CoapPMResource ("presencemonitoring","0001", pmRaw);
         PirRawSensor PMPirRawSensor = new PirRawSensor();
         CameraRawSensor PMCameraRawSensor = new CameraRawSensor();
-        CoapPirResource PMcoapPirResource = new CoapPirResource ("pir",deviceId, PMPirRawSensor);
-        CoapCameraResource PMcoapCameraRecource = new CoapCameraResource("camera", deviceId,PMCameraRawSensor );
+        CoapPirResource PMcoapPirResource = new CoapPirResource ("pir","0001", PMPirRawSensor);
+        CoapCameraResource PMcoapCameraRecource = new CoapCameraResource("camera", "0001",PMCameraRawSensor );
 
         coapPMResource.add(PMcoapPirResource);
         coapPMResource.add(PMcoapCameraRecource);
@@ -60,35 +54,35 @@ public class SmartBuildingCoapSmartObjectProcess extends CoapServer {
 
     };
 
-    private static CoapResource CreateAlarmResource () throws InterruptedException {
+    private static CoapResource createAlarmResource () throws InterruptedException {
         String deviceId = String.format("%s", UUID.randomUUID().toString());
         AlarmActuator alarmRawSensor = new AlarmActuator();
-        CoapAlarmResource coapAlarmResource = new CoapAlarmResource ("alarm",deviceId, alarmRawSensor);
+        CoapAlarmResource coapAlarmResource = new CoapAlarmResource ("alarm","0004", alarmRawSensor);
         return coapAlarmResource;
 
     };
-    private static CoapResource CreateLightResource () throws InterruptedException {
+    private static CoapResource createLightResource () throws InterruptedException {
         String deviceId = String.format("%s", UUID.randomUUID().toString());
         LightActuator lightRawSensor = new LightActuator();
-        CoapLightResource coapLightResource = new CoapLightResource ("light",deviceId, lightRawSensor);
+        CoapLightResource coapLightResource = new CoapLightResource ("light","0005", lightRawSensor);
         return coapLightResource;
 
     };
 
 
 
-    public static void registerToCoapResourceDirectory(Resource rootResource, String endpointName, String sourceIp, int sourcePort){
+    public void registerToCoapResourceDirectory(SmartBuildingCoapSmartObjectProcess smartBuildingCoapSmartObjectProcess, String endpointName, String sourceIp, int sourcePort){
 
         String finalRdUrl = String.format("%s?ep=%s&base=coap://%s:%d", RD_COAP_ENDPOINT_BASE_URL, endpointName, sourceIp, sourcePort);
 
         logger.info("Registering to Resource Directory: {}", finalRdUrl);
 
-        logger.info("{}", LinkFormat.serializeTree(rootResource));
+        logger.info("{}", (smartBuildingCoapSmartObjectProcess.getRoot()).toString());
 
         CoapClient coapClient = new CoapClient(finalRdUrl);
         Request request = new Request(CoAP.Code.POST);
 
-        request.setPayload(LinkFormat.serializeTree(rootResource));
+        request.setPayload(LinkFormat.serializeTree(smartBuildingCoapSmartObjectProcess.getRoot()));
         request.setConfirmable(true);
 
         logger.info("Request Pretty Print:\n{}", Utils.prettyPrint(request));
@@ -141,10 +135,11 @@ public class SmartBuildingCoapSmartObjectProcess extends CoapServer {
 
             logger.info("Root è: {}", smartBuildingCoapSmartObjectProcess.getRoot().toString());
 
-            registerToCoapResourceDirectory(smartBuildingCoapSmartObjectProcess.getRoot(),
+            smartBuildingCoapSmartObjectProcess.registerToCoapResourceDirectory(smartBuildingCoapSmartObjectProcess,
                     "CoapEndpointSmartObject", TARGET_LISTENING_IP, TARGET_PORT);
             Thread.sleep(50000);
         }
+
 
     }
 

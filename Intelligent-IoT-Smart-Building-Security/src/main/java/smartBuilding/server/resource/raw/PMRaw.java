@@ -18,6 +18,9 @@ public class PMRaw extends SmartObjectResource<Integer>{
     private static final String RESOURCE_TYPE = "iot.sensor.presencemonitoring";
 
 
+    public PMRaw() {
+        super(UUID.randomUUID().toString(), RESOURCE_TYPE);
+    }
 
     private void init(){
 
