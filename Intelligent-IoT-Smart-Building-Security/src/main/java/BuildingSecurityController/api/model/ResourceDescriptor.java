@@ -2,6 +2,7 @@ package BuildingSecurityController.api.model;
 
 public class ResourceDescriptor {
 
+    private String resourceId;
     private String deviceId;
     private String manufacturer;
     private String type;
@@ -9,19 +10,26 @@ public class ResourceDescriptor {
 
     public ResourceDescriptor(){}
 
-    public ResourceDescriptor(String resourceId, String manufacturer, String type, String coreInterface) {
-        this.deviceId = resourceId;
+    public ResourceDescriptor(String resourceId, String deviceId, String manufacturer, String type, String coreInterface) {
+        this.deviceId = deviceId;
         this.manufacturer = manufacturer;
         this.type = type;
         this.coreInterface = coreInterface;
+        this.resourceId = resourceId;
     }
 
     public String getResourceId() {
-        return deviceId;
+        return resourceId;
     }
 
     public void setResourceId(String resourceId) {
-        this.deviceId = resourceId;
+        this.resourceId = resourceId;
+    }
+    public String getDeviceId(){
+        return deviceId;
+    }
+    public void setDeviceId(String deviceId){
+        this.deviceId = deviceId;
     }
 
     public String getManufacturer() {

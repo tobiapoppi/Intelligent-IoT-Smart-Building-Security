@@ -1,5 +1,6 @@
 package smartBuilding.server.resource;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import smartBuilding.server.resource.coap.*;
 import smartBuilding.server.resource.raw.*;
 import org.eclipse.californium.core.*;
@@ -28,12 +29,15 @@ public class SmartBuildingCoapSmartObjectProcess extends CoapServer {
 
         super();
 
+        createRoot();
 
-        this.add(CreatePresenceMonitoringResource());
-        this.add(CreateAlarmResource());
-        this.add(CreateAlarmResource());
-        this.add(CreateLightResource());
-        this.add(CreateLightResource());
+
+
+        add(CreatePresenceMonitoringResource());
+        add(CreateAlarmResource());
+        add(CreateAlarmResource());
+        add(CreateLightResource());
+        add(CreateLightResource());
 
 
 
@@ -78,6 +82,8 @@ public class SmartBuildingCoapSmartObjectProcess extends CoapServer {
         String finalRdUrl = String.format("%s?ep=%s&base=coap://%s:%d", RD_COAP_ENDPOINT_BASE_URL, endpointName, sourceIp, sourcePort);
 
         logger.info("Registering to Resource Directory: {}", finalRdUrl);
+
+        logger.info("{}", LinkFormat.serializeTree(rootResource));
 
         CoapClient coapClient = new CoapClient(finalRdUrl);
         Request request = new Request(CoAP.Code.POST);
@@ -130,14 +136,15 @@ public class SmartBuildingCoapSmartObjectProcess extends CoapServer {
                 });
             }
         });
+
         while(true){
+
+            logger.info("Root è: {}", smartBuildingCoapSmartObjectProcess.getRoot().toString());
+
             registerToCoapResourceDirectory(smartBuildingCoapSmartObjectProcess.getRoot(),
                     "CoapEndpointSmartObject", TARGET_LISTENING_IP, TARGET_PORT);
             Thread.sleep(50000);
         }
-
-
-
 
     }
 

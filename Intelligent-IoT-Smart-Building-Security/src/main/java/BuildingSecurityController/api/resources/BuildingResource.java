@@ -4,9 +4,7 @@ import BuildingSecurityController.api.client.CoapResourceClient;
 import BuildingSecurityController.api.client.LookupAndObserveProcess;
 import BuildingSecurityController.api.data_transfer_object.*;
 import BuildingSecurityController.api.exception.IInventoryDataManagerConflict;
-import BuildingSecurityController.api.model.AreaDescriptor;
-import BuildingSecurityController.api.model.FloorDescriptor;
-import BuildingSecurityController.api.model.PolicyDescriptor;
+import BuildingSecurityController.api.model.*;
 import BuildingSecurityController.api.services.OperatorAppConfig;
 import com.codahale.metrics.annotation.Timed;
 import io.dropwizard.jersey.errors.ErrorMessage;
@@ -146,7 +144,7 @@ public class BuildingResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     @ApiOperation(value="Update an existing Floor")
-    public Response updateLocation(@Context ContainerRequestContext req,
+    public Response updateFloor(@Context ContainerRequestContext req,
                                    @Context UriInfo uriInfo,
                                    @PathParam("floor_id") String floorId,
                                    FloorUpdateRequest floorUpdateRequest) {
@@ -283,7 +281,7 @@ public class BuildingResource {
     @Timed
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value="Get an Area's infos")
-    public Response getFloor(@Context ContainerRequestContext requestContext,
+    public Response getArea(@Context ContainerRequestContext requestContext,
                              @PathParam("floor_id") String floorId, @PathParam("area_id") String areaId) {
 
         try {
@@ -296,7 +294,7 @@ public class BuildingResource {
 
             Optional<AreaDescriptor> areaDescriptor = this.conf.getInventoryDataManager().getArea(areaId);
 
-            if(!areaDescriptor.isPresent()){
+            if(!areaDescriptor.isPresent() || !areaDescriptor.get().getFloorId().equals(floorId)){
                 return Response.status(Response.Status.NOT_FOUND).type(MediaType.APPLICATION_JSON_TYPE).entity(new ErrorMessage(Response.Status.NOT_FOUND.getStatusCode(),"Floor Not Found !")).build();
 
             }
@@ -318,7 +316,7 @@ public class BuildingResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     @ApiOperation(value="Update an existing Area")
-    public Response updateLocation(@Context ContainerRequestContext req,
+    public Response updateArea(@Context ContainerRequestContext req,
                                    @Context UriInfo uriInfo,
                                    @PathParam("floor_id") String floorId, @PathParam("area_id") String areaId,
                                    AreaUpdateRequest areaUpdateRequest) {
@@ -351,7 +349,7 @@ public class BuildingResource {
     @Timed
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value="Delete a Area")
-    public Response deleteFloor(@Context ContainerRequestContext req,
+    public Response deleteArea(@Context ContainerRequestContext req,
                                 @PathParam("floor_id") String floorId, @PathParam("area_id") String areaId) {
 
         try {
@@ -377,38 +375,39 @@ public class BuildingResource {
         }
     }
 
-//    @RolesAllowed("USER")
-//    @GET
-//    @Path("/{floor_id}/area/{area_id}/device")
-//    @Timed
-//    @Produces(MediaType.APPLICATION_JSON)
-//    @ApiOperation(value = "Get all the Areas of the floor")
-//    public Response GetAreas(@Context ContainerRequestContext requestContext,
-//                             @PathParam("floor_id") String floorId){
-//        try{
-//
-//
-//            if(floorId == null)
-//                return Response.status(Response.Status.BAD_REQUEST).type(MediaType.APPLICATION_JSON_TYPE).entity(new ErrorMessage(Response.Status.BAD_REQUEST.getStatusCode(),"Invalid Floor id Provided !")).build();
-//
-//            logger.info("Loading all the Floor {} 's Areas", floorId);
-//
-//            Optional<FloorDescriptor> floorDescriptor = this.conf.getInventoryDataManager().getFloor(floorId);
-//
-//            if(!floorDescriptor.isPresent())
-//                return Response.status(Response.Status.NOT_FOUND).type(MediaType.APPLICATION_JSON_TYPE).entity(new ErrorMessage(Response.Status.NOT_FOUND.getStatusCode(),"Floor Not Found !")).build();
-//
-//
-//            if (floorDescriptor.get().getAreaList().isEmpty())
-//                return Response.status(Response.Status.NOT_FOUND).type(MediaType.APPLICATION_JSON_TYPE).entity(new ErrorMessage(Response.Status.NOT_FOUND.getStatusCode(), "No areas found")).build();
-//
-//            return Response.ok(floorDescriptor.get().getAreaList()).build();
-//
-//        }catch(Exception e){
-//            e.printStackTrace();
-//            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).type(MediaType.APPLICATION_JSON_TYPE).entity(new ErrorMessage(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Internal Server Error!")).build();
-//        }
-//    }
+    //DEVICE MANAGEMENT
+
+    @RolesAllowed("USER")
+    @GET
+    @Path("/{floor_id}/area/{area_id}/device")
+    @Timed
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "Get all the Devices of the area")
+    public Response GetDevices(@Context ContainerRequestContext requestContext,
+                             @PathParam("floor_id") String floorId, @PathParam("area_id") String areaId){
+        try{
+
+            if(floorId == null || areaId == null)
+                return Response.status(Response.Status.BAD_REQUEST).type(MediaType.APPLICATION_JSON_TYPE).entity(new ErrorMessage(Response.Status.BAD_REQUEST.getStatusCode(),"Invalid FloorId or AreaId Provided !")).build();
+
+            logger.info("Loading all the Area {} 's Devices in the floor {}", areaId, floorId);
+
+            Optional<AreaDescriptor> areaDescriptor = this.conf.getInventoryDataManager().getArea(areaId);
+
+            if(!areaDescriptor.isPresent() || !areaDescriptor.get().getFloorId().equals(floorId))
+                return Response.status(Response.Status.NOT_FOUND).type(MediaType.APPLICATION_JSON_TYPE).entity(new ErrorMessage(Response.Status.NOT_FOUND.getStatusCode(),"Device Not Found !")).build();
+
+
+            if (areaDescriptor.get().getDeviceIdList().isEmpty())
+                return Response.status(Response.Status.NOT_FOUND).type(MediaType.APPLICATION_JSON_TYPE).entity(new ErrorMessage(Response.Status.NOT_FOUND.getStatusCode(), "No Devices found")).build();
+
+            return Response.ok(areaDescriptor.get().getDeviceIdList()).build();
+
+        }catch(Exception e){
+            e.printStackTrace();
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).type(MediaType.APPLICATION_JSON_TYPE).entity(new ErrorMessage(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Internal Server Error!")).build();
+        }
+    }
 
 
     @RolesAllowed("USER")
@@ -423,21 +422,19 @@ public class BuildingResource {
         try {
 
             //Check the request
-            if(floorId == null)
-                return Response.status(Response.Status.BAD_REQUEST).type(MediaType.APPLICATION_JSON_TYPE).entity(new ErrorMessage(Response.Status.BAD_REQUEST.getStatusCode(),"Invalid Floor id Provided !")).build();
+            if(floorId == null || areaId == null || deviceId == null)
+                return Response.status(Response.Status.BAD_REQUEST).type(MediaType.APPLICATION_JSON_TYPE).entity(new ErrorMessage(Response.Status.BAD_REQUEST.getStatusCode(),"Invalid Floorid or AreaId or DeviceId Provided !")).build();
 
             logger.info("Loading infos for device: {}, in Area {}, in floor {}", deviceId, areaId, floorId);
 
-            CoapResponse response = coapResourceClient.getRequest(String.format("%s/%s/%s", floorId, areaId, deviceId));
-            logger.info("Response Pretty Print:\n{}", Utils.prettyPrint(response));
-            String text = response.getResponseText();
-            logger.info("Payload: {}", text);
+            Optional<GenericDeviceDescriptor> genericDeviceDescriptor = this.conf.getInventoryDataManager().getDevice(deviceId);
 
-            if(text == null){
-                return Response.status(Response.Status.NOT_FOUND).type(MediaType.APPLICATION_JSON_TYPE).entity(new ErrorMessage(Response.Status.NOT_FOUND.getStatusCode(), "Device not found")).build();
-            }
+            //check if the device is present and if it is inside the correct area and the area is inside the correct floor
+            if(!genericDeviceDescriptor.isPresent() || !genericDeviceDescriptor.get().getAreaId().equals(areaId) || !this.conf.getInventoryDataManager().getArea(genericDeviceDescriptor.get().getAreaId()).get().getFloorId().equals(floorId))
+                return Response.status(Response.Status.NOT_FOUND).type(MediaType.APPLICATION_JSON_TYPE).entity(new ErrorMessage(Response.Status.NOT_FOUND.getStatusCode(),"Device Not Found !")).build();
 
-            return Response.ok(text).build();
+            return Response.ok(genericDeviceDescriptor.get()).build();
+
 
         } catch (Exception e){
             e.printStackTrace();
@@ -445,42 +442,75 @@ public class BuildingResource {
         }
     }
 
-//
-//    @RolesAllowed("USER")
-//    @DELETE
-//    @Path("/{floor_id}/area/{area_id}")
-//    @Timed
-//    @Produces(MediaType.APPLICATION_JSON)
-//    @ApiOperation(value="Delete an Area and all her devices")
-//    public Response deleteArea(@Context ContainerRequestContext req,
-//                               @PathParam("floor_id") String floorId, @PathParam("area_id") String areaId) {
-//
-//        try {
-//
-//            logger.info("Deleting Area: {}", areaId);
-//
-//            //Check the request
-//            if(areaId == null)
-//                return Response.status(Response.Status.BAD_REQUEST).type(MediaType.APPLICATION_JSON_TYPE).entity(new ErrorMessage(Response.Status.BAD_REQUEST.getStatusCode(),"Invalid AreaId Provided !")).build();
-//
-//            //Check if the area exists is available or not
-//            if(LookupAndObserveProcess.getAreas(floorId).isEmpty()){
-//                return Response.status(Response.Status.NOT_FOUND).type(MediaType.APPLICATION_JSON_TYPE).entity(new ErrorMessage(Response.Status.NOT_FOUND.getStatusCode(), "No areas found")).build();
-//
-//            }
-//
-//            CoapResponse response = coapResourceClient.deleteRequest(String.format("%s/%s", floorId, areaId));
-//
-//            lookupAndObserveProcess.deleteRelation(String.format("%s/%s", floorId, areaId));
-//
-//            //Delete the location
-//
-//            return Response.ok(response).build();
-//
-//        } catch (Exception e){
-//            e.printStackTrace();
-//            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).type(MediaType.APPLICATION_JSON_TYPE).entity(new ErrorMessage(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(),"Internal Server Error !")).build();
-//        }
-//    }
+    //RESOURCE MANAGEMENT
+
+    @RolesAllowed("USER")
+    @GET
+    @Path("/{floor_id}/area/{area_id}/device/{device_id}/resource")
+    @Timed
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "Get all the Devices' of the Area")
+    public Response GetResource(@Context ContainerRequestContext requestContext,
+                               @PathParam("floor_id") String floorId, @PathParam("area_id") String areaId, @PathParam("device_id") String deviceId){
+        try{
+
+            if(floorId == null || areaId == null || deviceId == null)
+                return Response.status(Response.Status.BAD_REQUEST).type(MediaType.APPLICATION_JSON_TYPE).entity(new ErrorMessage(Response.Status.BAD_REQUEST.getStatusCode(),"Invalid FloorId or AreaId or DeviceId Provided !")).build();
+
+            logger.info("Loading all the Device {} 's Resources in the area {} in the floor {}", deviceId, areaId, floorId);
+
+            Optional<GenericDeviceDescriptor> genericDeviceDescriptor = this.conf.getInventoryDataManager().getDevice(deviceId);
+
+            if(!genericDeviceDescriptor.isPresent() || !genericDeviceDescriptor.get().getAreaId().equals(areaId) || !this.conf.getInventoryDataManager().getArea(areaId).get().getFloorId().equals(floorId))
+                return Response.status(Response.Status.NOT_FOUND).type(MediaType.APPLICATION_JSON_TYPE).entity(new ErrorMessage(Response.Status.NOT_FOUND.getStatusCode(),"Resource Not Found !")).build();
+
+
+            if (genericDeviceDescriptor.get().getResourceList().isEmpty())
+                return Response.status(Response.Status.NOT_FOUND).type(MediaType.APPLICATION_JSON_TYPE).entity(new ErrorMessage(Response.Status.NOT_FOUND.getStatusCode(), "No Resources found")).build();
+
+            return Response.ok(genericDeviceDescriptor.get().getResourceList()).build();
+
+        }catch(Exception e){
+            e.printStackTrace();
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).type(MediaType.APPLICATION_JSON_TYPE).entity(new ErrorMessage(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Internal Server Error!")).build();
+        }
+    }
+
+
+    @RolesAllowed("USER")
+    @GET
+    @Path("/{floor_id}/area/{area_id}/device/{device_id}/resource/{resource_id}")
+    @Timed
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value="Get a Resource's infos")
+    public Response getDevice(@Context ContainerRequestContext requestContext,
+                              @PathParam("floor_id") String floorId, @PathParam("area_id") String areaId, @PathParam("device_id") String deviceId,
+                                @PathParam("resource_id") String resourceId) {
+        try {
+
+            //Check the request
+            if(floorId == null || areaId == null || deviceId == null || resourceId == null)
+                return Response.status(Response.Status.BAD_REQUEST).type(MediaType.APPLICATION_JSON_TYPE).entity(new ErrorMessage(Response.Status.BAD_REQUEST.getStatusCode(),"Invalid FloorId or AreaId or DeviceId Provided !")).build();
+
+            logger.info("Loading infos for resource: {}, in device {}, in Area {}, in floor {}", resourceId, deviceId, areaId, floorId);
+
+            Optional<ResourceDescriptor> resourceDescriptor = this.conf.getInventoryDataManager().getResource(resourceId);
+
+            //check if the device is present and if it is inside the correct area and the area is inside the correct floor
+            if(!resourceDescriptor.isPresent() || !resourceDescriptor.get().getDeviceId().equals(deviceId) || !this.conf.getInventoryDataManager().getDevice(deviceId).get().getAreaId().equals(areaId) || !this.conf.getInventoryDataManager().getArea(areaId).get().getFloorId().equals(floorId))
+                return Response.status(Response.Status.NOT_FOUND).type(MediaType.APPLICATION_JSON_TYPE).entity(new ErrorMessage(Response.Status.NOT_FOUND.getStatusCode(),"Resource Not Found !")).build();
+
+            return Response.ok(resourceDescriptor.get()).build();
+
+
+        } catch (Exception e){
+            e.printStackTrace();
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).type(MediaType.APPLICATION_JSON_TYPE).entity(new ErrorMessage(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(),"Internal Server Error !")).build();
+        }
+    }
+
+    //PROXY COAP RESOURCES MANAGEMENTS
+
+
 
 }
