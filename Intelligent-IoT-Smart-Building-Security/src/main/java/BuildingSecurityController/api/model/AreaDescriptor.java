@@ -1,5 +1,6 @@
 package BuildingSecurityController.api.model;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class AreaDescriptor {
@@ -9,12 +10,15 @@ public class AreaDescriptor {
 
     public AreaDescriptor(){
 
+        this.deviceIdList = new ArrayList<>();
     }
 
     public AreaDescriptor(String area_id, List<String> deviceIdList, String floorId) {
         this.area_id = area_id;
         this.deviceIdList = deviceIdList;
         this.floorId = floorId;
+
+
     }
 
     public String getArea_id() {
@@ -29,8 +33,8 @@ public class AreaDescriptor {
         return deviceIdList;
     }
 
-    public void setDeviceIdList(List<String> deviceIdList) {
-        this.deviceIdList = deviceIdList;
+    public void addDeviceToList(String deviceId){
+        this.deviceIdList.add(deviceId);
     }
 
     public String getFloorId() {

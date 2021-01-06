@@ -59,7 +59,8 @@ public class ResourceDescriptor {
     @Override
     public String toString() {
         return "ResourceDescriptor{" +
-                "resourceId='" + deviceId + '\'' +
+                "resourceId='" + resourceId + '\'' +
+                ", deviceId='" + deviceId + '\'' +
                 ", manufacturer='" + manufacturer + '\'' +
                 ", type='" + type + '\'' +
                 ", coreInterface='" + coreInterface + '\'' +

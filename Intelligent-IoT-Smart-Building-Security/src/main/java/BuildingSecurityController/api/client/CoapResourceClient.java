@@ -25,7 +25,7 @@ public class CoapResourceClient {
     }
 
     public CoapResponse getRequest(String uriRequest){
-        CoapClient coapClient = new CoapClient(String.format("%s/%s", SMARTOBJECT_ENDPOINT, uriRequest));
+        CoapClient coapClient = new CoapClient(String.format("%s",uriRequest));
         Request request = new Request(CoAP.Code.GET);
         request.setConfirmable(true);
         request.setOptions(new OptionSet().setAccept(MediaTypeRegistry.APPLICATION_SENML_JSON));

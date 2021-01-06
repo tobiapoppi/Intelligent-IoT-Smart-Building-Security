@@ -1,8 +1,8 @@
-package BuildingSecurityController.api.model;
+package BuildingSecurityController.api.data_transfer_object;
 
 import java.util.*;
 
-public class GenericDeviceDescriptor {
+public class DeviceUpdateRequest {
 
     private String areaId;
 
@@ -10,13 +10,7 @@ public class GenericDeviceDescriptor {
 
     private String deviceId;
 
-    private List<String> resourceList;
-
-    public GenericDeviceDescriptor(){
-        resourceList = new ArrayList<>();
-        areaId = "unallocated";
-        floorId = "unallocated";
-    }
+    public DeviceUpdateRequest(){}
 
     public String getFloorId() {
         return floorId;
@@ -24,14 +18,6 @@ public class GenericDeviceDescriptor {
 
     public void setFloorId(String floorId) {
         this.floorId = floorId;
-    }
-
-    public List<String> getResourceList(){
-        return resourceList;
-    }
-
-    public void setResourceList(List<String> resourceList){
-        this.resourceList = resourceList;
     }
 
     public String getDeviceId() {
@@ -50,11 +36,10 @@ public class GenericDeviceDescriptor {
         this.areaId = areaId;
     }
 
-    public GenericDeviceDescriptor(String areaId, String floorId, String deviceId, List<String> resourceList) {
+    public DeviceUpdateRequest(String areaId, String floorId, String deviceId) {
         this.areaId = areaId;
         this.floorId = floorId;
         this.deviceId = deviceId;
-        this.resourceList = resourceList;
     }
 
     @Override
@@ -62,12 +47,7 @@ public class GenericDeviceDescriptor {
         return "GenericDeviceDescriptor{" +
                 "areaId='" + areaId + '\'' +
                 ", deviceId='" + deviceId + '\'' +
-                ", resourceList=" + resourceList +
                 '}';
-    }
-
-    public void addValueToResourceList(String value){
-        this.resourceList.add(value);
     }
 
 }

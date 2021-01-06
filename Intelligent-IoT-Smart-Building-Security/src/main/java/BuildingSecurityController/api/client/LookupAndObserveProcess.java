@@ -1,7 +1,12 @@
 package BuildingSecurityController.api.client;
 
+import BuildingSecurityController.api.exception.IInventoryDataManagerConflict;
+import BuildingSecurityController.api.exception.IInventoryDataManagerException;
+import BuildingSecurityController.api.model.GenericDeviceDescriptor;
 import BuildingSecurityController.api.model.PolicyDescriptor;
+import BuildingSecurityController.api.model.ResourceDescriptor;
 import BuildingSecurityController.api.persistance.DefaultInventoryDataManager;
+import BuildingSecurityController.api.services.OperatorAppConfig;
 import smartBuilding.server.resource.coap.CoapCameraResource;
 import smartBuilding.server.resource.coap.CoapPirResource;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -13,7 +18,9 @@ import org.eclipse.californium.core.coap.Request;
 import org.eclipse.californium.elements.exception.ConnectorException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import utils.SenMLPack;
 
+import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.util.*;
 
@@ -44,49 +51,21 @@ public class LookupAndObserveProcess implements Runnable{
     private static List<String> camTargetObservableList = null;
     private static List<String> lightTargetObservableList = null;
     private static List<String> alarmTargetObservableList = null;
+    private static List<String> presenceMonitoringTargetList = null;
     private static Map<String, CoapObserveRelation> observingRelationMap = null;
 
-
+    @SuppressWarnings("serial")
+    public static class MissingKeyException extends Exception{}
+    final OperatorAppConfig conf;
 
     private static ObjectMapper objectMapper = new ObjectMapper();
 
-
-//    public static List<String> getDevices(String uri){
-//
-//        List<String> formattedDevList = new ArrayList<>();
-//        pirTargetObservableList.forEach(dev ->  {
-//                    if(dev.contains(uri)){
-//                        dev = dev.replace(String.format("coap://192.168.1.107:5683/buildingPoppiZaniboniInc/%s/", uri), "");
-//                        formattedDevList.add(dev);
-//                    }
-//                }
-//        );
-//        alarmTargetObservableList.forEach(dev ->  {
-//                    if(dev.contains(uri)){
-//                        dev = dev.replace(String.format("coap://192.168.1.107:5683/buildingPoppiZaniboniInc/%s/", uri), "");
-//                        formattedDevList.add(dev);
-//                    }
-//                }
-//        );
-//        camTargetObservableList.forEach(dev ->  {
-//                    if(dev.contains(uri)){
-//                        dev = dev.replace(String.format("coap://192.168.1.107:5683/buildingPoppiZaniboniInc/%s/", uri), "");
-//                        formattedDevList.add(dev);
-//                    }
-//                }
-//        );
-//        lightTargetObservableList.forEach(dev ->  {
-//                    if(dev.contains(uri)){
-//                        dev = dev.replace(String.format("coap://192.168.1.107:5683/buildingPoppiZaniboniInc/%s/", uri), "");
-//                        formattedDevList.add(dev);
-//                    }
-//                }
-//        );
-//        return formattedDevList;
-//    }
+    public LookupAndObserveProcess(OperatorAppConfig operatorAppConfig){
+        this.conf = operatorAppConfig;
+    }
 
 
-    private static void lookupTarget(CoapClient coapClient){
+    private void lookupTarget(CoapClient coapClient){
 
         //we set the type of request as a "Get"
         Request request = new Request(Code.GET);
@@ -116,15 +95,13 @@ public class LookupAndObserveProcess implements Runnable{
                         if(webLink.getURI() != null && !webLink.getURI().equals(WELL_KNOWN_CORE_URI) && webLink.getAttributes() != null && webLink.getAttributes().getCount() > 0){
 
                             //considero solamente le risorse osservabili, che abbiano interface core attribute, e che sia di tipo sensor
-                            if (webLink.getAttributes().containsAttribute(OBSERVABLE_CORE_ATTRIBUTE) &&
-                                    webLink.getAttributes().containsAttribute(INTERFACE_CORE_ATTRIBUTE)){
+                            if (webLink.getAttributes().containsAttribute(INTERFACE_CORE_ATTRIBUTE)){
                                 if (webLink.getAttributes().getAttributeValues(RESOURCE_TYPE).contains("iot.sensor.pir")){
 
 
                                     String targetResourceUrl = String.format("%s", webLink.getURI());
                                     if (!pirTargetObservableList.contains(targetResourceUrl)) {
                                         logger.info("Target Resource found! URI: {}", webLink.getURI());
-
                                         pirTargetObservableList.add(targetResourceUrl);
                                         logger.info("Target Resource URL: {} correctly saved!", targetResourceUrl);
 
@@ -139,7 +116,6 @@ public class LookupAndObserveProcess implements Runnable{
                                         logger.info("Target Resource found! URI: {}", webLink.getURI());
                                         camTargetObservableList.add(targetResourceUrl);
                                         logger.info("Target Resource URL: {} correctly saved!", targetResourceUrl);
-
                                     }
 
                                 } else if (webLink.getAttributes().getAttributeValues(RESOURCE_TYPE).contains("iot.actuator.light")){
@@ -150,7 +126,6 @@ public class LookupAndObserveProcess implements Runnable{
                                         logger.info("Target Resource found! URI: {}", webLink.getURI());
                                         lightTargetObservableList.add(targetResourceUrl);
                                         logger.info("Target Resource URL: {} correctly saved!", targetResourceUrl);
-
                                     }
 
                                 } else if (webLink.getAttributes().getAttributeValues(RESOURCE_TYPE).contains("iot.actuator.alarm")){
@@ -161,9 +136,18 @@ public class LookupAndObserveProcess implements Runnable{
                                         logger.info("Target Resource found! URI: {}", webLink.getURI());
                                         alarmTargetObservableList.add(targetResourceUrl);
                                         logger.info("Target Resource URL: {} correctly saved!", targetResourceUrl);
+                                    }
 
+                                } else if (webLink.getAttributes().getAttributeValues(RESOURCE_TYPE).contains("iot.sensor.presencemonitoring")){
+
+                                    String targetResourceUrl = String.format("%s", webLink.getURI());
+                                    if (!presenceMonitoringTargetList.contains(targetResourceUrl)){
+                                        logger.info("Target Resource found! URI: {}", webLink.getURI());
+                                        presenceMonitoringTargetList.add(targetResourceUrl);
+                                        logger.info("Target Resource URL: {} correctly saved!", targetResourceUrl);
                                     }
                                 }
+
                             }
                         }
                     });
@@ -189,8 +173,6 @@ public class LookupAndObserveProcess implements Runnable{
 
     private static void handleNotification(CoapResponse response, String targetUrl){
         try{
-
-
             //this is the method asynchronously invoked when an observed resource is sending data;
 
             String content = response.getResponseText();
@@ -249,21 +231,18 @@ public class LookupAndObserveProcess implements Runnable{
                             }else if(hour == hourFin && minutes < minuteFin){
                                 //CoapResponse coapResponse = coapResourceClient.putRequest(String.format("%s/%s/alarm", floor, area), "true");
                                 logger.info("ALARM ACTIVATED FOR FLOOR {} AREA {}", floor, area);
-
                             }
                         }
                     }
                 });
-
             }
 
         }catch (Exception e){
             e.printStackTrace();
         }
-
     }
 
-    private static void startObservingPir (CoapClient coapClient, String targetUrl) {
+    private void startObservingPir (CoapClient coapClient, String targetUrl) {
 
         logger.info("OBSERVING ... {}", targetUrl);
         Request request = Request.newGet().setURI(targetUrl).setObserve();
@@ -272,13 +251,12 @@ public class LookupAndObserveProcess implements Runnable{
             @Override
             public void onLoad(CoapResponse response) {
 
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        handleNotification(response, targetUrl);
-                    }
-                }).start();
-
+//                new Thread(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        handleNotification(response, targetUrl);
+//                    }
+//                }).start();
 
             }
 
@@ -288,43 +266,31 @@ public class LookupAndObserveProcess implements Runnable{
             }
         });
 
+        CoapResourceClient coapResourceClient = new CoapResourceClient();
+        CoapResponse response = coapResourceClient.getRequest(targetUrl);
+
+        try{
+            SenMLPack newPack = new ObjectMapper().readValue(response.getPayload(), SenMLPack.class);
+
+            ResourceDescriptor newResource = new ResourceDescriptor();
+            newResource.setDeviceId(newPack.get(0).getBn());
+            newResource.setResourceId(String.format("%s:pir", newPack.get(0).getBn()));
+            newResource.setType("iot.sensor.pir");
+            newResource.setManufacturer("theBuildingSecurity.servehttp.com");
+
+            this.conf.getInventoryDataManager().getDevice(newPack.get(0).getBn()).get().addValueToResourceList("pir");
+
+
+            this.conf.getInventoryDataManager().createNewResource(newResource);
+
+        }catch (Exception e){
+            e.printStackTrace();
+        }
         observingRelationMap.put(targetUrl, relation);
 
     }
 
-    private static void startObservingCam (CoapClient coapClient, String targetUrl){
-
-        logger.info("OBSERVING ... {}", targetUrl);
-        Request request = Request.newGet().setURI(targetUrl).setObserve();
-        request.setConfirmable(true);
-        //request.setOptions(new OptionSet().setAccept(MediaTypeRegistry.APPLICATION_SENML_JSON));
-        CoapObserveRelation relation = coapClient.observe(request, new CoapHandler() {
-            @Override
-            public void onLoad(CoapResponse response) {
-
-                //this is the method asynchronously invoked when an observed resource is sending data;
-
-                String content = response.getResponseText();
-
-                logger.info("Notification -> Resource Target: {} -> Body: {}", targetUrl, content);
-
-
-            }
-
-            @Override
-            public void onError() {
-                logger.error("OBSERVE {} FAILED", targetUrl);
-            }
-        });
-
-
-        observingRelationMap.put(targetUrl, relation);
-
-
-    }
-
-
-    private static void startObservingLight (CoapClient coapClient, String targetUrl){
+    private void startObservingCam (CoapClient coapClient, String targetUrl){
 
         logger.info("OBSERVING ... {}", targetUrl);
         Request request = Request.newGet().setURI(targetUrl).setObserve();
@@ -347,9 +313,30 @@ public class LookupAndObserveProcess implements Runnable{
                 logger.error("OBSERVE {} FAILED", targetUrl);
             }
         });
+
+        CoapResourceClient coapResourceClient = new CoapResourceClient();
+        CoapResponse response = coapResourceClient.getRequest(targetUrl);
+
+        try{
+            SenMLPack newPack = new ObjectMapper().readValue(response.getPayload(), SenMLPack.class);
+
+            ResourceDescriptor newResource = new ResourceDescriptor();
+            newResource.setDeviceId(newPack.get(0).getBn());
+            newResource.setResourceId(String.format("%s:camera", newPack.get(0).getBn()));
+            newResource.setType("iot.sensor.camera");
+            newResource.setManufacturer("theBuildingSecurity.servehttp.com");
+            this.conf.getInventoryDataManager().getDevice(newPack.get(0).getBn()).get().addValueToResourceList("camera");
+
+            conf.getInventoryDataManager().createNewResource(newResource);
+
+        }catch (Exception e){
+            e.printStackTrace();
+        }
         observingRelationMap.put(targetUrl, relation);
+
     }
-    private static void startObservingAlarm (CoapClient coapClient, String targetUrl){
+
+    private void startObservingLight (CoapClient coapClient, String targetUrl){
 
         logger.info("OBSERVING ... {}", targetUrl);
         Request request = Request.newGet().setURI(targetUrl).setObserve();
@@ -372,9 +359,107 @@ public class LookupAndObserveProcess implements Runnable{
                 logger.error("OBSERVE {} FAILED", targetUrl);
             }
         });
+
+        CoapResourceClient coapResourceClient = new CoapResourceClient();
+        CoapResponse response = coapResourceClient.getRequest(targetUrl);
+
+        try{
+            SenMLPack newPack = new ObjectMapper().readValue(response.getPayload(), SenMLPack.class);
+
+            GenericDeviceDescriptor newDevice = new GenericDeviceDescriptor();
+            newDevice.setDeviceId(newPack.get(0).getBn());
+            newDevice.addValueToResourceList("light");
+            ResourceDescriptor newResource = new ResourceDescriptor();
+            newResource.setDeviceId(newPack.get(0).getBn());
+            newResource.setResourceId(String.format("%s:light", newPack.get(0).getBn()));
+            newResource.setType("iot.actuator.light");
+            newResource.setManufacturer("theBuildingSecurity.servehttp.com");
+
+            conf.getInventoryDataManager().createNewResource(newResource);
+            conf.getInventoryDataManager().createNewDevice(newDevice);
+
+            logger.info("New Device added to Inventory!: {}", newDevice);
+
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+
         observingRelationMap.put(targetUrl, relation);
     }
 
+    private void startObservingAlarm (CoapClient coapClient, String targetUrl){
+
+        logger.info("OBSERVING ... {}", targetUrl);
+        Request request = Request.newGet().setURI(targetUrl).setObserve();
+        request.setConfirmable(true);
+        //request.setOptions(new OptionSet().setAccept(MediaTypeRegistry.APPLICATION_SENML_JSON));
+        CoapObserveRelation relation = coapClient.observe(request, new CoapHandler() {
+            @Override
+            public void onLoad(CoapResponse response) {
+                //this is the method asynchronously invoked when an observed resource is sending data;
+
+                String content = response.getResponseText();
+
+                logger.info("Notification -> Resource Target: {} -> Body: {}", targetUrl, content);
+            }
+
+            @Override
+            public void onError() {
+                logger.error("OBSERVE {} FAILED", targetUrl);
+            }
+        });
+
+        CoapResourceClient coapResourceClient = new CoapResourceClient();
+        CoapResponse response = coapResourceClient.getRequest(targetUrl);
+
+        try{
+            SenMLPack newPack = new ObjectMapper().readValue(response.getPayload(), SenMLPack.class);
+
+            GenericDeviceDescriptor newDevice = new GenericDeviceDescriptor();
+            newDevice.setDeviceId(newPack.get(0).getBn());
+            newDevice.addValueToResourceList("alarm");
+            ResourceDescriptor newResource = new ResourceDescriptor();
+            newResource.setDeviceId(newPack.get(0).getBn());
+            newResource.setResourceId(String.format("%s:alarm", newPack.get(0).getBn()));
+            newResource.setType("iot.actuator.alarm");
+            newResource.setManufacturer("theBuildingSecurity.servehttp.com");
+
+
+            conf.getInventoryDataManager().createNewResource(newResource);
+            conf.getInventoryDataManager().createNewDevice(newDevice);
+
+            logger.info("New Device added to Inventory!: {}", newDevice);
+
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+
+        observingRelationMap.put(targetUrl, relation);
+    }
+
+    private void addPresenceMonitoringToDevices (CoapClient coapClient, String targetUrl){
+
+        logger.info("COLLECTING ... {}", targetUrl);
+
+        CoapResourceClient coapResourceClient = new CoapResourceClient();
+        CoapResponse response = coapResourceClient.getRequest(targetUrl);
+
+        try{
+            SenMLPack newPack = new ObjectMapper().readValue(response.getPayload(), SenMLPack.class);
+
+            GenericDeviceDescriptor newDevice = new GenericDeviceDescriptor();
+            newDevice.setDeviceId(newPack.get(0).getBn());
+
+            conf.getInventoryDataManager().createNewDevice(newDevice);
+
+            logger.info("New Device added to Inventory!: {}", newDevice);
+
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        observingRelationMap.put(targetUrl, null);
+
+    }
 
 
     @Override
@@ -390,20 +475,18 @@ public class LookupAndObserveProcess implements Runnable{
         camTargetObservableList = new ArrayList<>();
         lightTargetObservableList = new ArrayList<>();
         alarmTargetObservableList = new ArrayList<>();
+        presenceMonitoringTargetList = new ArrayList<>();
 
         while(true){
 
             lookupTarget(coapClient);
 
             //start observing resources
-            pirTargetObservableList.forEach(targetResourceUrl -> {
+            presenceMonitoringTargetList.forEach(targetResourceUrl -> {
                 if (!observingRelationMap.containsKey(targetResourceUrl))
-                    startObservingPir(coapClient, targetResourceUrl);
+                    addPresenceMonitoringToDevices(coapClient, targetResourceUrl);
             });
-            camTargetObservableList.forEach(targetResourceUrl -> {
-                if (!observingRelationMap.containsKey(targetResourceUrl))
-                    startObservingCam(coapClient, targetResourceUrl);
-            });
+
 
 
             lightTargetObservableList.forEach(targetResourceUrl -> {
@@ -414,6 +497,17 @@ public class LookupAndObserveProcess implements Runnable{
                 if (!observingRelationMap.containsKey(targetResourceUrl))
                     startObservingAlarm(coapClient, targetResourceUrl);
             });
+
+
+            pirTargetObservableList.forEach(targetResourceUrl -> {
+                if (!observingRelationMap.containsKey(targetResourceUrl))
+                    startObservingPir(coapClient, targetResourceUrl);
+            });
+            camTargetObservableList.forEach(targetResourceUrl -> {
+                if (!observingRelationMap.containsKey(targetResourceUrl))
+                    startObservingCam(coapClient, targetResourceUrl);
+            });
+
 
             try {
                 Thread.sleep(1000*60);

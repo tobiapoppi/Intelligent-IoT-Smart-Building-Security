@@ -30,7 +30,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-@Path("/buildingPoppiZaniboniInc/floor")
+@Path("/TheBuildingSecurity/floor")
 @Api("IoT Building Resource Endpoint")
 public class BuildingResource {
 
@@ -226,11 +226,19 @@ public class BuildingResource {
             if(!floorDescriptor.isPresent())
                 return Response.status(Response.Status.NOT_FOUND).type(MediaType.APPLICATION_JSON_TYPE).entity(new ErrorMessage(Response.Status.NOT_FOUND.getStatusCode(),"Floor Not Found !")).build();
 
+            List<AreaDescriptor> areaList = this.conf.getInventoryDataManager().getAreaList();
+            List<AreaDescriptor> newAreaList = new ArrayList<>();
 
-            if (floorDescriptor.get().getAreaList().isEmpty())
+
+            areaList.forEach(area -> {
+                if(area.getFloorId().equals(floorId))
+                    newAreaList.add(area);
+            });
+
+            if (newAreaList.isEmpty())
                 return Response.status(Response.Status.NOT_FOUND).type(MediaType.APPLICATION_JSON_TYPE).entity(new ErrorMessage(Response.Status.NOT_FOUND.getStatusCode(), "No areas found")).build();
 
-            return Response.ok(floorDescriptor.get().getAreaList()).build();
+            return Response.ok(newAreaList).build();
 
         }catch(Exception e){
             e.printStackTrace();
@@ -397,11 +405,18 @@ public class BuildingResource {
             if(!areaDescriptor.isPresent() || !areaDescriptor.get().getFloorId().equals(floorId))
                 return Response.status(Response.Status.NOT_FOUND).type(MediaType.APPLICATION_JSON_TYPE).entity(new ErrorMessage(Response.Status.NOT_FOUND.getStatusCode(),"Device Not Found !")).build();
 
+            List<GenericDeviceDescriptor> genericDeviceDescriptors = this.conf.getInventoryDataManager().getDeviceList();
+            List<GenericDeviceDescriptor> newDeviceList = new ArrayList<>();
 
-            if (areaDescriptor.get().getDeviceIdList().isEmpty())
+            genericDeviceDescriptors.forEach(device -> {
+                if(!device.getAreaId().equals("unallocated") || device.getAreaId().equals(areaId))
+                    newDeviceList.add(device);
+            });
+
+            if (newDeviceList.isEmpty())
                 return Response.status(Response.Status.NOT_FOUND).type(MediaType.APPLICATION_JSON_TYPE).entity(new ErrorMessage(Response.Status.NOT_FOUND.getStatusCode(), "No Devices found")).build();
 
-            return Response.ok(areaDescriptor.get().getDeviceIdList()).build();
+            return Response.ok(newDeviceList).build();
 
         }catch(Exception e){
             e.printStackTrace();

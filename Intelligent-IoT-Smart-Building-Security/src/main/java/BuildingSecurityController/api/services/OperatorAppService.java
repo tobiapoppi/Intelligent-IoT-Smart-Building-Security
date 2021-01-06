@@ -6,6 +6,7 @@ import BuildingSecurityController.api.auth.ExampleAuthenticator;
 import BuildingSecurityController.api.auth.User;
 import BuildingSecurityController.api.client.LookupAndObserveProcess;
 import BuildingSecurityController.api.resources.BuildingResource;
+import BuildingSecurityController.api.resources.DevicesResource;
 import BuildingSecurityController.api.resources.PolicyResource;
 import BuildingSecurityController.api.resources.UserResource;
 import org.slf4j.Logger;
@@ -24,9 +25,6 @@ import org.glassfish.jersey.server.filter.RolesAllowedDynamicFeature;
 
 import javax.servlet.DispatcherType;
 import javax.servlet.FilterRegistration;
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.util.ArrayList;
 import java.util.EnumSet;
 
 public class OperatorAppService extends Application<OperatorAppConfig> {
@@ -35,24 +33,20 @@ public class OperatorAppService extends Application<OperatorAppConfig> {
 
     public static void main(String[] args) throws Exception {
 
-        LookupAndObserveProcess lookupAndObserveProcess = new LookupAndObserveProcess();
+
 
         new OperatorAppService().run(new String[]{"server", args.length > 0 ? args[0] : "configuration.yml"});
 
-        Thread newThread = new Thread(() -> {
-            try{
-                lookupAndObserveProcess.run();
-            }catch (Exception e){
-                e.printStackTrace();
-            }
 
-        });
-        newThread.start();
 
     }
 
 
     public void run(OperatorAppConfig operatorAppConfig, Environment environment) throws Exception {
+
+        LookupAndObserveProcess lookupAndObserveProcess = new LookupAndObserveProcess(operatorAppConfig);
+
+
 
         //creo dati fittizzi per le risorse
         DummyDataGenerator.generateRandomPolicies(operatorAppConfig.getInventoryDataManager());
@@ -76,7 +70,7 @@ public class OperatorAppService extends Application<OperatorAppConfig> {
         environment.jersey().register(new BuildingResource(operatorAppConfig));
         environment.jersey().register(new UserResource(operatorAppConfig));
         environment.jersey().register(new PolicyResource(operatorAppConfig));
-
+        environment.jersey().register(new DevicesResource(operatorAppConfig));
 
         // Enable CORS headers
         final FilterRegistration.Dynamic cors = environment.servlets().addFilter("CORS", CrossOriginFilter.class);
@@ -88,6 +82,17 @@ public class OperatorAppService extends Application<OperatorAppConfig> {
 
         // Add URL mapping
         cors.addMappingForUrlPatterns(EnumSet.allOf(DispatcherType.class), true, "/*");
+
+        Thread newThread = new Thread(() -> {
+            try{
+                lookupAndObserveProcess.run();
+            }catch (Exception e){
+                e.printStackTrace();
+            }
+
+        });
+        newThread.start();
+
     }
 
     @Override

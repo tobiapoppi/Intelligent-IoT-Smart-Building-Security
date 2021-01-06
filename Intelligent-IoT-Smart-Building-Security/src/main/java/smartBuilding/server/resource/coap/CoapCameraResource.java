@@ -78,7 +78,7 @@ public class CoapCameraResource extends CoapResource {
             SenMLPack senMLPack = new SenMLPack();
 
             SenMLRecord senMLRecord = new SenMLRecord();
-            senMLRecord.setBn(String.format("%s:%s", this.deviceId,"camera"));
+            senMLRecord.setBn(String.format("%s:%s", this.deviceId,"presencemonitoring"));
             senMLRecord.setBver(SENSOR_VERSION);
             senMLRecord.setU(UNIT);
             senMLRecord.setV(value);

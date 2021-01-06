@@ -34,7 +34,11 @@ public class DefaultInventoryDataManager implements IInventoryDataManager {
 
 
     public DefaultInventoryDataManager() {
-        policyMap = new HashMap<>();
+        this.policyMap = new HashMap<>();
+        this.floorMap = new HashMap<>();
+        this.areaMap = new HashMap<>();
+        this.deviceMap = new HashMap<>();
+        this.resourceDeviceMap = new HashMap<>();
         this.userMap = new HashMap<>();
     }
 
@@ -148,8 +152,6 @@ public class DefaultInventoryDataManager implements IInventoryDataManager {
         if(this.getFloor(floorDescriptor.getFloor_id()).isPresent())
             throw new IInventoryDataManagerConflict("Floor already exists!");
 
-        floorDescriptor.setFloor_id(UUID.randomUUID().toString());
-
         this.floorMap.put(floorDescriptor.getFloor_id(), floorDescriptor);
         return floorDescriptor;
     }
@@ -224,6 +226,7 @@ public class DefaultInventoryDataManager implements IInventoryDataManager {
     @Override
     public GenericDeviceDescriptor updateDevice(GenericDeviceDescriptor genericDeviceDescriptor) throws IInventoryDataManagerException {
         this.deviceMap.put(genericDeviceDescriptor.getDeviceId(), genericDeviceDescriptor);
+        this.areaMap.get(genericDeviceDescriptor.getAreaId()).addDeviceToList(genericDeviceDescriptor.getDeviceId());
         return genericDeviceDescriptor;
     }
 
@@ -233,13 +236,20 @@ public class DefaultInventoryDataManager implements IInventoryDataManager {
     }
 
     @Override
+    public ResourceDescriptor createNewResource(ResourceDescriptor resourceDescriptor) throws IInventoryDataManagerException, IInventoryDataManagerConflict {
+
+        this.resourceDeviceMap.put(resourceDescriptor.getResourceId(), resourceDescriptor);
+        return resourceDescriptor;
+    }
+
+    @Override
     public List<ResourceDescriptor> getResourceList() throws IInventoryDataManagerException {
         return new ArrayList<>(this.resourceDeviceMap.values());
     }
 
     @Override
-    public Optional<ResourceDescriptor> getResource(String device_id) throws IInventoryDataManagerException {
-        return Optional.ofNullable(this.resourceDeviceMap.get(device_id));
+    public Optional<ResourceDescriptor> getResource(String resource_id) throws IInventoryDataManagerException {
+        return Optional.ofNullable(this.resourceDeviceMap.get(resource_id));
     }
 
     @Override

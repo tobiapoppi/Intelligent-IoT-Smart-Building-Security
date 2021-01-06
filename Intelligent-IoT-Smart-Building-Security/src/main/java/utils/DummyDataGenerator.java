@@ -1,5 +1,7 @@
 package utils;
 
+import BuildingSecurityController.api.model.AreaDescriptor;
+import BuildingSecurityController.api.model.FloorDescriptor;
 import BuildingSecurityController.api.model.PolicyDescriptor;
 import BuildingSecurityController.api.model.UserDescriptor;
 import BuildingSecurityController.api.persistance.IInventoryDataManager;
@@ -61,6 +63,29 @@ public class DummyDataGenerator {
 
             inventoryDataManager.createNewUser(user1);
             inventoryDataManager.createNewUser(user2);
+
+            FloorDescriptor floor1 = new FloorDescriptor();
+
+            floor1.setFloor_id("1");
+
+            FloorDescriptor floor0 = new FloorDescriptor();
+
+            floor0.setFloor_id("0");
+
+            AreaDescriptor area0 = new AreaDescriptor();
+
+            area0.setArea_id("A");
+            area0.setFloorId("0");
+
+            AreaDescriptor area1 = new AreaDescriptor();
+
+            area1.setArea_id("B");
+            area1.setFloorId("1");
+
+            inventoryDataManager.createNewFloor(floor0);
+            inventoryDataManager.createNewFloor(floor1);
+            inventoryDataManager.createNewArea(area0);
+            inventoryDataManager.createNewArea(area1);
 
 
         }catch (Exception e){

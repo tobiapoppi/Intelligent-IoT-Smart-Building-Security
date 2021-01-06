@@ -54,6 +54,7 @@ public interface IInventoryDataManager {
 
     //RESOURCE DEVICES management
 
+    public ResourceDescriptor createNewResource(ResourceDescriptor resourceDescriptor) throws IInventoryDataManagerException, IInventoryDataManagerConflict;
     public List<ResourceDescriptor> getResourceList() throws IInventoryDataManagerException;
     public Optional<ResourceDescriptor> getResource(String device_id) throws IInventoryDataManagerException;
     public ResourceDescriptor updateResource(ResourceDescriptor resourceDescriptor) throws  IInventoryDataManagerException;

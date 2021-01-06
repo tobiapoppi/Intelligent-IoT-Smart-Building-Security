@@ -82,7 +82,7 @@ public class  CoapPirResource extends CoapResource {
             SenMLPack senMLPack = new SenMLPack();
 
             SenMLRecord senMLRecordValue = new SenMLRecord();
-            senMLRecordValue.setBn(String.format("%s:%s", this.deviceId, "pir"));
+            senMLRecordValue.setBn(String.format("%s:%s", this.deviceId, "presencemonitoring"));
             senMLRecordValue.setBver(SENSOR_VERSION);
             senMLRecordValue.setU(UNIT);
             senMLRecordValue.setVb(value);
