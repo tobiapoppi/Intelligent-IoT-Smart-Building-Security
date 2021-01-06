@@ -104,19 +104,19 @@ public class  CoapPirResource extends CoapResource {
 
         exchange.setMaxAge(PirRawSensor.UPDATE_PERIOD);
 
-        if(exchange.getRequestOptions().getAccept() == MediaTypeRegistry.APPLICATION_SENML_JSON ||
-                exchange.getRequestOptions().getAccept() == MediaTypeRegistry.APPLICATION_JSON){
+        //if(exchange.getRequestOptions().getAccept() == MediaTypeRegistry.APPLICATION_SENML_JSON ||
+        //        exchange.getRequestOptions().getAccept() == MediaTypeRegistry.APPLICATION_JSON){
 
-            Optional<String> senmlPayload = getJsonSenmlResponse();
+        Optional<String> senmlPayload = getJsonSenmlResponse();
 
-            if(senmlPayload.isPresent())
-                exchange.respond(CoAP.ResponseCode.CONTENT, senmlPayload.get(), exchange.getRequestOptions().getAccept());
-            else
-                exchange.respond(CoAP.ResponseCode.INTERNAL_SERVER_ERROR);
-        }
-        //Otherwise respond with the default textplain payload
+        if(senmlPayload.isPresent())
+            exchange.respond(CoAP.ResponseCode.CONTENT, senmlPayload.get(), exchange.getRequestOptions().getAccept());
         else
-            exchange.respond(CoAP.ResponseCode.CONTENT, String.valueOf(value), MediaTypeRegistry.TEXT_PLAIN);
+            exchange.respond(CoAP.ResponseCode.INTERNAL_SERVER_ERROR);
+        //}
+        //Otherwise respond with the default textplain payload
+        //else
+        //    exchange.respond(CoAP.ResponseCode.CONTENT, String.valueOf(value), MediaTypeRegistry.TEXT_PLAIN);
 
 
     }
@@ -144,8 +144,6 @@ public class  CoapPirResource extends CoapResource {
                 rawResource.getId(),
                 "pir",
                 rawResource.loadUpdatedValue());
-
-
 
     }
 }

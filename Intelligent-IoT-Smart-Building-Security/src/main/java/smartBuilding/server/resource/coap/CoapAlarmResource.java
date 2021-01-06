@@ -94,19 +94,19 @@ public class CoapAlarmResource extends CoapResource {
     @Override
     public void handleGET(CoapExchange exchange){
 
-        if(exchange.getRequestOptions().getAccept() == MediaTypeRegistry.APPLICATION_SENML_JSON ||
-                exchange.getRequestOptions().getAccept() == MediaTypeRegistry.APPLICATION_JSON){
+        //if(exchange.getRequestOptions().getAccept() == MediaTypeRegistry.APPLICATION_SENML_JSON ||
+        //        exchange.getRequestOptions().getAccept() == MediaTypeRegistry.APPLICATION_JSON){
 
-            Optional<String> senmlPayload = getJsonSenmlResponse();
+        Optional<String> senmlPayload = getJsonSenmlResponse();
 
-            if(senmlPayload.isPresent())
-                exchange.respond(CoAP.ResponseCode.CONTENT, senmlPayload.get(), exchange.getRequestOptions().getAccept());
-            else
-                exchange.respond(CoAP.ResponseCode.INTERNAL_SERVER_ERROR);
-        }
-        //Otherwise respond with the default textplain payload
+        if(senmlPayload.isPresent())
+            exchange.respond(CoAP.ResponseCode.CONTENT, senmlPayload.get(), exchange.getRequestOptions().getAccept());
         else
-            exchange.respond(CoAP.ResponseCode.CONTENT, String.valueOf(isActive), MediaTypeRegistry.TEXT_PLAIN);
+            exchange.respond(CoAP.ResponseCode.INTERNAL_SERVER_ERROR);
+
+        //Otherwise respond with the default textplain payload
+        //else
+        //    exchange.respond(CoAP.ResponseCode.CONTENT, String.valueOf(isActive), MediaTypeRegistry.TEXT_PLAIN);
     }
     @Override
     public void handlePOST(CoapExchange exchange){
