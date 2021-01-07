@@ -21,6 +21,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
+import java.awt.geom.Area;
 import java.util.List;
 import java.util.Optional;
 
@@ -92,9 +93,15 @@ public class DevicesResource {
             genericDeviceDescriptor.setDeviceId(deviceUpdateRequest.getDeviceId());
             genericDeviceDescriptor.setAreaId(deviceUpdateRequest.getAreaId());
 
-            this.conf.getInventoryDataManager().updateDevice(genericDeviceDescriptor);
+            Optional<AreaDescriptor> areaDescriptor = this.conf.getInventoryDataManager().getArea(deviceUpdateRequest.getAreaId());
 
-            return Response.noContent().build();
+            if (areaDescriptor.isPresent()){
+                if(areaDescriptor.get().getFloorId().equals(deviceUpdateRequest.getFloorId())){
+                    this.conf.getInventoryDataManager().updateDevice(genericDeviceDescriptor);
+                    return Response.noContent().build();
+                }
+            }
+            return Response.status(Response.Status.BAD_REQUEST).type(MediaType.APPLICATION_JSON_TYPE).entity(new ErrorMessage(Response.Status.BAD_REQUEST.getStatusCode(), "Area or floor does not exists !")).build();
 
 
         } catch (Exception e) {

@@ -18,7 +18,7 @@ public class CoapResourceClient {
 
     private final static Logger logger = LoggerFactory.getLogger(CoapResourceClient.class);
 
-    private static final String SMARTOBJECT_ENDPOINT = "coap://192.168.1.107:5683/buildingPoppiZaniboniInc";
+    private static final String SMARTOBJECT_ENDPOINT = "coap://192.168.1.107:5683/";
 
     public CoapResourceClient(){
 
@@ -63,7 +63,7 @@ public class CoapResourceClient {
     }
 
     public CoapResponse putRequest(String uriRequest, String payload){
-        CoapClient coapClient = new CoapClient(String.format("%s/%s", SMARTOBJECT_ENDPOINT, uriRequest));
+        CoapClient coapClient = new CoapClient(uriRequest);
         Request request = new Request(CoAP.Code.PUT);
         request.setConfirmable(true);
         request.setPayload(payload);

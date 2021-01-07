@@ -121,6 +121,8 @@ public class CoapAlarmResource extends CoapResource {
                 logger.info("Resource Status Updated: {}", this.isActive);
 
                 exchange.respond(CoAP.ResponseCode.CHANGED);
+
+                changed();
             }
             else
                 exchange.respond(CoAP.ResponseCode.BAD_REQUEST);
@@ -146,6 +148,8 @@ public class CoapAlarmResource extends CoapResource {
                 this.alarmActuator.setActive(this.isActive);
 
                 logger.info("Resource Status Updated: {}", this.isActive);
+
+                changed();
 
                 exchange.respond(CoAP.ResponseCode.CHANGED);
             }

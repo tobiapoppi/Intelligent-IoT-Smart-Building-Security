@@ -2,6 +2,7 @@ package BuildingSecurityController.api.client;
 
 import BuildingSecurityController.api.exception.IInventoryDataManagerConflict;
 import BuildingSecurityController.api.exception.IInventoryDataManagerException;
+import BuildingSecurityController.api.model.AreaDescriptor;
 import BuildingSecurityController.api.model.GenericDeviceDescriptor;
 import BuildingSecurityController.api.model.PolicyDescriptor;
 import BuildingSecurityController.api.model.ResourceDescriptor;
@@ -171,7 +172,7 @@ public class LookupAndObserveProcess implements Runnable{
     }
 
 
-    private static void handleNotification(CoapResponse response, String targetUrl){
+    private void handleNotificationPir(CoapResponse response, String targetUrl){
         try{
             //this is the method asynchronously invoked when an observed resource is sending data;
 
@@ -179,23 +180,35 @@ public class LookupAndObserveProcess implements Runnable{
 
             logger.info("Notification -> Resource Target: {} -> Body: {}", targetUrl, content);
 
-            if(content.equals("true")){
+            SenMLPack newPack = new ObjectMapper().readValue(response.getPayload(), SenMLPack.class);
+
+            Boolean pirValue = newPack.get(0).getVb();
+
+            if(pirValue){
                 //accedo alle policy
 
-                HashMap<String, PolicyDescriptor> policyMap = DefaultInventoryDataManager.getPolicies();
+                List<PolicyDescriptor> policyList = this.conf.getInventoryDataManager().getPolicyList();
+
+                List<GenericDeviceDescriptor> deviceList = this.conf.getInventoryDataManager().getDeviceList();
 
                 //controllo se tutte le policy rispettano i cambiamenti
 
                 //prima ottengo area e floor di questo pir
 
-                String floor = targetUrl.replace("coap://192.168.1.107:5683/buildingPoppiZaniboniInc/", "").split("/")[0];
-                String area = targetUrl.replace("coap://192.168.1.107:5683/buildingPoppiZaniboniInc/", "").split("/")[1];
+                List<String> floorId = new ArrayList<>();
+                List<String> areaId = new ArrayList<>();
 
+                deviceList.forEach(device -> {
+                    if(device.getDeviceId().equals(newPack.get(0).getBn())){
+                        floorId.add(device.getFloorId());
+                        areaId.add(device.getAreaId());
+                    }
+                });
 
-                logger.info("Sto accedendo alle risorse.");
+                //ora accedo alle policy che hanno lo stessa area e floor del pir in questione
 
-                policyMap.values().forEach(policy ->{
-                    if (policy.getFloor_id().equals(floor) && policy.getArea_id().equals(area)){
+                policyList.forEach(policy ->{
+                    if (policy.getFloor_id().equals(floorId.get(0)) && policy.getArea_id().equals(areaId.get(0))){
                         if(policy.getPresence_mode()){
 
                             int hourStart = Integer.parseInt(policy.getStart_working_time().split(":")[0]);
@@ -206,36 +219,114 @@ public class LookupAndObserveProcess implements Runnable{
                             int hour = java.time.LocalTime.now().getHour();
                             int minutes = java.time.LocalTime.now().getMinute();
 
-                            logger.info("Ora faccio i controlli sull'ora" );
-
-                            logger.info("{} {}", hour, minutes);
-
-
-
-                            if(hour > hourStart || hour < hourFin){
+                            if(hour > hourStart || hour < hourFin || hour == hourStart && minutes > minuteStart || hour == hourFin && minutes < minuteFin){
 
                                 //I MAKE A PUT REQUEST
+                                //se l'ora non è rispettata faccio una put request TRUE a tutti i device di luce e allarme nella stessa area
 
                                 CoapResourceClient coapResourceClient = new CoapResourceClient();
 
-                                CoapResponse coapResponse = coapResourceClient.putRequest(String.format("%s/%s/alarm", floor, area), "true");
+                                List<String> targetUrlsAlarm = new ArrayList<>();
 
+                                deviceList.forEach(device -> {
+                                    logger.info("AREA {} FLOOR {} DEVICE", areaId.get(0), floorId.get(0));
+                                    if(device.getFloorId().equals(floorId.get(0)) && device.getAreaId().equals(areaId.get(0))){
+                                        if(device.getDeviceId().contains("alarm") || device.getDeviceId().contains("light")){
+                                            targetUrlsAlarm.add(String.format("coap://192.168.1.107:5683/%s", device.getDeviceId()));
+                                        }
+                                    }
 
-                                logger.info("ALARM ACTIVATED FOR FLOOR {} AREA {}", floor, area);
+                                });
+                                targetUrlsAlarm.forEach(url ->{
+                                    CoapResponse coapResponse = coapResourceClient.putRequest(url, "true");
+                                    logger.info("Response pretty print:\n{}", Utils.prettyPrint(coapResponse));
+                                    logger.info("ALARMS AND LIGHTS ACTIVATED FOR FLOOR {} AREA {}", floorId.get(0), areaId.get(0));
+                                });
 
-                            }else if(hour == hourStart && minutes > minuteStart){
-                                //CoapResponse coapResponse = coapResourceClient.putRequest(String.format("%s/%s/alarm", floor, area), "true");
-                                logger.info("ALARM ACTIVATED FOR FLOOR {} AREA {}", floor, area);
-
-
-                            }else if(hour == hourFin && minutes < minuteFin){
-                                //CoapResponse coapResponse = coapResourceClient.putRequest(String.format("%s/%s/alarm", floor, area), "true");
-                                logger.info("ALARM ACTIVATED FOR FLOOR {} AREA {}", floor, area);
                             }
                         }
                     }
                 });
             }
+
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    private void handleNotificationCam(CoapResponse response, String targetUrl){
+        try{
+            //this is the method asynchronously invoked when an observed resource is sending data;
+
+            String content = response.getResponseText();
+
+            logger.info("Notification -> Resource Target: {} -> Body: {}", targetUrl, content);
+
+            SenMLPack newPack = new ObjectMapper().readValue(response.getPayload(), SenMLPack.class);
+
+            Number camValue = newPack.get(0).getV();
+
+
+            //accedo alle policy
+
+            List<PolicyDescriptor> policyList = this.conf.getInventoryDataManager().getPolicyList();
+
+            List<GenericDeviceDescriptor> deviceList = this.conf.getInventoryDataManager().getDeviceList();
+
+            //controllo se tutte le policy rispettano i cambiamenti
+
+            //prima ottengo area e floor di questo pir
+
+            List<String> floorId = new ArrayList<>();
+            List<String> areaId = new ArrayList<>();
+
+            deviceList.forEach(device -> {
+                if(device.getDeviceId().equals(newPack.get(0).getBn())){
+                    floorId.add(device.getFloorId());
+                    areaId.add(device.getAreaId());
+                }
+            });
+
+            //ora accedo alle policy che hanno lo stessa area e floor del pir in questione
+
+            policyList.forEach(policy ->{
+                if (policy.getFloor_id().equals(floorId.get(0)) && policy.getArea_id().equals(areaId.get(0))){
+                    if(!policy.getPresence_mode() && policy.getMax_persons() < (Integer) camValue){
+
+                        int hourStart = Integer.parseInt(policy.getStart_working_time().split(":")[0]);
+                        int minuteStart = Integer.parseInt(policy.getStart_working_time().split(":")[1]);
+                        int hourFin = Integer.parseInt(policy.getEnd_working_time().split(":")[0]);
+                        int minuteFin = Integer.parseInt(policy.getEnd_working_time().split(":")[1]);
+
+                        int hour = java.time.LocalTime.now().getHour();
+                        int minutes = java.time.LocalTime.now().getMinute();
+
+                        if(hour > hourStart || hour < hourFin || hour == hourStart && minutes > minuteStart || hour == hourFin && minutes < minuteFin){
+
+                            //I MAKE A PUT REQUEST
+                            //se l'ora non è rispettata faccio una put request TRUE a tutti i device di luce e allarme nella stessa area
+
+                            CoapResourceClient coapResourceClient = new CoapResourceClient();
+
+                            List<String> targetUrls = new ArrayList<>();
+
+                            deviceList.forEach(device -> {
+                                logger.info("AREA {} FLOOR {} DEVICE", areaId.get(0), floorId.get(0));
+                                if(device.getFloorId().equals(floorId.get(0)) && device.getAreaId().equals(areaId.get(0))){
+                                    if(device.getDeviceId().contains("alarm") || device.getDeviceId().contains("light")){
+                                        targetUrls.add(String.format("coap://192.168.1.107:5683/%s", device.getDeviceId()));
+                                    }
+                                }
+                            });
+                            targetUrls.forEach(url ->{
+                                CoapResponse coapResponse = coapResourceClient.putRequest(url, "true");
+                                logger.info("Response pretty print:\n{}", Utils.prettyPrint(coapResponse));
+                                logger.info("ALARMS AND LIGHTS ACTIVATED FOR FLOOR {} AREA {}", floorId.get(0), areaId.get(0));
+                            });
+                        }
+                    }
+                }
+            });
 
         }catch (Exception e){
             e.printStackTrace();
@@ -251,12 +342,12 @@ public class LookupAndObserveProcess implements Runnable{
             @Override
             public void onLoad(CoapResponse response) {
 
-//                new Thread(new Runnable() {
-//                    @Override
-//                    public void run() {
-//                        handleNotification(response, targetUrl);
-//                    }
-//                }).start();
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        handleNotificationPir(response, targetUrl);
+                    }
+                }).start();
 
             }
 

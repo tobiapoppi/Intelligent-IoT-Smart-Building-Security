@@ -130,6 +130,8 @@ public class CoapLightResource extends CoapResource {
 
                 logger.info("Resource Status Updated: {}", this.Is_Active);
 
+                changed();
+
                 exchange.respond(CoAP.ResponseCode.CHANGED);
             }
             else
@@ -156,6 +158,8 @@ public class CoapLightResource extends CoapResource {
                 this.lightActuator.setActive(this.Is_Active);
 
                 logger.info("Resource Status Updated: {}", this.Is_Active);
+
+                changed();
 
                 exchange.respond(CoAP.ResponseCode.CHANGED);
             }
