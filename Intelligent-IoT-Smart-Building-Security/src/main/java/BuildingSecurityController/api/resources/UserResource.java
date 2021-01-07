@@ -43,7 +43,7 @@ public class UserResource {
         this.conf = conf;
     }
 
-    @RolesAllowed("ADMIN")
+    @RolesAllowed("USER")
     @GET
     @Path("/")
     @Timed
@@ -69,7 +69,7 @@ public class UserResource {
         }
     }
 
-    @RolesAllowed("ADMIN")
+    @RolesAllowed("USER")
     @GET
     @Path("/{username}")
     @Timed
@@ -99,7 +99,7 @@ public class UserResource {
         }
     }
 
-    @RolesAllowed("ADMIN")
+    @RolesAllowed("USER")
     @POST
     @Path("/")
     @Timed
@@ -132,7 +132,7 @@ public class UserResource {
         }
     }
 
-    @RolesAllowed("ADMIN")
+    @RolesAllowed("USER")
     @PUT
     @Path("/{username}")
     @Timed
@@ -167,7 +167,7 @@ public class UserResource {
         }
     }
 
-    @RolesAllowed("ADMIN")
+    @RolesAllowed("USER")
     @DELETE
     @Path("/{username}")
     @Timed

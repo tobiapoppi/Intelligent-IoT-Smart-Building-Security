@@ -6,8 +6,6 @@ public class GenericDeviceDescriptor {
 
     private String areaId;
 
-    private String floorId;
-
     private String deviceId;
 
     private List<String> resourceList;
@@ -15,17 +13,7 @@ public class GenericDeviceDescriptor {
     public GenericDeviceDescriptor(){
         resourceList = new ArrayList<>();
         areaId = "unallocated";
-        floorId = "unallocated";
     }
-
-    public String getFloorId() {
-        return floorId;
-    }
-
-    public void setFloorId(String floorId) {
-        this.floorId = floorId;
-    }
-
     public List<String> getResourceList(){
         return resourceList;
     }
@@ -50,9 +38,8 @@ public class GenericDeviceDescriptor {
         this.areaId = areaId;
     }
 
-    public GenericDeviceDescriptor(String areaId, String floorId, String deviceId, List<String> resourceList) {
+    public GenericDeviceDescriptor(String areaId, String deviceId, List<String> resourceList) {
         this.areaId = areaId;
-        this.floorId = floorId;
         this.deviceId = deviceId;
         this.resourceList = resourceList;
     }

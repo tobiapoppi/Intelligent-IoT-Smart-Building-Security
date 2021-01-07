@@ -4,17 +4,16 @@ public class PolicyDescriptor {
 
     private String policy_id;
     private String area_id;
-    private String floor_id;
+
     private Boolean is_enabled; //to determine if in that zone the controls are taking place
     private Boolean presence_mode; //if 0 --> it counts the number of maxPersons; if 1 --> just the presence
     private String start_working_time;  //start working time for this policy
     private String end_working_time; //stop working time for this policy
     private Integer max_persons;
 
-    public PolicyDescriptor(String policy_id, String area_id, String floor_id, Boolean is_enabled, Boolean presence_mode, String start_working_time, String end_working_time, Integer max_persons) {
+    public PolicyDescriptor(String policy_id, String area_id, Boolean is_enabled, Boolean presence_mode, String start_working_time, String end_working_time, Integer max_persons) {
         this.policy_id = policy_id;
         this.area_id = area_id;
-        this.floor_id = floor_id;
         this.is_enabled = is_enabled;
         this.presence_mode = presence_mode;
         this.start_working_time = start_working_time;
@@ -44,14 +43,6 @@ public class PolicyDescriptor {
 
     public Boolean getIs_enabled() {
         return is_enabled;
-    }
-
-    public String getFloor_id() {
-        return floor_id;
-    }
-
-    public void setFloor_id(String floor_id) {
-        this.floor_id = floor_id;
     }
 
     public void setIs_enabled(Boolean is_enabled) {

@@ -3,7 +3,6 @@ package BuildingSecurityController.api.model;
 import java.util.List;
 
 public class FloorDescriptor {
-   ;
     private String floor_id;
 
     public FloorDescriptor( String floor_id) {

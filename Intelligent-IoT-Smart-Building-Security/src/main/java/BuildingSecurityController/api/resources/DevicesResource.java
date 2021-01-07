@@ -1,6 +1,7 @@
 package BuildingSecurityController.api.resources;
 
 import BuildingSecurityController.api.client.CoapResourceClient;
+import BuildingSecurityController.api.client.LookupAndObserveProcess;
 import BuildingSecurityController.api.data_transfer_object.DeviceUpdateRequest;
 import BuildingSecurityController.api.model.AreaDescriptor;
 import BuildingSecurityController.api.model.GenericDeviceDescriptor;
@@ -10,6 +11,7 @@ import com.codahale.metrics.annotation.Timed;
 import io.dropwizard.jersey.errors.ErrorMessage;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import org.eclipse.californium.core.CoapResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,11 +38,13 @@ public class DevicesResource {
     }
 
     final OperatorAppConfig conf;
+    LookupAndObserveProcess lookupAndObserveProcess;
 
     CoapResourceClient coapResourceClient = new CoapResourceClient();
 
-    public DevicesResource(OperatorAppConfig conf) throws InterruptedException {
+    public DevicesResource(OperatorAppConfig conf, LookupAndObserveProcess lookupAndObserveProcess) throws InterruptedException {
         this.conf = conf;
+        this.lookupAndObserveProcess = lookupAndObserveProcess;
     }
 
     //DEVICE MANAGEMENT
@@ -89,17 +93,16 @@ public class DevicesResource {
 
             GenericDeviceDescriptor genericDeviceDescriptor = this.conf.getInventoryDataManager().getDevice(deviceId).get();
 
-            genericDeviceDescriptor.setFloorId(deviceUpdateRequest.getFloorId());
             genericDeviceDescriptor.setDeviceId(deviceUpdateRequest.getDeviceId());
             genericDeviceDescriptor.setAreaId(deviceUpdateRequest.getAreaId());
 
             Optional<AreaDescriptor> areaDescriptor = this.conf.getInventoryDataManager().getArea(deviceUpdateRequest.getAreaId());
 
             if (areaDescriptor.isPresent()){
-                if(areaDescriptor.get().getFloorId().equals(deviceUpdateRequest.getFloorId())){
-                    this.conf.getInventoryDataManager().updateDevice(genericDeviceDescriptor);
-                    return Response.noContent().build();
-                }
+
+                this.conf.getInventoryDataManager().updateDevice(genericDeviceDescriptor);
+                return Response.noContent().build();
+
             }
             return Response.status(Response.Status.BAD_REQUEST).type(MediaType.APPLICATION_JSON_TYPE).entity(new ErrorMessage(Response.Status.BAD_REQUEST.getStatusCode(), "Area or floor does not exists !")).build();
 
@@ -154,28 +157,160 @@ public class DevicesResource {
 
     @RolesAllowed("USER")
     @GET
-    @Path("/{floor_id}/area/{area_id}/device/{device_id}/resource/{resource_id}")
+    @Path("/{device_id}/resource/{resource_id}")
     @Timed
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "Get a Resource's infos")
     public Response getDevice(@Context ContainerRequestContext requestContext,
-                              @PathParam("floor_id") String floorId, @PathParam("area_id") String areaId, @PathParam("device_id") String deviceId,
                               @PathParam("resource_id") String resourceId) {
         try {
 
             //Check the request
-            if (floorId == null || areaId == null || deviceId == null || resourceId == null)
+            if (resourceId == null)
                 return Response.status(Response.Status.BAD_REQUEST).type(MediaType.APPLICATION_JSON_TYPE).entity(new ErrorMessage(Response.Status.BAD_REQUEST.getStatusCode(), "Invalid FloorId or AreaId or DeviceId Provided !")).build();
 
-            logger.info("Loading infos for resource: {}, in device {}, in Area {}, in floor {}", resourceId, deviceId, areaId, floorId);
+            logger.info("Loading infos for resource: {}", resourceId);
 
             Optional<ResourceDescriptor> resourceDescriptor = this.conf.getInventoryDataManager().getResource(resourceId);
 
             //check if the device is present and if it is inside the correct area and the area is inside the correct floor
-            if (!resourceDescriptor.isPresent() || !resourceDescriptor.get().getDeviceId().equals(deviceId) || !this.conf.getInventoryDataManager().getDevice(deviceId).get().getAreaId().equals(areaId) || !this.conf.getInventoryDataManager().getArea(areaId).get().getFloorId().equals(floorId))
+            if (!resourceDescriptor.isPresent())
                 return Response.status(Response.Status.NOT_FOUND).type(MediaType.APPLICATION_JSON_TYPE).entity(new ErrorMessage(Response.Status.NOT_FOUND.getStatusCode(), "Resource Not Found !")).build();
 
             return Response.ok(resourceDescriptor.get()).build();
+
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).type(MediaType.APPLICATION_JSON_TYPE).entity(new ErrorMessage(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Internal Server Error !")).build();
+        }
+    }
+
+    @RolesAllowed("USER")
+    @GET
+    @Path("/{device_id}/resource/{resource_id}/proxy")
+    @Timed
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "Make a Coap Get request to the Resource")
+    public Response getProxy(@Context ContainerRequestContext requestContext,
+                              @PathParam("resource_id") String resourceId) {
+        try {
+
+            //Check the request
+            if (resourceId == null)
+                return Response.status(Response.Status.BAD_REQUEST).type(MediaType.APPLICATION_JSON_TYPE).entity(new ErrorMessage(Response.Status.BAD_REQUEST.getStatusCode(), "ResourceId Provided !")).build();
+
+            logger.info("Loading infos for resource: {}", resourceId);
+
+            Optional<ResourceDescriptor> resourceDescriptor = this.conf.getInventoryDataManager().getResource(resourceId);
+
+            //check if the device is present and if it is inside the correct area and the area is inside the correct floor
+            if (!resourceDescriptor.isPresent())
+                return Response.status(Response.Status.NOT_FOUND).type(MediaType.APPLICATION_JSON_TYPE).entity(new ErrorMessage(Response.Status.NOT_FOUND.getStatusCode(), "Resource Not Found !")).build();
+
+            CoapResourceClient coapResourceClient = new CoapResourceClient();
+
+            String url = "";
+
+            if (resourceId.contains("pir") || resourceId.contains("camera")){
+                url = String.format("%s/%s:%s", this.conf.getInventoryDataManager().getResource(resourceId).get().getDeviceId(),resourceId.split(":")[0] ,resourceId.split(":")[2]);
+                logger.info("url: {}", url);
+
+            }else if(resourceId.contains("light") || resourceId.contains("alarm")){
+                url = this.conf.getInventoryDataManager().getResource(resourceId).get().getDeviceId();
+                logger.info("url: {}", url);
+            }
+
+            CoapResponse response = coapResourceClient.getRequest(String.format("coap://192.168.1.107:5683/%s", url));
+            return Response.ok(response.getResponseText()).build();
+
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).type(MediaType.APPLICATION_JSON_TYPE).entity(new ErrorMessage(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Internal Server Error !")).build();
+        }
+    }
+    @RolesAllowed("USER")
+    @PUT
+    @Path("/{device_id}/resource/{resource_id}/proxy")
+    @Timed
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "Make a Coap Put request to the Resource")
+    public Response putProxy(@Context ContainerRequestContext requestContext,
+                             @PathParam("resource_id") String resourceId, String payload) {
+        try {
+
+            //Check the request
+            if (resourceId == null || payload == null)
+                return Response.status(Response.Status.BAD_REQUEST).type(MediaType.APPLICATION_JSON_TYPE).entity(new ErrorMessage(Response.Status.BAD_REQUEST.getStatusCode(), "ResourceId Provided !")).build();
+
+            logger.info("Loading infos for resource: {}", resourceId);
+
+            Optional<ResourceDescriptor> resourceDescriptor = this.conf.getInventoryDataManager().getResource(resourceId);
+
+            //check if the device is present and if it is inside the correct area and the area is inside the correct floor
+            if (!resourceDescriptor.isPresent())
+                return Response.status(Response.Status.NOT_FOUND).type(MediaType.APPLICATION_JSON_TYPE).entity(new ErrorMessage(Response.Status.NOT_FOUND.getStatusCode(), "Resource Not Found !")).build();
+
+            CoapResourceClient coapResourceClient = new CoapResourceClient();
+
+            String url = "";
+
+            if (resourceId.contains("pir") || resourceId.contains("camera")){
+                url = String.format("%s/%s:%s", this.conf.getInventoryDataManager().getResource(resourceId).get().getDeviceId(),resourceId.split(":")[0] ,resourceId.split(":")[2]);
+                logger.info("url: {}", url);
+
+            }else if(resourceId.contains("light") || resourceId.contains("alarm")){
+                url = this.conf.getInventoryDataManager().getResource(resourceId).get().getDeviceId();
+                logger.info("url: {}", url);
+            }
+
+            CoapResponse response = coapResourceClient.putRequest(String.format("coap://192.168.1.107:5683/%s", url), payload);
+            return Response.ok(response).build();
+
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).type(MediaType.APPLICATION_JSON_TYPE).entity(new ErrorMessage(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Internal Server Error !")).build();
+        }
+    }
+    @RolesAllowed("USER")
+    @POST
+    @Path("/{device_id}/resource/{resource_id}/proxy")
+    @Timed
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "Make a Coap Put request to the Resource")
+    public Response putProxy(@Context ContainerRequestContext requestContext,
+                             @PathParam("resource_id") String resourceId) {
+        try {
+
+            //Check the request
+            if (resourceId == null)
+                return Response.status(Response.Status.BAD_REQUEST).type(MediaType.APPLICATION_JSON_TYPE).entity(new ErrorMessage(Response.Status.BAD_REQUEST.getStatusCode(), "ResourceId Provided !")).build();
+
+            logger.info("Loading infos for resource: {}", resourceId);
+
+            Optional<ResourceDescriptor> resourceDescriptor = this.conf.getInventoryDataManager().getResource(resourceId);
+
+            //check if the device is present and if it is inside the correct area and the area is inside the correct floor
+            if (!resourceDescriptor.isPresent())
+                return Response.status(Response.Status.NOT_FOUND).type(MediaType.APPLICATION_JSON_TYPE).entity(new ErrorMessage(Response.Status.NOT_FOUND.getStatusCode(), "Resource Not Found !")).build();
+
+            CoapResourceClient coapResourceClient = new CoapResourceClient();
+
+            String url = "";
+
+            if (resourceId.contains("pir") || resourceId.contains("camera")){
+                url = String.format("%s/%s:%s", this.conf.getInventoryDataManager().getResource(resourceId).get().getDeviceId(),resourceId.split(":")[0] ,resourceId.split(":")[2]);
+                logger.info("url: {}", url);
+
+            }else if(resourceId.contains("light") || resourceId.contains("alarm")){
+                url = this.conf.getInventoryDataManager().getResource(resourceId).get().getDeviceId();
+                logger.info("url: {}", url);
+            }
+
+            CoapResponse response = coapResourceClient.postRequest(String.format("coap://192.168.1.107:5683/%s", url));
+            return Response.ok(response).build();
 
 
         } catch (Exception e) {

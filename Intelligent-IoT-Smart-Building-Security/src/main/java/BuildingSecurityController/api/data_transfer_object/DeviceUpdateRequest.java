@@ -6,19 +6,11 @@ public class DeviceUpdateRequest {
 
     private String areaId;
 
-    private String floorId;
-
     private String deviceId;
 
     public DeviceUpdateRequest(){}
 
-    public String getFloorId() {
-        return floorId;
-    }
 
-    public void setFloorId(String floorId) {
-        this.floorId = floorId;
-    }
 
     public String getDeviceId() {
         return deviceId;
@@ -36,9 +28,8 @@ public class DeviceUpdateRequest {
         this.areaId = areaId;
     }
 
-    public DeviceUpdateRequest(String areaId, String floorId, String deviceId) {
+    public DeviceUpdateRequest(String areaId, String deviceId) {
         this.areaId = areaId;
-        this.floorId = floorId;
         this.deviceId = deviceId;
     }
 

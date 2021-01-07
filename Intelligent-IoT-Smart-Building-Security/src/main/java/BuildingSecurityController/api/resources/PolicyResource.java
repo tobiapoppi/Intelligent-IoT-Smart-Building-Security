@@ -42,7 +42,6 @@ public class PolicyResource {
         this.conf = conf;
     }
 
-    //@DenyAll
     @RolesAllowed("USER")
     @GET
     @Path("/")
@@ -109,7 +108,7 @@ public class PolicyResource {
         }
     }
 
-    @RolesAllowed("ADMIN")
+    @RolesAllowed("USER")
     @POST
     @Path("/")
     @Timed
@@ -144,7 +143,7 @@ public class PolicyResource {
         }
     }
 
-    @RolesAllowed("ADMIN")
+    @RolesAllowed("USER")
     @PUT
     @Path("/{policy_id}")
     @Timed
@@ -179,7 +178,7 @@ public class PolicyResource {
         }
     }
 
-    @RolesAllowed("ADMIN")
+    @RolesAllowed("USER")
     @DELETE
     @Path("/{policy_id}")
     @Timed

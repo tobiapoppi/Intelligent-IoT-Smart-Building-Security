@@ -40,9 +40,7 @@ public class ExampleAuthenticator implements Authenticator<BasicCredentials, Use
     public Optional<User> authenticate(BasicCredentials credentials) throws AuthenticationException {
         try {
             deserialize();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (ClassNotFoundException e) {
+        } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
         }
         if (userMap.get(credentials.getUsername()).getPassword().equals(credentials.getPassword())) {

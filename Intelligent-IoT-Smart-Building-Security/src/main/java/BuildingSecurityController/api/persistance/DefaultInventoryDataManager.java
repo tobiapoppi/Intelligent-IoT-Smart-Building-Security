@@ -5,10 +5,6 @@ import BuildingSecurityController.api.auth.ExampleAuthenticator;
 import BuildingSecurityController.api.exception.IInventoryDataManagerConflict;
 import BuildingSecurityController.api.exception.IInventoryDataManagerException;
 import BuildingSecurityController.api.model.*;
-import org.eclipse.californium.core.server.resources.Resource;
-import smartBuilding.server.resource.coap.CoapCameraResource;
-import smartBuilding.server.resource.coap.CoapPirResource;
-import org.eclipse.californium.core.server.resources.CoapExchange;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,17 +16,13 @@ public class DefaultInventoryDataManager implements IInventoryDataManager {
 
     final protected Logger logger = LoggerFactory.getLogger(ExampleAuthenticator.class);
 
-    private static HashMap<String, PolicyDescriptor> policyMap;
+    private HashMap<String, PolicyDescriptor> policyMap;
     private HashMap<String, UserDescriptor> userMap;
     private HashMap<String, FloorDescriptor> floorMap;
     private HashMap<String, AreaDescriptor> areaMap;
     private HashMap<String, GenericDeviceDescriptor> deviceMap;
     private HashMap<String, ResourceDescriptor> resourceDeviceMap;
 
-
-    public static HashMap<String, PolicyDescriptor> getPolicies(){
-        return policyMap;
-    }
 
 
     public DefaultInventoryDataManager() {
@@ -179,11 +171,12 @@ public class DefaultInventoryDataManager implements IInventoryDataManager {
 
     @Override
     public AreaDescriptor createNewArea(AreaDescriptor areaDescriptor) throws IInventoryDataManagerException, IInventoryDataManagerConflict {
-        if(this.getArea(areaDescriptor.getArea_id()).isPresent())
+        if(this.getArea(areaDescriptor.getAreaId()).isPresent())
             throw new IInventoryDataManagerConflict("Area already exists!");
 
+        areaDescriptor.setAreaId(String.format("%s:%s", areaDescriptor.getFloorId(), areaDescriptor.getAreaName()));
 
-        this.areaMap.put(areaDescriptor.getArea_id(), areaDescriptor);
+        this.areaMap.put(areaDescriptor.getAreaId(), areaDescriptor);
         return areaDescriptor;
     }
 
@@ -194,7 +187,7 @@ public class DefaultInventoryDataManager implements IInventoryDataManager {
 
     @Override
     public AreaDescriptor updateArea(AreaDescriptor areaDescriptor) throws IInventoryDataManagerException {
-        this.areaMap.put(areaDescriptor.getArea_id(), areaDescriptor);
+        this.areaMap.put(areaDescriptor.getAreaId(), areaDescriptor);
         return areaDescriptor;
     }
 

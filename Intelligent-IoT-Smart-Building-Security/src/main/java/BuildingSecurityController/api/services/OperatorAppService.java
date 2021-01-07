@@ -70,7 +70,7 @@ public class OperatorAppService extends Application<OperatorAppConfig> {
         environment.jersey().register(new BuildingResource(operatorAppConfig));
         environment.jersey().register(new UserResource(operatorAppConfig));
         environment.jersey().register(new PolicyResource(operatorAppConfig));
-        environment.jersey().register(new DevicesResource(operatorAppConfig));
+        environment.jersey().register(new DevicesResource(operatorAppConfig, lookupAndObserveProcess));
 
         // Enable CORS headers
         final FilterRegistration.Dynamic cors = environment.servlets().addFilter("CORS", CrossOriginFilter.class);

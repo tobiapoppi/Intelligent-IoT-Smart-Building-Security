@@ -4,29 +4,29 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class AreaDescriptor {
-    private String area_id;
+    private String areaId;
+    private String areaName;
     private List<String> deviceIdList;
     private String floorId;
 
     public AreaDescriptor(){
-
         this.deviceIdList = new ArrayList<>();
     }
 
-    public AreaDescriptor(String area_id, List<String> deviceIdList, String floorId) {
-        this.area_id = area_id;
+    public AreaDescriptor(String areaName, List<String> deviceIdList, String floorId, String areaId) {
+        this.areaName = areaName;
         this.deviceIdList = deviceIdList;
         this.floorId = floorId;
-
+        this.areaId = areaId;
 
     }
 
-    public String getArea_id() {
-        return area_id;
+    public String getAreaName() {
+        return areaName;
     }
 
-    public void setArea_id(String area_id) {
-        this.area_id = area_id;
+    public void setAreaName(String areaName) {
+        this.areaName = areaName;
     }
 
     public List<String> getDeviceIdList() {
@@ -43,6 +43,14 @@ public class AreaDescriptor {
 
     public void setFloorId(String floorId) {
         this.floorId = floorId;
+    }
+
+    public String getAreaId() {
+        return areaId;
+    }
+
+    public void setAreaId(String areaId) {
+        this.areaId = areaId;
     }
 
     @Override

@@ -66,6 +66,7 @@ public class LookupAndObserveProcess implements Runnable{
     }
 
 
+
     private void lookupTarget(CoapClient coapClient){
 
         //we set the type of request as a "Get"
@@ -195,12 +196,10 @@ public class LookupAndObserveProcess implements Runnable{
 
                 //prima ottengo area e floor di questo pir
 
-                List<String> floorId = new ArrayList<>();
                 List<String> areaId = new ArrayList<>();
 
                 deviceList.forEach(device -> {
                     if(device.getDeviceId().equals(newPack.get(0).getBn())){
-                        floorId.add(device.getFloorId());
                         areaId.add(device.getAreaId());
                     }
                 });
@@ -208,7 +207,7 @@ public class LookupAndObserveProcess implements Runnable{
                 //ora accedo alle policy che hanno lo stessa area e floor del pir in questione
 
                 policyList.forEach(policy ->{
-                    if (policy.getFloor_id().equals(floorId.get(0)) && policy.getArea_id().equals(areaId.get(0))){
+                    if (policy.getArea_id().equals(areaId.get(0))){
                         if(policy.getPresence_mode()){
 
                             int hourStart = Integer.parseInt(policy.getStart_working_time().split(":")[0]);
@@ -229,8 +228,8 @@ public class LookupAndObserveProcess implements Runnable{
                                 List<String> targetUrlsAlarm = new ArrayList<>();
 
                                 deviceList.forEach(device -> {
-                                    logger.info("AREA {} FLOOR {} DEVICE", areaId.get(0), floorId.get(0));
-                                    if(device.getFloorId().equals(floorId.get(0)) && device.getAreaId().equals(areaId.get(0))){
+                                    logger.info("AREA {} DEVICE", areaId.get(0));
+                                    if(device.getAreaId().equals(areaId.get(0))){
                                         if(device.getDeviceId().contains("alarm") || device.getDeviceId().contains("light")){
                                             targetUrlsAlarm.add(String.format("coap://192.168.1.107:5683/%s", device.getDeviceId()));
                                         }
@@ -240,7 +239,7 @@ public class LookupAndObserveProcess implements Runnable{
                                 targetUrlsAlarm.forEach(url ->{
                                     CoapResponse coapResponse = coapResourceClient.putRequest(url, "true");
                                     logger.info("Response pretty print:\n{}", Utils.prettyPrint(coapResponse));
-                                    logger.info("ALARMS AND LIGHTS ACTIVATED FOR FLOOR {} AREA {}", floorId.get(0), areaId.get(0));
+                                    logger.info("ALARMS AND LIGHTS ACTIVATED FOR AREA {}", areaId.get(0));
                                 });
 
                             }
@@ -277,12 +276,10 @@ public class LookupAndObserveProcess implements Runnable{
 
             //prima ottengo area e floor di questo pir
 
-            List<String> floorId = new ArrayList<>();
             List<String> areaId = new ArrayList<>();
 
             deviceList.forEach(device -> {
                 if(device.getDeviceId().equals(newPack.get(0).getBn())){
-                    floorId.add(device.getFloorId());
                     areaId.add(device.getAreaId());
                 }
             });
@@ -290,7 +287,7 @@ public class LookupAndObserveProcess implements Runnable{
             //ora accedo alle policy che hanno lo stessa area e floor del pir in questione
 
             policyList.forEach(policy ->{
-                if (policy.getFloor_id().equals(floorId.get(0)) && policy.getArea_id().equals(areaId.get(0))){
+                if (policy.getArea_id().equals(areaId.get(0))){
                     if(!policy.getPresence_mode() && policy.getMax_persons() < (Integer) camValue){
 
                         int hourStart = Integer.parseInt(policy.getStart_working_time().split(":")[0]);
@@ -311,8 +308,8 @@ public class LookupAndObserveProcess implements Runnable{
                             List<String> targetUrls = new ArrayList<>();
 
                             deviceList.forEach(device -> {
-                                logger.info("AREA {} FLOOR {} DEVICE", areaId.get(0), floorId.get(0));
-                                if(device.getFloorId().equals(floorId.get(0)) && device.getAreaId().equals(areaId.get(0))){
+                                logger.info("AREA {} FLOOR {} DEVICE", areaId.get(0));
+                                if(device.getAreaId().equals(areaId.get(0))){
                                     if(device.getDeviceId().contains("alarm") || device.getDeviceId().contains("light")){
                                         targetUrls.add(String.format("coap://192.168.1.107:5683/%s", device.getDeviceId()));
                                     }
@@ -321,7 +318,7 @@ public class LookupAndObserveProcess implements Runnable{
                             targetUrls.forEach(url ->{
                                 CoapResponse coapResponse = coapResourceClient.putRequest(url, "true");
                                 logger.info("Response pretty print:\n{}", Utils.prettyPrint(coapResponse));
-                                logger.info("ALARMS AND LIGHTS ACTIVATED FOR FLOOR {} AREA {}", floorId.get(0), areaId.get(0));
+                                logger.info("ALARMS AND LIGHTS ACTIVATED FOR AREA {}",  areaId.get(0));
                             });
                         }
                     }
