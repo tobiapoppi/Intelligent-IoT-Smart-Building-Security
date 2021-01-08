@@ -1,10 +1,12 @@
+from django.shortcuts import render
+import matplotlib.pyplot as plt
+import io
+import urllib, base64
 import os
 import json
 import pandas as pd
-import matplotlib.pyplot as plt
-
-data_folder = r"C:\Users\zanna\Desktop\data-analysis-playground-master\data"
-data_file = "Pir Sensor.json"
+data_folder = r"C:\Users\Tobi\Documents\uni\Intelligent-IoT-Smart-Building-Security\Intelligent-IoT-Smart-Building-Security"
+data_file = "recordSensorsFile"
 
 plt.style.use('seaborn')
 
@@ -15,12 +17,8 @@ with open(file_path) as file:
     for line in file.readlines():
         json_senml_pack = json.loads(line)
         senml_record_list.append(json_senml_pack[0])
-
-df = pd.DataFrame(senml_record_list) 
+df = pd.DataFrame(senml_record_list)
 df['datetime'] = pd.to_datetime(df['t'], unit='ms')
-
-
-
 
 #Grafico Lineare Camera
 plt1 = plt.subplot(2,2,1)
@@ -31,7 +29,6 @@ plt.xticks(rotation=70)
 plt1.title.set_text('Camera Sensor')
 plt1.set_xlabel('Time')
 plt1.set_ylabel('Measurements Count')
-
 
 
 #Bar Graph Pir
@@ -47,8 +44,6 @@ plt2.title.set_text('Pir Sensor')
 plt2.set_xlabel('Days')
 plt2.set_ylabel('Measurements Count')
 
-
-
 #Grafico lineare Allarme
 plt3 = plt.subplot(2,2,3)
 pp=df[df['bn'].str.contains("alarm")]
@@ -57,7 +52,6 @@ plt.scatter(pp['VEROdt'],pp['vb'],c='#ff0000',s=500)
 plt3.title.set_text('ALLARME')
 plt3.set_xlabel('Days')
 plt3.set_ylabel('Measurements Count')
-
 
 #GraficoLuci
 plt4 = plt.subplot(2,2,4)
@@ -73,5 +67,11 @@ plt.xticks(range(len(rr)), rr.index)
 plt.bar(range(len(rr)), rr)
 plt.xticks(rotation=70)
 
+fig = plt.gcf()
+buf = io.BytesIO()
+fig.savefig('NO.svg', format='svg', dpi=1200)
 
-plt.show()
+buf.seek(0)
+string = base64.b64encode(buf.read())
+uri =  urllib.parse.quote(string)
+

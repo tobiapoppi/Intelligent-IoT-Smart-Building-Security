@@ -16,7 +16,7 @@ import utils.SenMLPack;
 public class CloudPostClient {
 
     private static final Logger logger = LoggerFactory.getLogger(CloudPostClient.class);
-    private String targetCloudUrl = "http://192.168.1.107:8090/cloudCollector/pack";
+    private String targetCloudUrl = "http://thebuildingsecurity.servehttp.com:8090/cloudCollector/pack";
     private CloseableHttpClient httpClient;
     private ObjectMapper objectMapper;
 
