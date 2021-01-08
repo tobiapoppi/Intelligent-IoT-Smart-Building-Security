@@ -1,7 +1,7 @@
 from shutil import copyfile
 import time
 
-while(True)
+while(True):
     try:
         copyfile("/root/Intelligent-IoT-Smart-Building-Security/Intelligent-IoT-Smart-Building-Security/recordSensorsFile", "/root/Intelligent-IoT-Smart-Building-Security/Intelligent-IoT-Smart-Building-Security/newRecords")
         time.sleep(15)
