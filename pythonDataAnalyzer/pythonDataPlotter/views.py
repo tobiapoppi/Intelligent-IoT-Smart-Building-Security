@@ -9,8 +9,10 @@ import pandas as pd
 
 def home(request):
 
-    data_folder = r"C:\Users\Tobi\Documents\uni\Intelligent-IoT-Smart-Building-Security\Intelligent-IoT-Smart-Building-Security"
-    data_file = "recordSensorsFile"
+    #data_folder = r"C:\Users\Tobi\Documents\uni\Intelligent-IoT-Smart-Building-Security\Intelligent-IoT-Smart-Building-Security"
+    data_folder = "/root/Intelligent-IoT-Smart-Building-Security/Intelligent-IoT-Smart-Building-Security"
+    
+    data_file = "newRecords"
 
     plt.style.use('seaborn')
 
