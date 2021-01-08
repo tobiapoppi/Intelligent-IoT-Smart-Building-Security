@@ -20,9 +20,6 @@ import static org.eclipse.californium.core.coap.LinkFormat.RESOURCE_TYPE;
 
 public class DataFetcher {
     private final static Logger logger = LoggerFactory.getLogger(LookupAndObserveProcess.class);
-
-    //private static final String COAP_ENDPOINT = "coap://127.0.0.1:<porta>/rd-lookup/res";
-
     private static final String TARGET_RD_IP = "edgeiotgateway.servehttp.com";
     private static final int TARGET_RD_PORT = 5683;
     private static final String RD_LOOKUP_URI = "/rd-lookup/res";
@@ -104,17 +101,9 @@ public class DataFetcher {
                         CloudPostClient cloudPostClient = new CloudPostClient();
                         try {
                             SenMLPack newPack = new ObjectMapper().readValue(response.getPayload(), SenMLPack.class);
-                            CloseableHttpResponse httpresponse = cloudPostClient.postRequestToCloud(newPack);
+                            cloudPostClient.postRequestToCloud(newPack);
 
-                            //Obtain response body as a String
-                            String bodyString = EntityUtils.toString(httpresponse.getEntity());
-
-                            //Extract the Location Header
-                            String packHeader = Arrays.stream(httpresponse.getHeaders("Pack")).findFirst().get().getValue();
-
-                            logger.info("Response Code: {}", httpresponse.getStatusLine().getStatusCode());
-                            logger.info("Response Location Header: {}", packHeader);
-                            logger.info("Raw Response Body: {}", bodyString);
+                            logger.info("pack delivered to Cloud");
 
                         } catch (IOException e) {
                             e.printStackTrace();
@@ -150,16 +139,7 @@ public class DataFetcher {
                             SenMLPack newPack = new ObjectMapper().readValue(response.getPayload(), SenMLPack.class);
                             CloseableHttpResponse httpresponse = cloudPostClient.postRequestToCloud(newPack);
 
-                            //Obtain response body as a String
-                            String bodyString = EntityUtils.toString(httpresponse.getEntity());
-
-                            //Extract the Location Header
-                            String packHeader = Arrays.stream(httpresponse.getHeaders("Pack")).findFirst().get().getValue();
-
-                            logger.info("Response Code: {}", httpresponse.getStatusLine().getStatusCode());
-                            logger.info("Response Location Header: {}", packHeader);
-                            logger.info("Raw Response Body: {}", bodyString);
-
+                            logger.info("pack delivered to Cloud");
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
@@ -195,15 +175,7 @@ public class DataFetcher {
                             SenMLPack newPack = new ObjectMapper().readValue(response.getPayload(), SenMLPack.class);
                             CloseableHttpResponse httpresponse = cloudPostClient.postRequestToCloud(newPack);
 
-                            //Obtain response body as a String
-                            String bodyString = EntityUtils.toString(httpresponse.getEntity());
-
-                            //Extract the Location Header
-                            String packHeader = Arrays.stream(httpresponse.getHeaders("Pack")).findFirst().get().getValue();
-
-                            logger.info("Response Code: {}", httpresponse.getStatusLine().getStatusCode());
-                            logger.info("Response Location Header: {}", packHeader);
-                            logger.info("Raw Response Body: {}", bodyString);
+                            logger.info("pack delivered to Cloud");
 
                         } catch (IOException e) {
                             e.printStackTrace();
@@ -237,15 +209,7 @@ public class DataFetcher {
                             SenMLPack newPack = new ObjectMapper().readValue(response.getPayload(), SenMLPack.class);
                             CloseableHttpResponse httpresponse = cloudPostClient.postRequestToCloud(newPack);
 
-                            //Obtain response body as a String
-                            String bodyString = EntityUtils.toString(httpresponse.getEntity());
-
-                            //Extract the Location Header
-                            String packHeader = Arrays.stream(httpresponse.getHeaders("Pack")).findFirst().get().getValue();
-
-                            logger.info("Response Code: {}", httpresponse.getStatusLine().getStatusCode());
-                            logger.info("Response Location Header: {}", packHeader);
-                            logger.info("Raw Response Body: {}", bodyString);
+                            logger.info("pack delivered to Cloud");
 
                         } catch (IOException e) {
                             e.printStackTrace();

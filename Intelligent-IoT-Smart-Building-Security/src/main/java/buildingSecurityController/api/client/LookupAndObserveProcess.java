@@ -28,9 +28,6 @@ l'observing va fatto su tutti e soli i sensori (no attuatori). */
 public class LookupAndObserveProcess implements Runnable{
 
     private final static Logger logger = LoggerFactory.getLogger(LookupAndObserveProcess.class);
-
-    //private static final String COAP_ENDPOINT = "coap://127.0.0.1:<porta>/rd-lookup/res";
-
     private static final String TARGET_RD_IP = "edgeiotgateway.servehttp.com";
     private static final int TARGET_RD_PORT = 5683;
     private static final String RD_LOOKUP_URI = "/rd-lookup/res";

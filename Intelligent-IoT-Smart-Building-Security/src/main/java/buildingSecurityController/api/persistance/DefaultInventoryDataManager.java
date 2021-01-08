@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 
 public class DefaultInventoryDataManager implements IInventoryDataManager {
 
-    final protected Logger logger = LoggerFactory.getLogger(ExampleAuthenticator.class);
+    final protected Logger logger = LoggerFactory.getLogger(DefaultInventoryDataManager.class);
 
     private HashMap<String, PolicyDescriptor> policyMap;
     private HashMap<String, UserDescriptor> userMap;
