@@ -1,11 +1,11 @@
 package utils;
 
 
-import BuildingSecurityController.api.model.AreaDescriptor;
-import BuildingSecurityController.api.model.FloorDescriptor;
-import BuildingSecurityController.api.model.PolicyDescriptor;
-import BuildingSecurityController.api.model.UserDescriptor;
-import BuildingSecurityController.api.persistance.IInventoryDataManager;
+import buildingSecurityController.api.model.AreaDescriptor;
+import buildingSecurityController.api.model.FloorDescriptor;
+import buildingSecurityController.api.model.PolicyDescriptor;
+import buildingSecurityController.api.model.UserDescriptor;
+import buildingSecurityController.api.persistance.IInventoryDataManager;
 
 public class DummyDataGenerator {
 
