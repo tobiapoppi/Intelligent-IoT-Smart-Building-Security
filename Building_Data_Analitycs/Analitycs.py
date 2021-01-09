@@ -5,8 +5,12 @@ import urllib, base64
 import os
 import json
 import pandas as pd
-data_folder = r"C:\Users\Tobi\Documents\uni\Intelligent-IoT-Smart-Building-Security\Intelligent-IoT-Smart-Building-Security"
-data_file = "recordSensorsFile"
+import time
+import datetime
+pd.options.mode.chained_assignment = None  # default='warn'
+#data_folder = r"C:\Users\Tobi\Documents\uni\Intelligent-IoT-Smart-Building-Security\Intelligent-IoT-Smart-Building-Security"
+data_folder = r"C:\Users\zanna\Desktop"
+data_file = "newRecords"
 
 plt.style.use('seaborn')
 
@@ -19,11 +23,10 @@ with open(file_path) as file:
         senml_record_list.append(json_senml_pack[0])
 df = pd.DataFrame(senml_record_list)
 df['datetime'] = pd.to_datetime(df['t'], unit='ms')
-
 #Grafico Lineare Camera
 plt1 = plt.subplot(2,2,1)
-ss = df[df['u'].isin(["Num"])]
-sorted_df = ss.sort_values(by='t')
+ss2 = df[df['u'].isin(["Num"])]
+sorted_df = ss2.sort_values(by='t')
 plt1.plot(sorted_df['datetime'], sorted_df['v'])
 plt.xticks(rotation=70)
 plt1.title.set_text('Camera Sensor')
@@ -31,18 +34,33 @@ plt1.set_xlabel('Time')
 plt1.set_ylabel('Measurements Count')
 
 
+
+
 #Bar Graph Pir
+
+
+
 plt2 = plt.subplot(2,2,2)
-bf3=df[df['bn'].str.contains("alarm")]
-bf2 = bf3[bf3['vb'].isin([True])]
-bf2['VEROdt'] = bf2['datetime'].dt.date
-cc = bf2['VEROdt'].value_counts()
-plt.xticks(range(len(cc)), cc.index)
-plt.bar(range(len(cc)), cc)
+bf2 = df[df['u'].isin(["SEEING"])]
+adess=time.time()
+
+adess=datetime.datetime.fromtimestamp(adess)
+timestampunorafa=adess+datetime.timedelta(hours=-1)
+
+bf2 = bf2[bf2['datetime'] > timestampunorafa]
+bf2 = bf2[bf2['vb'].isin([True])]
+bf2['VEROdt'] = bf2['datetime'].dt.minute
+bf6=bf2.groupby(['VEROdt']).count()
+
+print(bf6)
+heads=bf6.index
+plt2.plot(heads, bf6['vb'])
 plt.xticks(rotation=70)
-plt2.title.set_text('Pir Sensor')
+plt2.title.set_text('Pir Sensor - Last Hour')
 plt2.set_xlabel('Days')
 plt2.set_ylabel('Measurements Count')
+
+
 
 #Grafico lineare Allarme
 plt3 = plt.subplot(2,2,3)
@@ -61,17 +79,9 @@ plt4.set_ylabel('Measurements Count')
 uu=df[df['bn'].str.contains("light")]
 uu2 = uu[uu['vb'].isin([True])]
 uu2['VEROdt'] = uu2['datetime'].dt.date
+
 rr = uu2['VEROdt'].value_counts()
-print(rr)
 plt.xticks(range(len(rr)), rr.index)
 plt.bar(range(len(rr)), rr)
 plt.xticks(rotation=70)
-
-fig = plt.gcf()
-buf = io.BytesIO()
-fig.savefig('NO.svg', format='svg', dpi=1200)
-
-buf.seek(0)
-string = base64.b64encode(buf.read())
-uri =  urllib.parse.quote(string)
-
+plt.show()

@@ -29,6 +29,7 @@ public class DataFetcher {
     private static final String WELL_KNOWN_CORE_URI = "/.well-known/core";
 
     private static final String SMARTOBJECT_ENDPOINT = "coap://192.168.1.107:5683/";
+    //private static final String SMARTOBJECT_ENDPOINT = "coap://192.168.1.59:5683/";
 
     private static List<String> pirTargetObservableList = null;
     private static List<String> camTargetObservableList = null;

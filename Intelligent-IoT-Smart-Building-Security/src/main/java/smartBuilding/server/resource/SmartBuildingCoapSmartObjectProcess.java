@@ -20,6 +20,8 @@ public class SmartBuildingCoapSmartObjectProcess extends CoapServer {
     private static final String RD_COAP_ENDPOINT_BASE_URL = "coap://edgeiotgateway.servehttp.com:5683/rd";
 
     private static final String TARGET_LISTENING_IP = "192.168.1.107"; //local machine address
+    //private static final String TARGET_LISTENING_IP = "192.168.1.59"; //local machine address
+
 
     private static final int TARGET_PORT = 5683;
 
