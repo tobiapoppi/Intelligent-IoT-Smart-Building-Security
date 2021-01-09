@@ -155,7 +155,7 @@ public class DevicesResource {
 
     @RolesAllowed("USER")
     @GET
-    @Path("/{device_id}/resource/{resource_id}")
+    @Path("/resource/{resource_id}")
     @Timed
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "Get a Resource's infos")
@@ -186,7 +186,7 @@ public class DevicesResource {
 
     @RolesAllowed("USER")
     @GET
-    @Path("/{device_id}/resource/{resource_id}/proxy")
+    @Path("/resource/{resource_id}/proxy")
     @Timed
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "Make a Coap Get request to the Resource")
@@ -230,7 +230,7 @@ public class DevicesResource {
     }
     @RolesAllowed("USER")
     @PUT
-    @Path("/{device_id}/resource/{resource_id}/proxy")
+    @Path("/resource/{resource_id}/proxy")
     @Timed
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "Make a Coap Put request to the Resource")
@@ -274,7 +274,7 @@ public class DevicesResource {
     }
     @RolesAllowed("USER")
     @POST
-    @Path("/{device_id}/resource/{resource_id}/proxy")
+    @Path("/resource/{resource_id}/proxy")
     @Timed
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "Make a Coap Put request to the Resource")
