@@ -277,7 +277,7 @@ public class DevicesResource {
     @Path("/resource/{resource_id}/proxy")
     @Timed
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "Make a Coap Put request to the Resource")
+    @ApiOperation(value = "Make a Coap Post request to the Resource")
     public Response putProxy(@Context ContainerRequestContext requestContext,
                              @PathParam("resource_id") String resourceId) {
         try {
