@@ -1,15 +1,18 @@
 package buildingSecurityController.api.resources;
 
 
+import buildingSecurityController.api.client.CoapResourceClient;
 import buildingSecurityController.api.data_transfer_object.PolicyCreationRequest;
 import buildingSecurityController.api.data_transfer_object.PolicyUpdateRequest;
 import buildingSecurityController.api.exception.IInventoryDataManagerConflict;
+import buildingSecurityController.api.model.GenericDeviceDescriptor;
 import buildingSecurityController.api.model.PolicyDescriptor;
 import buildingSecurityController.api.services.OperatorAppConfig;
 import com.codahale.metrics.annotation.Timed;
 import io.dropwizard.jersey.errors.ErrorMessage;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import org.eclipse.californium.core.CoapResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,6 +24,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -165,6 +169,35 @@ public class PolicyResource {
 
             PolicyDescriptor policyDescriptor = (PolicyDescriptor) policyUpdateRequest;
             this.conf.getInventoryDataManager().updatePolicy(policyDescriptor);
+
+
+            if (!policyUpdateRequest.getIs_enabled()){
+
+                List<GenericDeviceDescriptor> devList = this.conf.getInventoryDataManager().getDeviceList();
+                List<GenericDeviceDescriptor> newList = new ArrayList<>();
+
+                devList.forEach(dev ->{
+                    if(dev.getAreaId().equals(policyUpdateRequest.getArea_id())){
+                        newList.add(dev);
+                    }
+                });
+
+                if(!newList.isEmpty()){
+                    newList.forEach(dev ->{
+                        if(dev.getDeviceId().contains("alarm") || dev.getDeviceId().contains("light")){
+
+                            CoapResourceClient coapResourceClient = new CoapResourceClient();
+                            CoapResponse response = coapResourceClient.putRequest(String.format("coap://192.168.1.107:5683/%s", dev.getDeviceId()), "false");
+                            logger.info("Deactivated: {}", dev.getDeviceId());
+                        }
+
+                    });
+                }
+
+
+            }
+
+
 
             return Response.noContent().build();
 
