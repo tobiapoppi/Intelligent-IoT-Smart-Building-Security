@@ -94,10 +94,12 @@ public class DataFetcher {
         CoapObserveRelation relation = coapClient.observe(request, new CoapHandler() {
             @Override
             public void onLoad(CoapResponse response) {
+                logger.info("PROVO A FARE LA POST DEL PIR!!!!!!");
 
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
+
                         CloudPostClient cloudPostClient = new CloudPostClient();
                         try {
                             SenMLPack newPack = new ObjectMapper().readValue(response.getPayload(), SenMLPack.class);

@@ -19,7 +19,7 @@ public class SmartBuildingCoapSmartObjectProcess extends CoapServer {
 
     private static final String RD_COAP_ENDPOINT_BASE_URL = "coap://edgeiotgateway.servehttp.com:5683/rd";
 
-    private static final String TARGET_LISTENING_IP = "192.168.1.107";
+    private static final String TARGET_LISTENING_IP = "192.168.1.107"; //local machine address
 
     private static final int TARGET_PORT = 5683;
 
@@ -29,23 +29,30 @@ public class SmartBuildingCoapSmartObjectProcess extends CoapServer {
 
         super();
 
-        this.add(createPresenceMonitoringResource());
-        this.add(createAlarmResource());
-        this.add(createLightResource());
+        this.add(createPresenceMonitoringResource("0001"));
+        this.add(createAlarmResource("0002"));
+        this.add(createLightResource("0003"));
+        this.add(createPresenceMonitoringResource("0004"));
+        this.add(createAlarmResource("0005"));
+        this.add(createLightResource("0006"));
+        this.add(createPresenceMonitoringResource("0007"));
+        this.add(createAlarmResource("0008"));
+        this.add(createLightResource("0009"));
+        this.add(createPresenceMonitoringResource("0010"));
+        this.add(createAlarmResource("00011"));
+        this.add(createLightResource("00012"));
 
   }
 
 
-    private static CoapResource createPresenceMonitoringResource() throws InterruptedException {
-
-        String deviceId = String.format("%s", UUID.randomUUID().toString());
+    private static CoapResource createPresenceMonitoringResource(String deviceId) throws InterruptedException {
 
         PMRaw pmRaw = new PMRaw();
-        CoapPMResource coapPMResource = new CoapPMResource ("presencemonitoring","0001", pmRaw);
+        CoapPMResource coapPMResource = new CoapPMResource ("presencemonitoring",deviceId, pmRaw);
         PirRawSensor PMPirRawSensor = new PirRawSensor();
         CameraRawSensor PMCameraRawSensor = new CameraRawSensor();
-        CoapPirResource PMcoapPirResource = new CoapPirResource ("pir","0001", PMPirRawSensor);
-        CoapCameraResource PMcoapCameraRecource = new CoapCameraResource("camera", "0001",PMCameraRawSensor );
+        CoapPirResource PMcoapPirResource = new CoapPirResource ("pir",deviceId, PMPirRawSensor);
+        CoapCameraResource PMcoapCameraRecource = new CoapCameraResource("camera", deviceId,PMCameraRawSensor );
 
         coapPMResource.add(PMcoapPirResource);
         coapPMResource.add(PMcoapCameraRecource);
@@ -54,17 +61,15 @@ public class SmartBuildingCoapSmartObjectProcess extends CoapServer {
 
     };
 
-    private static CoapResource createAlarmResource () throws InterruptedException {
-        String deviceId = String.format("%s", UUID.randomUUID().toString());
+    private static CoapResource createAlarmResource (String deviceId) throws InterruptedException {
         AlarmActuator alarmRawSensor = new AlarmActuator();
-        CoapAlarmResource coapAlarmResource = new CoapAlarmResource ("alarm","0004", alarmRawSensor);
+        CoapAlarmResource coapAlarmResource = new CoapAlarmResource ("alarm",deviceId, alarmRawSensor);
         return coapAlarmResource;
 
     };
-    private static CoapResource createLightResource () throws InterruptedException {
-        String deviceId = String.format("%s", UUID.randomUUID().toString());
+    private static CoapResource createLightResource (String deviceId) throws InterruptedException {
         LightActuator lightRawSensor = new LightActuator();
-        CoapLightResource coapLightResource = new CoapLightResource ("light","0005", lightRawSensor);
+        CoapLightResource coapLightResource = new CoapLightResource ("light",deviceId, lightRawSensor);
         return coapLightResource;
 
     };

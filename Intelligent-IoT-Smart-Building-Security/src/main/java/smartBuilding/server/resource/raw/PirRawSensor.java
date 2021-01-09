@@ -72,7 +72,6 @@ public class PirRawSensor extends SmartObjectResource<Boolean> {
                 @Override
                 public void run() {
 
-
                     if (half > random.nextDouble()) {
 
                         updatedValue = Boolean.TRUE;
@@ -87,7 +86,6 @@ public class PirRawSensor extends SmartObjectResource<Boolean> {
         } catch (Exception e) {
             logger.error("Error executing periodic resource value ! Msg: {}", e.getLocalizedMessage());
         }
-
     }
 
     @Override

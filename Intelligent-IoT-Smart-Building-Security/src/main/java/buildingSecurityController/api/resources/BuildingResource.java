@@ -260,7 +260,7 @@ public class BuildingResource {
 
     @RolesAllowed("USER")
     @GET
-    @Path("/{floor_id}/area/{area_id}")
+    @Path("/area/{area_id}")
     @Timed
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value="Get an Area's infos")
@@ -294,7 +294,7 @@ public class BuildingResource {
 
     @RolesAllowed("USER")
     @PUT
-    @Path("/{floor_id}/area/{area_id}")
+    @Path("/area/{area_id}")
     @Timed
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
@@ -333,7 +333,7 @@ public class BuildingResource {
 
     @RolesAllowed("USER")
     @DELETE
-    @Path("/{floor_id}/area/{area_id}")
+    @Path("/area/{area_id}")
     @Timed
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value="Delete a Area")
@@ -378,7 +378,7 @@ public class BuildingResource {
 
     @RolesAllowed("USER")
     @GET
-    @Path("/{floor_id}/area/{area_id}/device")
+    @Path("/area/{area_id}/device")
     @Timed
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "Get all the Devices of the area")
@@ -418,7 +418,7 @@ public class BuildingResource {
 
     @RolesAllowed("USER")
     @GET
-    @Path("/{floor_id}/area/{area_id}/device/{device_id}")
+    @Path("/area/{area_id}/device/{device_id}")
     @Timed
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value="Get a Device's infos")
@@ -452,7 +452,7 @@ public class BuildingResource {
 
     @RolesAllowed("USER")
     @GET
-    @Path("/{floor_id}/area/{area_id}/device/{device_id}/resource")
+    @Path("/area/{area_id}/device/{device_id}/resource")
     @Timed
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "Get all the Devices' Resources")
@@ -485,7 +485,7 @@ public class BuildingResource {
 
     @RolesAllowed("USER")
     @GET
-    @Path("/{floor_id}/area/{area_id}/device/{device_id}/resource/{resource_id}")
+    @Path("/area/device/resource/{resource_id}")
     @Timed
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value="Get a Resource's infos")
