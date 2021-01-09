@@ -78,7 +78,9 @@ public class DevicesResource {
     @Timed
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "Modify a Device or allocate it to an Area")
-    public Response updateDevice(@Context ContainerRequestContext requestContext, @Context UriInfo uriInfo, DeviceUpdateRequest deviceUpdateRequest, @PathParam("device_id") String deviceId) {
+    public Response updateDevice(@Context ContainerRequestContext requestContext, @Context UriInfo uriInfo,
+                                 @PathParam("device_id") String deviceId,
+                                 DeviceUpdateRequest deviceUpdateRequest) {
 
         try {
 
@@ -118,6 +120,7 @@ public class DevicesResource {
     @Path("/{device_id}/resource")
     @Timed
     @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "Get all the Devices' Resources")
     public Response GetResource(@Context ContainerRequestContext requestContext,
                                 @PathParam("device_id") String deviceId) {
