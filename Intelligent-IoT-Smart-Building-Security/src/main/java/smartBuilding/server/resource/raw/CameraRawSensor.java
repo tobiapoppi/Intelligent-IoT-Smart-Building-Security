@@ -24,7 +24,6 @@ public class CameraRawSensor extends SmartObjectResource<Integer>{
 
     private static final String type ="People";
 
-    //Ms associated to data update
     public static final long UPDATE_PERIOD = 5000;
 
     private static final long TASK_DELAY_TIME = 10000;

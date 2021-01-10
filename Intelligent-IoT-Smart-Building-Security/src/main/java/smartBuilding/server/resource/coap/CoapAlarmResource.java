@@ -105,10 +105,8 @@ public class CoapAlarmResource extends CoapResource {
     @Override
     public void handlePOST(CoapExchange exchange){
         try{
-            //Empty request
             if(exchange.getRequestPayload() == null){
 
-                //Update internal status
                 this.isActive = !isActive;
                 this.alarmActuator.setActive(isActive);
 
@@ -130,14 +128,12 @@ public class CoapAlarmResource extends CoapResource {
     public void handlePUT(CoapExchange exchange){
         try{
 
-            //If the request body is available
             if(exchange.getRequestPayload() != null){
 
                 boolean submittedValue = Boolean.parseBoolean(new String(exchange.getRequestPayload()));
 
                 logger.info("Submitted value: {}", submittedValue);
 
-                //Update internal status
                 this.isActive = submittedValue;
                 this.alarmActuator.setActive(this.isActive);
 

@@ -78,6 +78,7 @@ plt4.set_xlabel('Days')
 plt4.set_ylabel('Measurements Count')
 uu=df[df['bn'].str.contains("light")]
 uu2 = uu[uu['vb'].isin([True])]
+print(uu2)
 uu2['VEROdt'] = uu2['datetime'].dt.date
 
 rr = uu2['VEROdt'].value_counts()

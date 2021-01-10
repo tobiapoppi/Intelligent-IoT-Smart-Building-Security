@@ -94,6 +94,5 @@ public class CoapPMResource extends CoapResource {
             else
                 exchange.respond(CoAP.ResponseCode.INTERNAL_SERVER_ERROR);
         }
-        //Otherwise respond with the default textplain payload
     }
 }

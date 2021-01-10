@@ -116,10 +116,8 @@ public class CoapLightResource extends CoapResource {
     @Override
     public void handlePOST(CoapExchange exchange){
         try{
-            //Empty request
             if(exchange.getRequestPayload() == null){
 
-                //Update internal status
                 this.Is_Active = !Is_Active;
                 this.lightActuator.setActive(Is_Active);
 
@@ -141,14 +139,12 @@ public class CoapLightResource extends CoapResource {
     public void handlePUT(CoapExchange exchange){
         try{
 
-            //If the request body is available
             if(exchange.getRequestPayload() != null){
 
                 boolean submittedValue = Boolean.parseBoolean(new String(exchange.getRequestPayload()));
 
                 logger.info("Submitted value: {}", submittedValue);
 
-                //Update internal status
                 this.Is_Active = submittedValue;
                 this.lightActuator.setActive(this.Is_Active);
 

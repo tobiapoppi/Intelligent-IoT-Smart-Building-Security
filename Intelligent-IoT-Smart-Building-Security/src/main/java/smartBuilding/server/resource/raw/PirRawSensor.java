@@ -20,7 +20,6 @@ public class PirRawSensor extends SmartObjectResource<Boolean> {
 
     private static final String LOG_DISPLAY_NAME = "Pir Sensor";
 
-    //Ms associated to data update
     public static final long UPDATE_PERIOD = 5000;
 
     private static final long TASK_DELAY_TIME = 10000;
