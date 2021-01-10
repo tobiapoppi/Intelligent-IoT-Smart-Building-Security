@@ -35,44 +35,55 @@ Quando viene disinserito spegne sirena e luci
 **ALBERO DELLE RISORSE**
 
 /building/floor
-    -GET: ricevi la lista dei piani del building
-    -POST: crea un nuovo piano
+    -GET: Get all floors
+    -POST: Create a new floor
     ../<floor_id>
-        -GET: ricevi le info del singolo piano
-        -PUT: cambia i dati del piano
-        -DELETE: cancella il piano
-        
-        
+        -GET: get floor infos
+        -DELETE: delete floor
         ../area
-            -GET: ricevi la lista delle zone in quel piano
-            -POST: crea una nuova zona
+            -GET: Get all areas of the floor
+            -POST: Create a new area
             ../<area_id>
-                -GET: ricevi le info di quella zona
-                -PUT: modifica le info di quella zona
-                -DELETE: elimina quella zona
+                -GET: Get area infos
+                -PUT: Update an existing area
+                -DELETE: Delete an area
                 ../device
-                    -GET: ricevi tutti i device di quella zona
-                    -POST: crea un nuovo device per quella zona
+                    -GET: Get all devices in the area
                     ../<device_id>
-                        -GET: ricevi i dati di quel device
-                        -PUT: modifica i dati di quel device
-                        -DELETE: elimina quel device
-                        
+                        -GET: Get device infos
+                        ../resource
+                            -GET: Get all resources in the device
+                            ../<resource_id>
+                                -GET: get resource info
+                                
+/building/allDevices
+    -GET: get all the building devices (also unallocated ones)
+    ../<device_id>
+        -PUT: update a device infos
+        ../resource
+            -GET: get all reosurces of the device
+            ../<resource_id>
+                -GET: Get a resource infos
+                ../proxy
+                    -GET: make a coap get request to the resource
+                    -POST: make a coap post request to the resource
+                    -PUT: make a coap put request to the resource
+    
 /building/policy
-    -GET: ricevi la lista delle policy del buiding
-    -POST: crea una nuova policy
+    -GET: get all policy list
+    -POST: create a new policy
     ../<policy_id>
-        -GET: ricevi le info della policy
-        -PUT: cambia i dati della policy
-        -DELETE: cancella la policy
+        -GET: get policy infos
+        -PUT: update a policy
+        -DELETE: delete a policy
         
 /building/user
-    -GET: ricevi la lista degli utenti
-    -POST: crea un nuovo utente
+    -GET: get all users list
+    -POST: create a new user
     ../<username>
-        -GET: ricevi le info dell'utente
-        -PUT: cambia i dati dell'utente
-        -DELETE: cancella l'utente
+        -GET: get user infos
+        -PUT: update a user
+        -DELETE: delete a user
     
     
 
