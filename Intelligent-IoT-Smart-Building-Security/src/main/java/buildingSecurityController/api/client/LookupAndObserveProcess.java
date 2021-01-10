@@ -23,7 +23,9 @@ import static org.eclipse.californium.core.coap.LinkFormat.RESOURCE_TYPE;
 
 /*questo process ha lo scopo di ricevere l'albero delle risorse presenti nel resource directory, e di iniziare
 automaticamente ad osservarle, implementando tutti i metody onLoad invocati in maniera asincrona.
-l'observing va fatto su tutti e soli i sensori (no attuatori). */
+l'observing va fatto su tutti e soli i sensori (no attuatori).
+Contiene anche la parte di intelligenza vera e propria che decide, accedendo alle policy,
+quando e se fare scattare luci e allarmi*/
 
 public class LookupAndObserveProcess implements Runnable{
 
@@ -65,7 +67,6 @@ public class LookupAndObserveProcess implements Runnable{
         request.setURI(String.format("coap://%s:%d%s", TARGET_RD_IP, TARGET_RD_PORT, RD_LOOKUP_URI));
         request.setConfirmable(true);
 
-        //logger.info("Request Pretty Print: \n{}", Utils.prettyPrint(request));
 
         //the system is synchronous, will wait the response (blocking)
         CoapResponse coapResponse = null;
@@ -149,14 +150,6 @@ public class LookupAndObserveProcess implements Runnable{
                     logger.info("Core Link Format Response not found.");
                 }
             }
-
-            String text = coapResponse.getResponseText();
-            //logger.info("Payload: {}", text);
-            //logger.info("Message ID: " + coapResponse.advanced().getMID());
-            //logger.info("Token: " + coapResponse.advanced().getTokenString());
-
-
-            ///  HERE WE NEED A CODE TO PARSE ALL THE RES RECEIVED, LOOK WHICH WE NEED TO OBS AND ADD THEM TO HE OBSERVINGLIST ///
 
         }catch (ConnectorException | IOException e){
             e.printStackTrace();
@@ -299,7 +292,7 @@ public class LookupAndObserveProcess implements Runnable{
                             List<String> targetUrls = new ArrayList<>();
 
                             deviceList.forEach(device -> {
-                                logger.info("AREA {} FLOOR {} DEVICE", areaId.get(0));
+                                logger.info("AREA {} DEVICE", areaId.get(0));
                                 if(device.getAreaId().equals(areaId.get(0))){
                                     if(device.getDeviceId().contains("alarm") || device.getDeviceId().contains("light")){
                                         targetUrls.add(String.format("coap://192.168.1.107:5683/%s", device.getDeviceId()));
@@ -356,6 +349,7 @@ public class LookupAndObserveProcess implements Runnable{
             newResource.setResourceId(String.format("%s:pir", newPack.get(0).getBn()));
             newResource.setType("iot.sensor.pir");
             newResource.setManufacturer("theBuildingSecurity.servehttp.com");
+            newResource.setCoreInterface("core.s");
 
             this.conf.getInventoryDataManager().getDevice(newPack.get(0).getBn()).get().addValueToResourceList("pir");
 
@@ -374,7 +368,6 @@ public class LookupAndObserveProcess implements Runnable{
         logger.info("OBSERVING ... {}", targetUrl);
         Request request = Request.newGet().setURI(targetUrl).setObserve();
         request.setConfirmable(true);
-        //request.setOptions(new OptionSet().setAccept(MediaTypeRegistry.APPLICATION_SENML_JSON));
         CoapObserveRelation relation = coapClient.observe(request, new CoapHandler() {
             @Override
             public void onLoad(CoapResponse response) {
@@ -404,6 +397,7 @@ public class LookupAndObserveProcess implements Runnable{
             newResource.setResourceId(String.format("%s:camera", newPack.get(0).getBn()));
             newResource.setType("iot.sensor.camera");
             newResource.setManufacturer("theBuildingSecurity.servehttp.com");
+            newResource.setCoreInterface("core.s");
             this.conf.getInventoryDataManager().getDevice(newPack.get(0).getBn()).get().addValueToResourceList("camera");
 
             conf.getInventoryDataManager().createNewResource(newResource);
@@ -420,7 +414,6 @@ public class LookupAndObserveProcess implements Runnable{
         logger.info("OBSERVING ... {}", targetUrl);
         Request request = Request.newGet().setURI(targetUrl).setObserve();
         request.setConfirmable(true);
-        //request.setOptions(new OptionSet().setAccept(MediaTypeRegistry.APPLICATION_SENML_JSON));
         CoapObserveRelation relation = coapClient.observe(request, new CoapHandler() {
             @Override
             public void onLoad(CoapResponse response) {
@@ -453,6 +446,7 @@ public class LookupAndObserveProcess implements Runnable{
             newResource.setResourceId(String.format("%s:light", newPack.get(0).getBn()));
             newResource.setType("iot.actuator.light");
             newResource.setManufacturer("theBuildingSecurity.servehttp.com");
+            newResource.setCoreInterface("core.a");
 
             conf.getInventoryDataManager().createNewResource(newResource);
             conf.getInventoryDataManager().createNewDevice(newDevice);
@@ -471,7 +465,6 @@ public class LookupAndObserveProcess implements Runnable{
         logger.info("OBSERVING ... {}", targetUrl);
         Request request = Request.newGet().setURI(targetUrl).setObserve();
         request.setConfirmable(true);
-        //request.setOptions(new OptionSet().setAccept(MediaTypeRegistry.APPLICATION_SENML_JSON));
         CoapObserveRelation relation = coapClient.observe(request, new CoapHandler() {
             @Override
             public void onLoad(CoapResponse response) {
@@ -502,6 +495,7 @@ public class LookupAndObserveProcess implements Runnable{
             newResource.setResourceId(String.format("%s:alarm", newPack.get(0).getBn()));
             newResource.setType("iot.actuator.alarm");
             newResource.setManufacturer("theBuildingSecurity.servehttp.com");
+            newResource.setCoreInterface("core.a");
 
 
             conf.getInventoryDataManager().createNewResource(newResource);

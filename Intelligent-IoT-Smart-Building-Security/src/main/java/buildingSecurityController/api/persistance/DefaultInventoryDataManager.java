@@ -1,7 +1,5 @@
 package buildingSecurityController.api.persistance;
 
-
-import buildingSecurityController.api.auth.ExampleAuthenticator;
 import buildingSecurityController.api.exception.IInventoryDataManagerConflict;
 import buildingSecurityController.api.exception.IInventoryDataManagerException;
 import buildingSecurityController.api.model.*;
@@ -130,9 +128,6 @@ public class DefaultInventoryDataManager implements IInventoryDataManager {
     }
 
     ///BUILDING RESOURCE MANAGEMENT
-    //TODO questa parte di floors andrà riadattata alle modifiche di design architetturale
-
-
 
     @Override
     public List<FloorDescriptor> getFloorList() throws IInventoryDataManagerException{

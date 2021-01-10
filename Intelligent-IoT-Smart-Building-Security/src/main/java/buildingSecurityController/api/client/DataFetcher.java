@@ -95,7 +95,6 @@ public class DataFetcher {
         CoapObserveRelation relation = coapClient.observe(request, new CoapHandler() {
             @Override
             public void onLoad(CoapResponse response) {
-                logger.info("PROVO A FARE LA POST DEL PIR!!!!!!");
 
                 new Thread(new Runnable() {
                     @Override
@@ -236,7 +235,6 @@ public class DataFetcher {
         request.setURI(String.format("coap://%s:%d%s", TARGET_RD_IP, TARGET_RD_PORT, RD_LOOKUP_URI));
         request.setConfirmable(true);
 
-        //logger.info("Request Pretty Print: \n{}", Utils.prettyPrint(request));
 
         //the system is synchronous, will wait the response (blocking)
         CoapResponse coapResponse = null;

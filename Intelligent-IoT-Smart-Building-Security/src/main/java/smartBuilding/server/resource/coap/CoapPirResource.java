@@ -104,8 +104,6 @@ public class  CoapPirResource extends CoapResource {
 
         exchange.setMaxAge(PirRawSensor.UPDATE_PERIOD);
 
-        //if(exchange.getRequestOptions().getAccept() == MediaTypeRegistry.APPLICATION_SENML_JSON ||
-        //        exchange.getRequestOptions().getAccept() == MediaTypeRegistry.APPLICATION_JSON){
 
         Optional<String> senmlPayload = getJsonSenmlResponse();
 
@@ -113,39 +111,10 @@ public class  CoapPirResource extends CoapResource {
             exchange.respond(CoAP.ResponseCode.CONTENT, senmlPayload.get(), exchange.getRequestOptions().getAccept());
         else
             exchange.respond(CoAP.ResponseCode.INTERNAL_SERVER_ERROR);
-        //}
-        //Otherwise respond with the default textplain payload
-        //else
-        //    exchange.respond(CoAP.ResponseCode.CONTENT, String.valueOf(value), MediaTypeRegistry.TEXT_PLAIN);
 
 
     }
 
-    public static void main(String[] args) {
-
-
-        PirRawSensor rawResource = new PirRawSensor();
-
-        rawResource.addDataListener(new ResourceDataListener<Boolean>() {
-            @Override
-            public void onDataChanged(SmartObjectResource<Boolean> resource, Boolean updatedValue) {
-
-                if (resource != null && updatedValue != null)
-                    logger.info("Device: {} -> New Value Received: {}", resource.getId(), updatedValue);
-                else
-                    logger.error("onDataChanged Callback -> Null Resource or Updated Value !");
-            }
-        });
-
-        CoapPirResource coapPirResource = new CoapPirResource ("idcazzodiboia","9090", rawResource);
-
-        logger.info("New {} Resource Created with Id: {} ! {} New Value: {}",
-                rawResource.getType(),
-                rawResource.getId(),
-                "pir",
-                rawResource.loadUpdatedValue());
-
-    }
 }
 
 

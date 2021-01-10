@@ -93,25 +93,4 @@ public class PirRawSensor extends SmartObjectResource<Boolean> {
         return this.updatedValue;
     }
 
-    public static void main(String[] args) {
-
-        PirRawSensor rawResource = new PirRawSensor();
-        logger.info("New {} Resource Created with Id: {} ! {} New Value: {}",
-                rawResource.getType(),
-                rawResource.getId(),
-                LOG_DISPLAY_NAME,
-                rawResource.loadUpdatedValue());
-
-        rawResource.addDataListener(new ResourceDataListener<Boolean>() {
-            @Override
-            public void onDataChanged(SmartObjectResource<Boolean> resource, Boolean updatedValue) {
-
-                if (resource != null && updatedValue != null)
-                    logger.info("Device: {} -> New Value Received: {}", resource.getId(), updatedValue);
-                else
-                    logger.error("onDataChanged Callback -> Null Resource or Updated Value !");
-            }
-        });
-
-    }
 }

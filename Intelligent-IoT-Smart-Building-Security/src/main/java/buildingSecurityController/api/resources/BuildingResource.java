@@ -463,7 +463,7 @@ public class BuildingResource {
             if(areaId == null || deviceId == null)
                 return Response.status(Response.Status.BAD_REQUEST).type(MediaType.APPLICATION_JSON_TYPE).entity(new ErrorMessage(Response.Status.BAD_REQUEST.getStatusCode(),"Invalid AreaId or DeviceId Provided !")).build();
 
-            logger.info("Loading all the Device {} 's Resources in the area {} in the floor {}", deviceId, areaId);
+            logger.info("Loading all the Device {} 's Resources in the area {}", deviceId, areaId);
 
             Optional<GenericDeviceDescriptor> genericDeviceDescriptor = this.conf.getInventoryDataManager().getDevice(deviceId);
 
@@ -513,9 +513,5 @@ public class BuildingResource {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).type(MediaType.APPLICATION_JSON_TYPE).entity(new ErrorMessage(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(),"Internal Server Error !")).build();
         }
     }
-
-    //PROXY COAP RESOURCES MANAGEMENTS
-
-
 
 }

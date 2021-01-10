@@ -98,16 +98,5 @@ public class CameraRawSensor extends SmartObjectResource<Integer>{
         return this.updatedValue;
     }
 
-    public static void main(String[] args) {
-
-        CameraRawSensor rawResource = new CameraRawSensor();
-        logger.info("New {} Resource Created with Id: {} ! {} New Value: {}",
-                rawResource.getType(),
-                rawResource.getId(),
-                LOG_DISPLAY_NAME,
-                rawResource.loadUpdatedValue());
-
-
-    }
 
 }
